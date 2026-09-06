@@ -2,11 +2,13 @@
 
 Stand: 2026-09-06
 
-Projektstatus: technisch abgeschlossen, Freigabe durch Auftraggeber ausstehend
+Projektstatus: Review nicht bestanden; funktionsorientierter Neuaufbau erforderlich
 
 Normative Grundlage: [Hardware-Anforderungsspezifikation Revision A](Hardware-Anforderungsspezifikation_Revision_A.md), Dokumentversion 1.5; [Phase-1-Festlegung](Phase_1_Architektur-und-Bauteilfestlegung.md)
 
 ## 1. Ergebnis
+
+> **Reviewhinweis vom 06.09.2026:** Dieser automatisch erzeugte Erstentwurf ist elektrisch auswertbar, aber wegen überlagerter Anschlussbeschriftungen, rasterartiger Bauteilplatzierung und fehlender visuell nachvollziehbarer Strom- und Signalpfade nicht als Schaltplan freigegeben. Er darf weder als Layoutgrundlage noch als Fertigungsunterlage verwendet werden. Phase 2 wird mit Standardsymbolen, lokaler Verdrahtung und funktionsorientierter Seitenaufteilung neu erstellt.
 
 Der hierarchische Schaltplan für Revision A ist als editierbares KiCad-10-Projekt umgesetzt. Er umfasst 197 einzelne Referenzen, davon 33 ausdrücklich als DNP gekennzeichnete Test-, Mess- oder Bestückungsoptionen. Der vorläufige BOM-Export fasst identische Bauteile in 122 Zeilen zusammen.
 

@@ -4,7 +4,7 @@ Hardwareentwicklung für das Landy-Heater-Steuergerät auf Basis des `ESP32-S3-W
 
 ## Aktueller Stand
 
-Revision A hat den vollständigen KiCad-Schaltplan technisch abgeschlossen. Phase 0 und Phase 1 sind durch den Auftraggeber freigegeben; Phase 2 wartet auf den Schaltplanreview. Die verbindliche Grundlage ist Dokumentversion 1.5 mit den zugehörigen Entwicklungsunterlagen:
+Revision A hat Phase 0 und Phase 1 abgeschlossen. Der erste automatisch erzeugte Phase-2-Schaltplan hat den Lesbarkeitsreview nicht bestanden und wird als echter, funktionsorientierter KiCad-Schaltplan neu aufgebaut. Die verbindliche Grundlage bleibt Dokumentversion 1.5 mit den zugehörigen Entwicklungsunterlagen:
 
 - [Hardware-Anforderungsspezifikation Revision A](docs/Hardware-Anforderungsspezifikation_Revision_A.md)
 - [Ergebnisbericht Phase 0](docs/Phase_0_KiCad-Arbeitsumgebung.md)
@@ -54,7 +54,7 @@ Jede Phase wird einzeln beauftragt, geprüft und freigegeben. Mit der nächsten 
 
 **Freigabepunkt:** Schaltplanreview abgeschlossen, ERC ohne ungeklärte Fehler und alle Hersteller-Pinouts unabhängig geprüft.
 
-**Status:** Technisch abgeschlossen am 06.09.2026; ERC mit 0 Fehlern und 0 Warnungen, Review-PDF und vorläufige BOM erzeugt. Freigabe durch den Auftraggeber ausstehend.
+**Status:** In Überarbeitung seit 06.09.2026. Der erste ERC-fehlerfreie Entwurf wurde wegen überlagerter Labels, rasterartiger Platzierung und unzureichend erkennbarer Schaltungszusammenhänge im Review zurückgewiesen. Phase 2 ist nicht freigegeben.
 
 ### Phase 3 – Mechanik und Platzierung
 
