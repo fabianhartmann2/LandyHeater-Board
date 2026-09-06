@@ -4,9 +4,10 @@ Hardwareentwicklung für das Landy-Heater-Steuergerät auf Basis des `ESP32-S3-W
 
 ## Aktueller Stand
 
-Revision A befindet sich in der Schaltplan- und PCB-Designphase. Die verbindliche Grundlage für die Beauftragung und Prüfung des PCB-Designs ist aktuell Dokumentversion 1.4:
+Revision A befindet sich in der Schaltungsarchitektur- und Bauteilauswahlphase. Phase 0, KiCad-Arbeitsumgebung und Projektgerüst, ist technisch abgeschlossen und wartet auf die Freigabe des Auftraggebers. Die verbindliche Grundlage für die Beauftragung und Prüfung des PCB-Designs ist aktuell Dokumentversion 1.4:
 
 - [Hardware-Anforderungsspezifikation Revision A](docs/Hardware-Anforderungsspezifikation_Revision_A.md)
+- [Ergebnisbericht Phase 0](docs/Phase_0_KiCad-Arbeitsumgebung.md)
 
 Die Spezifikation definiert Funktionsumfang, Schnittstellen, Versorgung, Mechanik, sichere Hardwarezustände, Layoutregeln, Fertigungsunterlagen und Abnahmetests. Die darin aufgeführten Verifikationspunkte müssen vor der Fertigungsfreigabe abgeschlossen werden.
 
@@ -22,6 +23,8 @@ Jede Phase wird einzeln beauftragt, geprüft und freigegeben. Mit der nächsten 
 - Reproduzierbare Prüf- und Exportbefehle vorbereiten.
 
 **Freigabepunkt:** Das Projekt lässt sich ohne fehlende Bibliotheken öffnen und die automatischen KiCad-Prüfwerkzeuge sind verfügbar.
+
+**Status:** Technisch abgeschlossen am 06.09.2026; Freigabe durch den Auftraggeber ausstehend.
 
 ### Phase 1 – Schaltungsarchitektur und Bauteilfestlegung
 

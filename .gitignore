@@ -1,0 +1,17 @@
+# KiCad transient files
+*-backups/
+*.bak
+*.bck
+*.kicad_prl
+*.kicad_pro-bak
+*.kicad_sch-bak
+*.kicad_pcb-bak
+*.lck
+~*.lck
+fp-info-cache
+
+# Reproducible generated output
+/build/
+
+# macOS metadata
+.DS_Store

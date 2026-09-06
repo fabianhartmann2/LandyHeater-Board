@@ -1,0 +1,22 @@
+(kicad_sch
+	(version 20250114)
+	(generator "eeschema")
+	(generator_version "9.0")
+	(uuid "1f18f017-fd00-47b6-89dd-a1aad62bccfb")
+	(paper "A4")
+	(title_block
+		(title "Landy Heater Controller")
+		(date "2026-09-06")
+		(rev "A")
+		(company "LandyHeater")
+		(comment 1 "Phase 0 project scaffold - not released for production")
+		(comment 2 "ESP32-S3-WROOM-1U-N16R8")
+	)
+	(lib_symbols)
+	(sheet_instances
+		(path "/"
+			(page "1")
+		)
+	)
+	(embedded_fonts no)
+)

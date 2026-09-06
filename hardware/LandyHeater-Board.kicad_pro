@@ -1,0 +1,170 @@
+{
+  "board": {
+    "design_settings": {
+      "defaults": {
+        "board_outline_line_width": 0.15,
+        "copper_line_width": 0.25,
+        "courtyard_line_width": 0.05,
+        "fab_line_width": 0.1,
+        "other_line_width": 0.1,
+        "silk_line_width": 0.15,
+        "silk_text_size_h": 1.0,
+        "silk_text_size_v": 1.0,
+        "silk_text_thickness": 0.15
+      },
+      "diff_pair_dimensions": [],
+      "drc_exclusions": [],
+      "rules": {
+        "allow_blind_buried_vias": false,
+        "allow_microvias": false,
+        "min_clearance": 0.2,
+        "min_copper_edge_clearance": 0.3,
+        "min_hole_to_hole": 0.25,
+        "min_text_height": 0.8,
+        "min_text_thickness": 0.12,
+        "min_through_hole_diameter": 0.3,
+        "min_track_width": 0.2,
+        "min_via_annular_width": 0.15,
+        "min_via_diameter": 0.6
+      },
+      "track_widths": [
+        0.0,
+        0.25,
+        0.5,
+        1.0
+      ],
+      "via_dimensions": [
+        {
+          "diameter": 0.0,
+          "drill": 0.0
+        },
+        {
+          "diameter": 0.8,
+          "drill": 0.4
+        }
+      ]
+    }
+  },
+  "boards": [],
+  "libraries": {
+    "pinned_footprint_libs": [
+      "LandyHeater"
+    ],
+    "pinned_symbol_libs": [
+      "LandyHeater"
+    ]
+  },
+  "meta": {
+    "filename": "LandyHeater-Board.kicad_pro",
+    "version": 3
+  },
+  "net_settings": {
+    "classes": [
+      {
+        "bus_width": 12,
+        "clearance": 0.2,
+        "diff_pair_gap": 0.2,
+        "diff_pair_via_gap": 0.25,
+        "diff_pair_width": 0.2,
+        "line_style": 0,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
+        "name": "Default",
+        "pcb_color": "rgba(0, 0, 0, 0.000)",
+        "priority": 2147483647,
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "track_width": 0.25,
+        "via_diameter": 0.8,
+        "via_drill": 0.4,
+        "wire_width": 6
+      },
+      {
+        "bus_width": 12,
+        "clearance": 0.3,
+        "diff_pair_gap": 0.2,
+        "diff_pair_via_gap": 0.25,
+        "diff_pair_width": 0.2,
+        "line_style": 0,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
+        "name": "POWER_12V",
+        "pcb_color": "rgba(255, 0, 0, 0.800)",
+        "priority": 0,
+        "schematic_color": "rgba(255, 0, 0, 0.800)",
+        "track_width": 1.0,
+        "via_diameter": 1.0,
+        "via_drill": 0.5,
+        "wire_width": 6
+      },
+      {
+        "bus_width": 12,
+        "clearance": 0.2,
+        "diff_pair_gap": 0.2,
+        "diff_pair_via_gap": 0.25,
+        "diff_pair_width": 0.2,
+        "line_style": 0,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
+        "name": "POWER_LOW_VOLTAGE",
+        "pcb_color": "rgba(255, 128, 0, 0.800)",
+        "priority": 1,
+        "schematic_color": "rgba(255, 128, 0, 0.800)",
+        "track_width": 0.5,
+        "via_diameter": 0.8,
+        "via_drill": 0.4,
+        "wire_width": 6
+      },
+      {
+        "bus_width": 12,
+        "clearance": 0.2,
+        "diff_pair_gap": 0.2,
+        "diff_pair_via_gap": 0.25,
+        "diff_pair_width": 0.2,
+        "line_style": 0,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
+        "name": "USB_DIFF_PROVISIONAL",
+        "pcb_color": "rgba(0, 128, 255, 0.800)",
+        "priority": 2,
+        "schematic_color": "rgba(0, 128, 255, 0.800)",
+        "track_width": 0.2,
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
+        "wire_width": 6
+      },
+      {
+        "bus_width": 12,
+        "clearance": 0.25,
+        "diff_pair_gap": 0.2,
+        "diff_pair_via_gap": 0.25,
+        "diff_pair_width": 0.2,
+        "line_style": 0,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
+        "name": "SENSITIVE",
+        "pcb_color": "rgba(128, 0, 255, 0.800)",
+        "priority": 3,
+        "schematic_color": "rgba(128, 0, 255, 0.800)",
+        "track_width": 0.25,
+        "via_diameter": 0.8,
+        "via_drill": 0.4,
+        "wire_width": 6
+      }
+    ],
+    "meta": {
+      "version": 4
+    },
+    "net_colors": null,
+    "netclass_assignments": null,
+    "netclass_patterns": []
+  },
+  "pcbnew": {
+    "page_layout_descr_file": ""
+  },
+  "sheets": [],
+  "text_variables": {
+    "PROJECT_REVISION": "A",
+    "PROJECT_STATUS": "PHASE_0_SCAFFOLD",
+    "TARGET_BOARD_SIZE": "98 x 48 mm"
+  }
+}

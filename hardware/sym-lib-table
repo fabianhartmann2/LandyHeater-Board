@@ -1,0 +1,10 @@
+(sym_lib_table
+	(version 7)
+	(lib
+		(name "LandyHeater")
+		(type "KiCad")
+		(uri "${KIPRJMOD}/libraries/symbols/LandyHeater.kicad_sym")
+		(options "")
+		(descr "Project-local symbols for the Landy Heater Controller")
+	)
+)
