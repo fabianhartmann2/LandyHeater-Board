@@ -4,7 +4,7 @@ Hardwareentwicklung für das Landy-Heater-Steuergerät auf Basis des `ESP32-S3-W
 
 ## Aktueller Stand
 
-Revision A befindet sich in der Schaltplan- und PCB-Designphase. Die verbindliche Grundlage für die Beauftragung und Prüfung des PCB-Designs ist:
+Revision A befindet sich in der Schaltplan- und PCB-Designphase. Die verbindliche Grundlage für die Beauftragung und Prüfung des PCB-Designs ist aktuell Dokumentversion 1.1:
 
 - [Hardware-Anforderungsspezifikation Revision A](docs/Hardware-Anforderungsspezifikation_Revision_A.md)
 

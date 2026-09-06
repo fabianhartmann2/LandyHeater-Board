@@ -1,10 +1,12 @@
 # Landy Heater Controller – Hardware-Anforderungsspezifikation Revision A
 
-Dokumentversion: 1.0
+Dokumentversion: 1.1
 
 Stand: 2026-09-06
 
 Status: freigegeben als Grundlage für Schaltplan, PCB-Layout und Angebotserstellung; noch keine Fertigungsfreigabe
+
+Änderungsstand 1.1: Anforderungen aus dem Espressif-Datenblatt v1.8 und den aktuellen ESP32-S3 Hardware Design Guidelines für Versorgung, Reset/Boot, USB, GPIO, Layout, Antenne und Fertigung konkretisiert.
 
 ## 1. Zweck und Verbindlichkeit
 
@@ -108,6 +110,9 @@ VBCS und Smart-Shunt sind nur als mögliche Funktionen einer späteren Leiterpla
 - Das Board arbeitet als USB-2.0-Gerät/Sink ohne USB-PD.
 - CC1 und CC2 erhalten die normgerechten separaten Rd-Widerstände.
 - USB-VBUS und D+/D− erhalten geeigneten ESD-Schutz; die VBUS-Eingangskapazität muss USB-konform sein.
+- In D− und D+ ist jeweils unmittelbar am ESP32-Modul ein bestückbarer Serienwiderstand vorzusehen. Anfangswert: 22 Ω oder 33 Ω gemäß Espressif; der endgültige Wert wird nach Signalintegritätsprüfung festgelegt.
+- Hinter den Serienwiderständen ist je Leitung ein optionaler, standardmäßig nicht bestückter Kondensator-Footprint nach GND vorzusehen. ESD-Schutz und optionale Kondensatoren müssen so kapazitätsarm gewählt werden, dass das USB-Full-Speed-Signal nicht unzulässig belastet wird.
+- USB-Testpads sind nur zulässig, wenn sie ohne relevante Stichleitung in den Hauptpfad integriert werden.
 - 12 V dürfen unter keinen Betriebs- oder Fehlerbedingungen auf USB-VBUS gelangen.
 - USB-VBUS darf nicht in den 12-V-Fahrzeugkreis oder in `AUTOTERM_5V` zurückspeisen.
 
@@ -127,7 +132,11 @@ Die verbindliche Funktionskette lautet:
 - Auto-/PFM-Leichtlastbetrieb muss möglich sein. Ein dauerhaft erzwungener FPWM-Modus ist wegen des Ruhestromziels nicht zulässig.
 - Referenzschaltung, Bauteilberechnung, Hot-Loop und Layout des Herstellers sind einzuhalten.
 - `3V3_CORE` muss bei zulässigen Quellen und Lastsprüngen zwischen 3,0 V und 3,6 V bleiben. Wi-Fi-Sendespitzen dürfen keinen Brownout oder unbeabsichtigten Reset verursachen.
-- Mindestens 10 µF Bulk-Kapazität und die von Espressif geforderte lokale Abblockung sind nahe der ESP32-Modulversorgung vorzusehen.
+- Die 3,3-V-Versorgung muss am ESP32-Modul mindestens 0,5 A liefern können. Der festgelegte 2-A-Regler erfüllt diese Mindestanforderung mit Reserve für Wi-Fi-Sendespitzen und Peripherie.
+- Direkt am 3,3-V-Pin des WROOM-1U sind mindestens **22 µF plus 100 nF** gemäß Espressif-Peripherieschaltung vorzusehen. Leiterwege zu Modul und GND müssen kurz und niederinduktiv sein.
+- Bei der 22-µF-Kapazität sind DC-Bias, Temperatur, Alterung und Bauteiltoleranz zu berücksichtigen. Die effektive Kapazität bei 3,3 V muss im Designbericht dokumentiert werden.
+- Am Eintritt von `3V3_CORE` in den ESP32-Bereich ist zusätzlich mindestens 10 µF wirksame Bulk-Kapazität vorzusehen, sofern diese Funktion nicht bereits nachweislich durch die vorgenannten 22 µF erfüllt wird.
+- Die Spannung am Modul darf den absoluten Bereich −0,3 V bis 3,6 V niemals überschreiten; der normale Betrieb bleibt auf 3,0 V bis 3,6 V begrenzt.
 
 ### 5.4 Versorgungsdomänen
 
@@ -167,17 +176,24 @@ Schaltbare Domänen dürfen bei ausgeschaltetem Zustand weder über GPIO-Schutzd
 - GPIO35, GPIO36 und GPIO37 sind durch das Octal-PSRAM belegt und dürfen nicht verwendet werden.
 - GPIO19 und GPIO20 sind für natives USB D−/D+ reserviert.
 - GPIO0 dient ausschließlich der BOOT-Funktion. GPIO3, GPIO45 und GPIO46 dürfen nicht für externe Schnittstellen, Wake-Signale oder Signale mit problematischem Einschaltpegel verwendet werden.
+- GPIO0 erhält einen externen 10-kΩ-Pull-up nach 3,3 V und den BOOT-Taster nach GND. An GPIO0 darf kein großer Kondensator vorgesehen werden.
+- GPIO45 muss während Reset LOW bleiben, damit VDD_SPI beim N16R8 in der vorgesehenen 3,3-V-Konfiguration bleibt. GPIO45 und GPIO46 dürfen keinen externen Pull-up erhalten; GPIO46 muss für den gemeinsamen USB-/UART-Download-Boot LOW bleiben können.
+- Die Strapping-Pegel müssen mindestens 3 ms nach dem Anstieg von `CHIP_PU/EN` unverändert gültig bleiben.
+- eFuses für VDD_SPI, Bootmodus, ROM-Ausgabe, USB-JTAG oder JTAG dürfen während Fertigung und Prototypentest nicht programmiert werden, sofern dies nicht ausdrücklich dokumentiert und freigegeben wurde.
 - GPIO47 und GPIO48 sollen frei bleiben, solange dadurch kein anderer Designnachteil entsteht.
-- Alle übrigen Pinzuordnungen sind vor Schaltplan-Freeze in einer Pin-Matrix mit Resetpegel, Pull-up/-down, Wake-Fähigkeit und Versorgungsdomäne zu dokumentieren.
+- Alle übrigen Pinzuordnungen sind vor Schaltplan-Freeze in einer Pin-Matrix mit Resetpegel, Pull-up/-down, Wake-Fähigkeit, Versorgungsdomäne und bekanntem Einschaltimpuls zu dokumentieren.
 - Es wird natives ESP32-S3-USB für Flashen, REPL und Diagnose verwendet.
 - Ein lokaler, beschrifteter `RESET`-Taster muss `CHIP_PU/EN` gegen GND ziehen.
 - Ein lokaler, beschrifteter `BOOT`-Taster muss GPIO0 gegen GND ziehen.
-- Pull-ups und das RC-Netzwerk an `CHIP_PU` müssen den aktuellen Espressif-Vorgaben entsprechen; `CHIP_PU` darf nicht floaten.
-- U0TXD/U0RXD sowie GND und 3,3 V sollen als beschriftete Testpads erreichbar sein, dürfen aber keinen zusätzlichen Außenstecker erfordern.
+- `CHIP_PU/EN` darf nicht floaten. Als Ausgangspunkt sind 10 kΩ Pull-up nach 3,3 V und 1 µF nach GND gemäß Espressif vorzusehen.
+- Vor dem Anstieg von `CHIP_PU/EN` müssen die 3,3-V-Modulversorgung und die internen Versorgungsschienen mindestens 50 µs stabil sein. Ein Hardware-Reset muss EN mindestens 50 µs unter dem zulässigen LOW-Pegel halten.
+- Wegen Fahrzeugversorgung, vorgeschaltetem Relais und Umschaltung zwischen USB und 12 V muss ein Low-IQ-Spannungswächter oder eine gleichwertige PGOOD-qualifizierte Resetlösung vorgesehen werden. Ein reines RC-Netzwerk ist nur zulässig, wenn sein sicheres Verhalten bei langsamem Spannungsanstieg/-abfall, Brownout, Prellen des Versorgungsrelais und Quellenwechsel per Worst-Case-Analyse nachgewiesen wird.
+- U0TXD/U0RXD sowie GND und 3,3 V sollen als beschriftete Testpads erreichbar sein, dürfen aber keinen zusätzlichen Außenstecker erfordern. U0TXD erhält nahe am Modul den von Espressif empfohlenen 499-Ω-Serienwiderstand.
 - Das Modul wird über seinen integrierten U.FL-/MHF-I-kompatiblen Antennenanschluss mit einer externen 2,4-GHz-/50-Ω-WLAN-Antenne und etwa 10 cm Koaxialkabel verbunden.
 - Der Antennengewinn darf 2,33 dBi nicht überschreiten, sofern nicht eine gesonderte regulatorische/EMV-Bewertung eine andere Antenne freigibt.
 - Auf dem Mainboard wird keine HF-Leitung zwischen Modul und Antenne geroutet.
 - Die Antenne muss bei aktivem Funk angeschlossen sein. Koaxstecker und Kabel dürfen bei Gehäusemontage nicht auf Zug belastet werden.
+- Antennenreichweite und Datendurchsatz müssen mit der tatsächlichen Antenne, dem 10-cm-Koaxkabel, dem finalen Gehäuse und am vorgesehenen Einbauort geprüft werden.
 
 ## 7. Steckverbinder und Kabelbaum
 
@@ -338,8 +354,11 @@ Für J4 darf zur sicheren mechanischen Unterscheidung ein 5-poliges Gehäuse ver
 - 1-Wire ist fest GPIO4 zugeordnet.
 - Taster und Touch-INT müssen direkte ESP32-Wake-Eingänge sein und dürfen nicht über Portexpander geführt werden.
 - Rail-Enables, Pegelwandler-OE, LED-Treiber und sonstige Ausgänge erhalten externe Pull-ups/-downs für einen sicheren Zustand vor Firmwareinitialisierung.
+- Die Pinplanung muss die von Espressif dokumentierten Einschaltimpulse berücksichtigen. GPIO1 bis GPIO17 können beim Einschalten etwa 60 µs LOW sein; GPIO18 kann LOW- und HIGH-Impulse zeigen. GPIO18 darf deshalb nicht für ein ungefiltertes Active-High-Enable einer externen Last verwendet werden.
+- Unbenutzte GPIOs dürfen nicht dauerhaft floaten. Sie erhalten einen geeigneten externen Pull-Widerstand oder werden nach dem Booten per Firmware mit einem internen Pull definiert. Strapping-Pins dürfen dadurch nicht verändert werden.
+- Jeder externe GPIO-Pfad muss durch Pegelwandlung, Serienimpedanz und Schutzbeschaltung sicherstellen, dass am Modul kein Pin unter −0,3 V oder über `VDD33 + 0,3 V` beaufschlagt wird. Eingangs- und Ausgangsstromgrenzen des Moduls sind einzuhalten.
 - Ein I2C-Portexpander ist für Revision A nicht vorgesehen. Falls der PCB-Designer wider Erwarten einen benötigt, ist dies vor Schaltplan-Freeze mit vollständiger Pinbilanz, Ruhestromauswirkung und Resetverhalten zur Freigabe vorzulegen.
-- Die Pin-Matrix muss mindestens Signalname, GPIO, Ein-/Ausgang, Resetpegel, externen Pull-Widerstand, Deep-Sleep-Zustand, Wake-Fähigkeit und Versorgungsdomäne enthalten.
+- Die Pin-Matrix muss mindestens Signalname, GPIO, Ein-/Ausgang, Resetpegel, externen Pull-Widerstand, Power-up-Glitch, Deep-Sleep-Zustand, Wake-Fähigkeit und Versorgungsdomäne enthalten.
 
 ## 15. Leiterplattenaufbau und Layoutregeln
 
@@ -357,10 +376,13 @@ Für J4 darf zur sicheren mechanischen Unterscheidung ein 5-poliges Gehäuse ver
 
 Empfohlene Lagenbelegung:
 
-- L1: Bauteile, USB und kritische Signale.
+- L1 ist für dieses Projekt die Elektronik-/Anschlussseite auf der Rückseite der Einheit; L4 ist die Display-/Bedienseite.
+- L1: ESP32-S3-WROOM-1U, USB, weitere Bauteile und kritische Signale.
 - L2: durchgehende, ungeteilte GND-Referenzfläche; keine Signale.
 - L3: Versorgungsflächen und wenige langsame Signale; keine Zerschneidung kritischer Rückstrompfade.
 - L4: Bauteile, langsame Signale und möglichst zusammenhängende GND-Flächen.
+
+Espressif empfiehlt für den generischen vierlagigen Aufbau keine Bauteile auf L4. Die wegen Display und Bauraum erforderliche beidseitige Bestückung ist hier eine dokumentierte mechanische Abweichung. Auf L4 sind deshalb nur störungsarme Bauteile zulässig; unter WROOM-1U, USB, Buck-Hot-Loop und kritischen Rückstrompfaden bleibt L4 frei.
 
 ### 15.2 Verbindliche Layoutregeln
 
@@ -373,12 +395,26 @@ Empfohlene Lagenbelegung:
 - Strompfade, Kupferbreiten und Via-Anzahl sind für Worst-Case-Strom und zulässigen Temperaturanstieg zu berechnen.
 - ESD-/TVS-Bauteile direkt am jeweiligen Stecker platzieren; der Ableitpfad nach GND muss kurz und niederinduktiv sein.
 - FPC-, WROOM-, QFN- und sonstige kritische Footprints müssen gegen die aktuelle Herstellerzeichnung unabhängig geprüft werden.
-- Das offizielle Espressif-WROOM-1U-Landpattern einschließlich Thermal-Pad/Via-Vorgaben ist unverändert zu verwenden.
-- Für das WROOM-1U-Modul gelten die Espressif-Platzierungsregeln. Trotz externer Antenne sind Koaxstecker, Modul und umgebendes Metall/Gehäuse mechanisch und HF-gerecht anzuordnen.
+- Das offizielle Espressif-WROOM-1U-Landpattern einschließlich Copper-Pads, GND-Pads, EPAD und Via-Geometrie ist unverändert zu verwenden. Das Landpattern des längeren WROOM-1-Moduls darf nicht verwendet werden.
+- Die beiden seitlichen GND-Pads des Moduls sind mit kurzen, breiten Verbindungen und mehreren Vias an die L2-GND-Fläche anzubinden. Das EPAD-Copper und seine Thermal-/Ground-Vias sind ebenfalls mit GND zu verbinden.
+- Ob das zentrale EPAD verlötet wird, ist im Fertigungsdatensatz ausdrücklich festzulegen. Bei verlötetem EPAD muss die Pastenöffnung so begrenzt werden, dass das Modul nicht angehoben wird und sämtliche seitlichen Pads zuverlässig verlötet werden.
+- Das ESP32-S3-WROOM-1U und USB müssen auf L1 unmittelbar über der durchgehenden L2-GND-Fläche liegen. Eine Platzierung des Moduls auf L4 ist nur zulässig, wenn der Stackup gespiegelt wird und die unmittelbar benachbarte Innenlage eine ungeteilte GND-Fläche bildet.
+- Im WROOM-Bereich dürfen auf der gegenüberliegenden PCB-Seite keine Schaltregler, Induktivitäten oder schnellen Signale angeordnet werden. Die Rückstromfläche unter den digitalen Modulanschlüssen muss zusammenhängend bleiben.
+- Der Bereich unter dem auf dem WROOM-1U integrierten U.FL-/MHF-I-Antennenstecker und dessen internem RF-Pfad ist entsprechend dem offiziellen Landpattern auf allen Lagen freizuhalten. Koaxstecker, Modul und umgebendes Metall/Gehäuse sind mechanisch und HF-gerecht anzuordnen.
+- Am E-Paper-SPI-Takt ist nahe am ESP32 ein bestückbarer Serienwiderstand oder Ferrit sowie ein optionaler, zunächst unbestückter Kondensator nach GND vorzusehen. Entsprechende Dämpfungsfootprints sollen, sofern der Platz reicht, auch für die übrigen SPI-Signale vorgesehen werden.
 - Testpads dürfen keine ungewollten Stubs an USB oder anderen schnellen Signalen erzeugen.
 - Bauteile sollen, sofern funktional und platzmäßig möglich, mindestens 0603 besitzen. Kleinere Bauformen und Spezialgehäuse sind zulässig, wenn sie für die Funktion oder den Bauraum nötig sind.
 - Silkscreen muss Steckerbezeichnungen, Pin 1, Polaritäten, Batteriepolung, BOOT/RESET, PCB-Revision und alle Testpunkte eindeutig kennzeichnen.
 - Die vollständige Predictable-Designs-Checkliste ist beim Layoutreview Punkt für Punkt abzuarbeiten und als ausgefülltes Reviewprotokoll abzugeben.
+
+### 15.3 Fertigung und Handhabung des ESP32-Moduls
+
+- Das `ESP32-S3-WROOM-1U-N16R8` ist ein MSL-3-Bauteil.
+- Nach Öffnung des Moisture-Barrier-Bags muss das Modul innerhalb von 168 Stunden bei 25 ± 5 °C und höchstens 60 % relativer Feuchte verlötet werden. Bei Überschreitung ist es nach Espressif-Vorgabe zu trocknen beziehungsweise zu backen.
+- Das ESP32-Modul darf nur **einen Reflow-Zyklus** durchlaufen.
+- Bei doppelseitiger Reflow-Bestückung darf das Modul deshalb erst für den zweiten/finalen Reflow bestückt werden. Eine andere Prozessfolge ist nur mit einem dokumentierten Verfahren zulässig, das ebenfalls genau einen Reflow des Moduls sicherstellt.
+- Das aktuelle Espressif-Reflowprofil und bleifreies SAC305 sind einzuhalten; PCBWay muss die Prozessfolge vor Produktionsfreigabe bestätigen.
+- Das bestückte Modul darf keiner Ultraschallreinigung und keiner Ultraschallschweißung ausgesetzt werden.
 
 ## 16. Sichere Hardware-Defaultzustände
 
@@ -432,6 +468,10 @@ Vor Bestellung müssen ERC und DRC ohne ungeklärte Fehler abgeschlossen sein. F
 12. Display-Voll- und Teilaktualisierung, BUSY/RESET, Touch und PWM-Frontlicht bei Raumtemperatur.
 13. Dimmbereich und Maximalstrom der weißen externen Taster-LED.
 14. RTC-Betrieb über I2C, Umschaltung auf BR1225, Backupstrommessung und rechnerischer Nachweis von mindestens vier Wochen Pufferzeit.
+15. Oszilloskopprüfung von `3V3_CORE` und `CHIP_PU/EN` bei 12-V-Einschalten/-Ausschalten, USB-Einschalten/-Ausschalten, Quellenwechsel, Brownout und schnell wiederkehrender Versorgung.
+16. Manueller Recovery-Test: BOOT gedrückt halten, RESET auslösen und erfolgreichen USB-Download-Boot nachweisen; GPIO46 bleibt dabei LOW.
+17. Prüfung aller extern wirksamen Enable-, TX- und LED-Ausgänge während Power-up, Reset und den dokumentierten GPIO-Einschaltimpulsen.
+18. WLAN-Reichweiten- und Durchsatztest im finalen Gehäuse am vorgesehenen Einbauort.
 
 EMV-Vorzertifizierung ist für Revision A nicht zwingend, aber Nahfeldprüfung und Kontrolle des Buck-Schaltknotens, der USB-Verbindung, der 1-Wire-Leitung und der 3-m-PWM-/Tasterleitung werden dringend empfohlen.
 
@@ -464,7 +504,9 @@ Diese Punkte blockieren nicht den Beginn von Schaltplan und Platzierung, müssen
 5. TVS, Verpolschutz-MOSFETs, Filter und `LMR43620-Q1` einschließlich aller Worst-Case-Spannungen und thermischen Reserven berechnen.
 6. Mechanische Platzierung im 98-mm-×-48-mm-Zielumriss als 3D-Modell prüfen; USB, Antennenkoax, Knopfzelle, BOOT/RESET und alle Verriegelungen müssen erreichbar sein.
 7. ESP32-Pin-Matrix und alle sicheren Reset-/Deep-Sleep-Zustände reviewen.
-8. PCBWay-Stackup, Impedanzregeln, Bauteilverfügbarkeit und beidseitige Bestückbarkeit für fünf Stück bestätigen.
+8. EN-/Resetlösung gegen langsame, unterbrochene und wechselnde Versorgung analysieren; Supervisor beziehungsweise PGOOD-Lösung festlegen.
+9. PCBWay-Stackup, Impedanzregeln, Bauteilverfügbarkeit und beidseitige Bestückbarkeit für fünf Stück bestätigen.
+10. PCBWay-Prozessfolge so bestätigen, dass das WROOM-1U trotz beidseitiger Bestückung genau einen Reflow-Zyklus durchläuft und die MSL-3-Handhabung eingehalten wird.
 
 Es bestehen keine weiteren offenen Funktionsentscheidungen des Auftraggebers. Änderungen an Funktionsumfang, Versorgung, Display, Schnittstellen oder Mechanik bedürfen einer neuen Dokumentrevision.
 
