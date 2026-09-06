@@ -1,10 +1,12 @@
 # Landy Heater Controller – Hardware-Anforderungsspezifikation Revision A
 
-Dokumentversion: 1.3
+Dokumentversion: 1.4
 
 Stand: 2026-09-06
 
 Status: freigegeben als Grundlage für Schaltplan, PCB-Layout und Angebotserstellung; noch keine Fertigungsfreigabe
+
+Änderungsstand 1.4: Verpflichtende, nur bei gedrücktem lokalem DIAG-Taster beziehungsweise überbrückten DIAG-Testpads aktive Energiefluss-Diagnoseanzeige für 12 V, USB, 3V3, ESP32-RUN und AUTOTERM-Anwesenheit ergänzt. Die zusätzlichen allgemeinen Status-LEDs wurden von vier auf zwei reduziert und bleiben bei GPIO- oder Platzmangel gemeinsam verzichtbar.
 
 Änderungsstand 1.3: Systemprüfung nach Integration der Espressif-, Good-Display- und FocalTech-Herstellerangaben. GPIO45- und WROOM-1U-Keep-out-Aussagen korrigiert, USB-C-Stromfreigabe konkretisiert, Touch-/I2C-Spannungsdomäne und Deep-Sleep-Resetzustand eindeutig festgelegt, sichere E-Paper-Signalzustände ergänzt und Status-LEDs bei GPIO-Mangel als verzichtbare Komfortfunktion eingestuft.
 
@@ -42,6 +44,7 @@ Revision A ist ein kompaktes Bedien- und Kommunikationssteuergerät für eine AU
 - liest drei extern zusammengeschaltete DS18B20-Temperatursensoren über einen gemeinsamen 1-Wire-Bus,
 - besitzt ein E-Paper-Display mit kapazitivem Touch und Frontlicht,
 - besitzt einen externen Taster mit dimmbarer weißer Ringbeleuchtung,
+- besitzt eine lokale, nur auf Anforderung aktive Energiefluss-Diagnoseanzeige auf dem PCB,
 - besitzt eine batteriegepufferte Echtzeituhr,
 - stellt WLAN über ein ESP32-S3-Modul bereit,
 - wird aus einem abgesicherten 12-V-Zweitbatteriekreis oder zu Servicezwecken über USB-C versorgt.
@@ -87,7 +90,7 @@ VBCS und Smart-Shunt sind nur als mögliche Funktionen einer späteren Leiterpla
 - Der überwiegende Teil der Elektronik darf auf der Rückseite bestückt werden. Beidseitige Bestückung ist zulässig und wird erwartet.
 - USB-C muss an einer seitlichen Gehäusekante von außen erreichbar sein.
 - Die Nano-Fit-Anschlüsse müssen auf der dem Display gegenüberliegenden Anschluss-/Rückseite angeordnet und im geöffneten Gehäuse entriegelbar sein.
-- Antennenstecker, Knopfzelle, BOOT- und RESET-Taster müssen für Montage und Service zugänglich bleiben.
+- Antennenstecker, Knopfzelle sowie BOOT-, RESET- und DIAG-Taster müssen für Montage und Service zugänglich bleiben.
 - Das Gehäuse wird nach dem finalen PCB als 3D-Druckteil konstruiert. PCB und Gehäuse müssen mindestens drei mechanisch belastbare Befestigungspunkte besitzen; Lage und Art werden beim Platzierungsreview gemeinsam festgelegt.
 - Die drei Display-FPCs dürfen weder als mechanische Halterung noch als Zugentlastung dienen.
 
@@ -401,14 +404,38 @@ Für J4 darf zur sicheren mechanischen Unterscheidung ein 5-poliges Gehäuse ver
 - Der RTC-Interrupt darf zu einem Testpunkt und einem freien RTC-GPIO geführt werden. RTC-Alarm ist jedoch keine geforderte Wake-Funktion von Revision A und kein Abnahmekriterium.
 - Die bestehende Software verwendet teilweise einen DS3231-Adapter. Die Umstellung auf RV-3028 ist eine Softwareaufgabe; eine elektrische DS3231-Kompatibilität ist nicht gefordert.
 
-## 13. Optionale Status-LEDs
+## 13. PCB-Diagnoseanzeige und optionale Status-LEDs
 
-- Vier einzeln steuerbare **rote** Status-LEDs sind als gemeinsamer Funktionsblock gewünscht, aber optional und kein Abnahmekriterium. Revision A wird entweder mit allen vier LEDs oder ohne Status-LEDs ausgeführt; eine Teilbestückung ist nicht vorgesehen.
-- Funktionale Schnittstellen, beide Wake-Eingänge, sichere Rail-/Reset-Steuerungen, natives USB und die geforderten Diagnosemöglichkeiten haben bei der GPIO-Zuteilung Vorrang. Zeigt die vollständige Pin-Matrix nicht genügend geeignete GPIOs, werden die vier Status-LEDs vollständig weggelassen; hierfür darf kein I2C-Portexpander ergänzt und keine sicherheits- oder diagnosebezogene Funktion eingeschränkt werden.
-- Werden die vier LEDs umgesetzt, erhält jede eine eigene Strombegrenzung. Direktansteuerung oder ein stromarmer Treiber sind zulässig; die Funktionen dürfen nicht von einem I2C-Portexpander abhängig gemacht werden.
+### 13.1 Verpflichtende Energiefluss-Diagnoseanzeige
+
+- Auf einer im geöffneten Gehäuse gut sichtbaren freien PCB-Fläche sind fünf optisch aufeinander abgestimmte rote Diagnose-LEDs mit dauerhaft lesbarer Silkscreen-Beschriftung und Verbindungslinien in folgender Energieflussanordnung zu platzieren:
+
+```text
+12V  ● ─┐
+        ├─ ● 3V3 ─ ● RUN ─ ● HEAT
+USB  ● ─┘
+```
+
+- Die Anzeige befindet sich auf dem Board und muss nicht am Displayrand oder durch das geschlossene Gehäuse sichtbar sein. Bauteile und Beschriftung dürfen FPC-Biegeradien, Steckverbinderzugang, Antennenkoax, Hochspannungsbereich des E-Paper-Boosters oder Befestigungspunkte nicht beeinträchtigen.
+- `12V` zeigt das Vorhandensein des gegen Verpolung und Transienten geschützten 12-V-Pfads vor dessen Zusammenführung mit USB an.
+- `USB` zeigt das Vorhandensein des geschützten USB-VBUS-Pfads vor dessen Zusammenführung mit 12 V an.
+- `3V3` zeigt die tatsächlich vorhandene Spannung auf `3V3_CORE` an.
+- `RUN` wird über genau einen ESP32-GPIO erst nach erfolgreichem Abschluss der Firmwareinitialisierung aktiviert. Bei Reset, Bootloaderfehler und Deep-Sleep ist `RUN` LOW beziehungsweise die LED aus.
+- `HEAT` zeigt ausschließlich das Vorhandensein von `AUTOTERM_5V` und damit die elektrische Anwesenheit der Heizungsseite an. Es ist kein Nachweis erfolgreicher UART-Kommunikation.
+- Die fünf LEDs dürfen nur leuchten, solange der lokale momentane DIAG-Taster gedrückt oder die parallel dazu vorgesehenen Testpads `DIAG` und `GND` überbrückt sind. Der DIAG-Taster ist ein Schließer, muss im geöffneten Gehäuse zugänglich sein und darf weder den ESP32 wecken noch einen GPIO, eine Versorgungsschiene oder einen Betriebszustand verändern.
+- Die Spannungszweige für 12 V, USB, 3V3 und HEAT arbeiten rein hardwareseitig und benötigen keinen GPIO. Unterschiedliche Spannungsquellen müssen durch Dioden, Transistorstufen oder eine gleichwertige Schaltung so getrennt sein, dass über die Diagnoseanzeige weder im gedrückten noch im ungedrückten Zustand eine Rückspeisung zwischen 12 V, USB-VBUS, `3V3_CORE` und `AUTOTERM_5V` möglich ist.
+- Ein einfaches unisoliertes Zusammenschalten der LED-Kathoden verschiedener Spannungsdomänen ist nicht zulässig. Schaltung und Worst-Case-Spannungen sind zu dokumentieren.
+- Zielstrom je leuchtender Diagnose-LED: 0,5 mA bis 1 mA. Vorwiderstände beziehungsweise Strombegrenzungen sind für 10 V bis 14 V, USB-Toleranzen, 3V3-Toleranzen, `AUTOTERM_5V`, LED-Durchlassspannung und Temperatur zu berechnen. Helligkeit und optische Gleichmäßigkeit werden am Prototyp geprüft; BOM-Werte müssen ohne Layoutänderung anpassbar sein.
+- Bei nicht gedrücktem DIAG-Taster darf die komplette Diagnoseanzeige einschließlich `RUN`-Pfad den Ruhestrom aus jedem beteiligten Versorgungszweig um höchstens 5 µA erhöhen. Es gibt keine dauerhaft leuchtende Power-LED.
+- Der verpflichtende `RUN`-GPIO und die Diagnoseanzeige haben in GPIO- und Platzbilanz Vorrang vor den optionalen Status-LEDs aus Abschnitt 13.2.
+
+### 13.2 Zwei optionale Status-LEDs
+
+- Zwei einzeln steuerbare **rote** Status-LEDs sind als gemeinsamer Funktionsblock gewünscht, aber optional und kein Abnahmekriterium. Revision A wird entweder mit beiden LEDs oder ohne zusätzliche Status-LEDs ausgeführt; eine Teilbestückung ist nicht vorgesehen.
+- Funktionale Schnittstellen, beide Wake-Eingänge, sichere Rail-/Reset-Steuerungen, natives USB, der verpflichtende `RUN`-GPIO und die Diagnosemöglichkeiten aus Abschnitt 13.1 haben bei GPIO- und Platzbedarf Vorrang. Zeigt die vollständige Pin-Matrix oder Platzierung nicht genügend geeignete Ressourcen, werden beide optionalen Status-LEDs vollständig weggelassen; hierfür darf kein I2C-Portexpander ergänzt und keine funktionale oder diagnosebezogene Anforderung eingeschränkt werden.
+- Werden die zwei Status-LEDs umgesetzt, erhält jede eine eigene Strombegrenzung und einen eigenen steuerbaren Zustand. Direktansteuerung oder ein stromarmer Treiber sind zulässig; die Funktionen dürfen nicht von einem I2C-Portexpander abhängig gemacht werden.
 - Hardware-Default bei Reset, Boot und Deep-Sleep ist AUS.
-- Es gibt keine dauerhaft leuchtende Power-LED.
-- Umgesetzte LEDs müssen im montierten Zustand sichtbar sein oder über definierte Lichtleiterpositionen verfügen; dies wird beim Platzierungsreview festgelegt.
+- Umgesetzte Status-LEDs müssen im montierten Zustand sichtbar sein oder über definierte Lichtleiterpositionen verfügen; dies wird beim Platzierungsreview festgelegt.
 
 ## 14. GPIO- und Bussystemregeln
 
@@ -417,7 +444,7 @@ Für J4 darf zur sicheren mechanischen Unterscheidung ein 5-poliges Gehäuse ver
 - AUTOTERM verwendet eine Hardware-UART ungleich UART0; Signale dürfen über die ESP32-GPIO-Matrix auf geeignete Pins gelegt werden.
 - 1-Wire ist fest GPIO4 zugeordnet.
 - Taster und Touch-INT müssen direkte ESP32-Wake-Eingänge sein und dürfen nicht über Portexpander geführt werden.
-- Die vollständige Pin-Matrix wird vor Auswahl beziehungsweise Freigabe der optionalen Status-LEDs erstellt. GPIO47/48, U0TXD/U0RXD, Wake-Fähigkeit und sichere Einschaltzustände sind ausdrücklich in die Bilanz aufzunehmen.
+- Die vollständige Pin-Matrix wird vor Auswahl beziehungsweise Freigabe der zwei optionalen Status-LEDs erstellt. Der verpflichtende Diagnoseausgang `RUN`, GPIO47/48, U0TXD/U0RXD, Wake-Fähigkeit und sichere Einschaltzustände sind ausdrücklich in die Bilanz aufzunehmen.
 - Rail-Enables, Pegelwandler-OE, LED-Treiber und sonstige Ausgänge erhalten externe Pull-ups/-downs für einen sicheren Zustand vor Firmwareinitialisierung.
 - Die Pinplanung muss die von Espressif dokumentierten Einschaltimpulse berücksichtigen. GPIO1 bis GPIO17 können beim Einschalten etwa 60 µs LOW sein; GPIO18 kann LOW- und HIGH-Impulse zeigen. GPIO18 darf deshalb nicht für ein ungefiltertes Active-High-Enable einer externen Last verwendet werden.
 - Unbenutzte GPIOs dürfen nicht dauerhaft floaten. Sie erhalten einen geeigneten externen Pull-Widerstand oder werden nach dem Booten per Firmware mit einem internen Pull definiert. Strapping-Pins dürfen dadurch nicht verändert werden.
@@ -494,7 +521,9 @@ Ohne laufende Firmware sowie während Reset, Boot und Deep-Sleep gelten zwingend
 | E-Paper-Versorgung | aus |
 | Frontlicht | aus |
 | externe weiße Taster-LED | aus |
-| optionale rote Status-LEDs, sofern umgesetzt | aus |
+| Diagnose-LEDs 12V/USB/3V3/HEAT | aus, solange DIAG nicht gedrückt beziehungsweise überbrückt ist |
+| Diagnose-LED RUN und zugehöriger GPIO | aus beziehungsweise LOW bei Power-up, Reset, Bootloader und Deep-Sleep |
+| zwei optionale rote Status-LEDs, sofern umgesetzt | aus |
 | DS18B20-Sensorversorgung | aus |
 | Tastereingang | definiert HIGH, Active-Low-wake-fähig |
 | Touch-INT | im Komfort-Standby durch versorgten FT6336U-Monitor-Modus definiert und active-LOW-wake-fähig; im Minimal-Standby keine Touch-Wake-Anforderung |
@@ -515,7 +544,8 @@ Mindestens folgende Netze benötigen zugängliche, beschriftete Testpunkte:
 - `1WIRE_DQ`,
 - I2C SDA/SCL, Touch-INT, Touch-RESET und RTC-INT,
 - E-Paper SCLK, SDIO/MOSI, CS, D/C, RESET und BUSY,
-- Frontlichtstrom sowie PWM-Signale der beiden Beleuchtungen.
+- Frontlichtstrom sowie PWM-Signale der beiden Beleuchtungen,
+- `DIAG`, Diagnosezweige 12V/USB/3V3/HEAT und Diagnoseausgang `RUN`.
 
 Testpunkte müssen im bestückten, geöffneten Gerät zugänglich sein. Ein zusammenhängendes GND-Testpad für Oszilloskop-Masse ist in der Nähe der Leistungs- und Kommunikationsbereiche vorzusehen.
 
@@ -545,6 +575,8 @@ Vor Bestellung müssen ERC und DRC ohne ungeklärte Fehler abgeschlossen sein. F
 20. Touch-Prüfung bei Power-on, Reset und Deep-Sleep: Spannung und Anstiegszeit von `3V0_TOUCH_AON`, Worst-Case-I2C-HIGH-Pegel an ESP32/RV-3028/FT6336U, Reset-LOW-Zeiten, `TOUCH_RESET_N`-Haltezustand, 300-ms-Initialisierungszeit, I2C-Busfreigabe, INT-Polarität/-Pulsdauer sowie Stromaufnahme in Active-, Monitor- und Hibernation-Modus.
 21. Falls Touch vollständig abschaltbar ausgeführt wird: Nachweis von unter 0,3 V für mindestens 5 ms, fehlender Rückspeisung über SDA/SCL/INT/RESET und erfolgreicher Wiederinbetriebnahme.
 22. Frontlichtmessung über den gesamten PWM-Bereich; der Worst-Case-Gesamtstrom bleibt unter 60 mA und der Treiber besitzt bei maximaler LED-Durchlassspannung ausreichende Regelreserve.
+23. Diagnoseanzeige bei 12 V allein, USB allein, beiden Quellen gleichzeitig, vorhandener/fehlender 3V3-Schiene, aktivem ESP32, ESP32-Deep-Sleep sowie vorhandener/fehlender `AUTOTERM_5V` prüfen. Nur die jeweils gültigen LEDs leuchten während gedrücktem DIAG-Taster; der Taster weckt den ESP32 nicht und beeinflusst keinen Betriebszustand.
+24. Rückspeisungsprüfung zwischen allen vier Diagnose-Spannungszweigen bei gedrücktem und ungedrücktem DIAG-Taster. Der zusätzliche Ruhestrom der vollständigen Diagnoseanzeige bleibt bei nicht gedrücktem Taster je Versorgungszweig unter 5 µA. Falls die zwei optionalen Status-LEDs bestückt sind, werden ihre unabhängige Ansteuerung und sicheren AUS-Zustände ebenfalls geprüft.
 
 EMV-Vorzertifizierung ist für Revision A nicht zwingend, aber Nahfeldprüfung und Kontrolle des Buck-Schaltknotens, der USB-Verbindung, der 1-Wire-Leitung und der 3-m-PWM-/Tasterleitung werden dringend empfohlen.
 
@@ -576,8 +608,8 @@ Diese Punkte blockieren nicht den Beginn von Schaltplan und Platzierung, müssen
 4. Exakte Nano-Fit-Header, Gegenstecker, Kontakte und sichere Nichtvertauschbarkeit von J2/J4 festlegen.
 5. APEM-Bestellcode `AV970220000700` durch Hersteller/Distributor bestätigen.
 6. TVS, Verpolschutz-MOSFETs, Filter und `LMR43620-Q1` einschließlich aller Worst-Case-Spannungen und thermischen Reserven berechnen.
-7. Mechanische Platzierung im 98-mm-×-48-mm-Zielumriss als 3D-Modell prüfen; USB, Antennenkoax, Knopfzelle, BOOT/RESET und alle Verriegelungen müssen erreichbar sein.
-8. ESP32-Pin-Matrix und alle sicheren Reset-/Deep-Sleep-Zustände reviewen. Reichen geeignete GPIOs nicht aus, sind die optionalen Status-LEDs gemäß Abschnitt 13 vollständig zu entfernen.
+7. Mechanische Platzierung im 98-mm-×-48-mm-Zielumriss als 3D-Modell prüfen; USB, Antennenkoax, Knopfzelle, BOOT/RESET/DIAG und alle Verriegelungen müssen erreichbar sein. Energieflusslinien und Beschriftungen der Diagnoseanzeige müssen lesbar bleiben.
+8. ESP32-Pin-Matrix und alle sicheren Reset-/Deep-Sleep-Zustände einschließlich des verpflichtenden `RUN`-Diagnoseausgangs reviewen. Reichen geeignete GPIOs oder PCB-Fläche nicht aus, sind die zwei optionalen Status-LEDs gemäß Abschnitt 13.2 vollständig zu entfernen; die fünf Diagnose-LEDs aus Abschnitt 13.1 bleiben verpflichtend.
 9. EN-/Resetlösung gegen langsame, unterbrochene und wechselnde Versorgung analysieren; Supervisor beziehungsweise PGOOD-Lösung festlegen.
 10. PCBWay-Stackup, Impedanzregeln, Bauteilverfügbarkeit und beidseitige Bestückbarkeit für fünf Stück bestätigen.
 11. PCBWay-Prozessfolge so bestätigen, dass das WROOM-1U trotz beidseitiger Bestückung genau einen Reflow-Zyklus durchläuft und die MSL-3-Handhabung eingehalten wird.
