@@ -1,10 +1,12 @@
 # Landy Heater Controller – Hardware-Anforderungsspezifikation Revision A
 
-Dokumentversion: 1.1
+Dokumentversion: 1.2
 
 Stand: 2026-09-06
 
 Status: freigegeben als Grundlage für Schaltplan, PCB-Layout und Angebotserstellung; noch keine Fertigungsfreigabe
+
+Änderungsstand 1.2: Anforderungen der Herstellerunterlagen `GDEY029T94-FT01` Revision 1.0 und `FT6336U` Datasheet Version 1.0 für FPC-Pinout, E-Paper-Referenzschaltung, SPI-Timing, Touch-Betriebsarten, Reset-/Power-Sequenz und Frontlicht konkretisiert. Insbesondere ist Touch-Wakeup nur im FT6336U-Monitor-Modus, nicht im 55-µA-Hibernation-Modus, gefordert.
 
 Änderungsstand 1.1: Anforderungen aus dem Espressif-Datenblatt v1.8 und den aktuellen ESP32-S3 Hardware Design Guidelines für Versorgung, Reset/Boot, USB, GPIO, Layout, Antenne und Fertigung konkretisiert.
 
@@ -143,7 +145,7 @@ Die verbindliche Funktionskette lautet:
 Folgende Netze sind getrennt und eindeutig zu benennen:
 
 - `3V3_CORE`: ESP32, I2C-Bus und dauerhaft benötigte Logik.
-- `3V3_TOUCH`: Touch-Controller im Komfort-Standby; für den Minimalmodus abschaltbar.
+- `3V3_TOUCH`: FT6336U-Versorgung im Bereich 2,8 V bis 3,3 V am Touch-FPC unter Berücksichtigung aller Regler-, Last- und Temperaturtoleranzen. Normalbetrieb und Komfort-Standby nutzen diese Versorgung; im Minimal-Standby wird der FT6336U in Hibernation versetzt. Vollständiges Abschalten ist nur mit Power-off-Isolation aller Touch-Signale und Einhaltung der Reset-/Power-Sequenz aus Abschnitt 10.3 zulässig.
 - `3V3_DISPLAY_SW`: E-Paper-Logik und Booster-Beschaltung; im Deep-Sleep aus.
 - `3V3_SENSOR_SW`: externe DS18B20-Versorgung; im Deep-Sleep aus.
 - `VIN_SYS`: strombegrenzte Versorgung der externen weißen Taster-LED, damit sie sowohl bei 12-V- als auch bei USB-Versorgung betrieben werden kann.
@@ -157,11 +159,12 @@ Schaltbare Domänen dürfen bei ausgeschaltetem Zustand weder über GPIO-Schutzd
 | Zustand | ESP32/WLAN | Display/Frontlicht | Touch | Sensor/UART/LEDs |
 |---|---|---|---|---|
 | Normalbetrieb | aktiv, WLAN typischerweise dauerhaft aktiv | nach Softwarebedarf | aktiv | nach Softwarebedarf |
-| Komfort-Standby | ESP32 Deep-Sleep, WLAN aus | aus | aktiv für Touch-Wakeup | aus |
-| Minimal-Standby | ESP32 Deep-Sleep, WLAN aus | aus | abgeschaltet oder tiefster Modus ohne Touch-Wakeup | aus |
+| Komfort-Standby | ESP32 Deep-Sleep, WLAN aus | aus | FT6336U Monitor-Modus für Touch-Wakeup | aus |
+| Minimal-Standby | ESP32 Deep-Sleep, WLAN aus | aus | FT6336U Hibernation oder vollständig isoliert abgeschaltet; kein Touch-Wakeup | aus |
 
 - Wake-Quellen im Komfort-Standby sind der externe Taster und Touch-INT.
 - Im Minimal-Standby ist mindestens der externe Taster als Wake-Quelle verfügbar.
+- Der typische Strom des FT6336U beträgt laut Datenblatt bei 2,8 V und 25 °C etwa 220 µA im Monitor-Modus und 55 µA im Sleep-/Hibernation-Modus. Diese Werte sind typische Werte ohne garantierte Obergrenze und dürfen nicht ohne Reserve als Worst-Case-Budget verwendet werden.
 - Ziel für den gesamten Strom aus dem 12-V-Eingang im Komfort-Standby: **< 0,5 mA bei 12 V**.
 - Der Minimal-Standby muss einen messbar niedrigeren Strom erreichen; es wird kein fester Grenzwert vorgegeben.
 - Keine LED darf im Reset, beim Booten oder im Deep-Sleep durch einen undefinierten GPIO-Zustand leuchten.
@@ -265,41 +268,86 @@ Für J4 darf zur sicheren mechanischen Unterscheidung ein 5-poliges Gehäuse ver
 ### 10.1 Verbindliches Display
 
 - Modell: **Good Display `GDEY029T94-FT01`**, komplette werkseitig verbundene Display-/Touch-/Frontlicht-Baugruppe.
+- Normative Herstellerunterlagen für diesen Abschnitt sind die [Good-Display-Spezifikation `GDEY029T94-FT01`, Revision 1.0](https://v4.cecdn.yun300.cn/100001_1909185148/GDEY029T94-FT01.pdf) und das darin referenzierte [FocalTech-Datenblatt `FT6336U`, Version 1.0](https://v4.cecdn.yun300.cn/100001_1909185148/FT6336U-DataSheet-V1.0.pdf). Verwendet wurde der von Good Display am 18.11.2025 bereitgestellte Stand der Display-Spezifikation. Bei einer neueren Dokumentrevision ist vor Übernahme eine Änderungsprüfung erforderlich.
 - Anzeige: 2,9 Zoll, monochrom, 296 × 128 Pixel, Treiber `SSD1680Z8`, 4-Draht-SPI.
 - Außenmaß des Moduls: 79,00 mm × 36,70 mm × 2,15 mm.
 - Aktive Fläche: 66,896 mm × 29,056 mm.
 - Das Display wird über seine originalen FPCs direkt mit der Hauptplatine verbunden. Verlängerungskabel sind nicht zulässig.
-- Es sind drei separate FPC-Steckverbinder vorzusehen: 24-polig/0,5 mm für E-Paper, 6-polig für Touch und 6-polig für Frontlicht.
+- Es sind drei separate FPC-Steckverbinder vorzusehen: 24-polig/0,5 mm für E-Paper, 6-polig/0,5 mm für Touch und 6-polig/0,5 mm für Frontlicht. Die Herstellerzeichnung nennt für alle drei FPC-Enden 0,30 mm ± 0,03 mm Dicke.
 - Exakte Pinfolge, Raster, Kontaktseite, Steckverbinderhöhe und FPC-Austrittsrichtung müssen aus der aktuellen Herstellerzeichnung übernommen und an einem Originalmuster geprüft werden.
 - Good Display weist darauf hin, dass Touch- und Frontlicht-FPC in umgekehrter Orientierung angeschlossen werden. Diese Angabe darf nicht aus einer Produktabbildung interpretiert werden; maßgeblich sind aktuelle Zeichnung, Datenblatt und physisches Muster.
 - Die Steckverbinder sind unmittelbar an den FPC-Austritten zu platzieren. Mindestbiegeradius, Entriegelungsweg und beschädigungsfreie Demontage sind im 3D-Modell nachzuweisen.
+- Die Pin-1-Ansicht der Herstellerzeichnung darf im Footprint nicht gespiegelt werden. Schaltplan, PCB-Footprint, 3D-Modell und Bestückungszeichnung müssen dieselbe Kontaktseitenansicht verwenden.
 
 ### 10.2 E-Paper-Ansteuerung
 
-- Benötigte Signale: `EPD_SCLK`, `EPD_MOSI`, `EPD_CS_N`, `EPD_DC`, `EPD_RESET_N`, `EPD_BUSY`.
-- Die SSD1680-Booster-/Ladungspumpenbeschaltung muss exakt aus der Referenzschaltung des konkret beschafften Displays übernommen werden.
-- Pinfolge, Kondensatorwerte und -spannungsfestigkeiten sowie Diodentypen dürfen nicht von einem ähnlich benannten Panel übernommen werden.
+- Benötigte MCU-Signale: `EPD_SCLK`, `EPD_SDIO/MOSI`, `EPD_CS_N`, `EPD_DC`, `EPD_RESET_N`, `EPD_BUSY`. Es gibt keine separate MISO-Leitung; FPC-Pin 14 ist im Lesebetrieb bidirektional.
+- Der 24-polige E-Paper-FPC wird elektrisch wie folgt belegt:
+
+| Pin | Herstellername | Verbindliche Beschaltung |
+|---:|---|---|
+| 1 | `NC` | offen lassen; nicht mit Pin 4 verbinden |
+| 2 | `GDR` | Gate des externen Booster-MOSFET gemäß Referenzschaltung |
+| 3 | `RESE` | Strommess-/Regelpfad mit 2,2 Ω und 1 MΩ gemäß Referenzschaltung |
+| 4 | `NC` | offen lassen; nicht mit Pin 1 verbinden |
+| 5 | `VSH2` | 1 µF/25 V nach GND gemäß Referenzschaltung |
+| 6 | `TSCL` | unbenutzte I2C-Masterschnittstelle für einen externen digitalen Temperatursensor; offen lassen |
+| 7 | `TSDA` | unbenutzte I2C-Masterschnittstelle für einen externen digitalen Temperatursensor; offen lassen |
+| 8 | `BS1` | fest LOW/GND für 4-Draht-SPI |
+| 9 | `BUSY` | `EPD_BUSY` zum ESP32; HIGH bedeutet beschäftigt |
+| 10 | `RES#` | `EPD_RESET_N` zum ESP32; active LOW |
+| 11 | `D/C#` | `EPD_DC`; LOW = Befehl, HIGH = Daten |
+| 12 | `CS#` | `EPD_CS_N`; active LOW |
+| 13 | `SCL` | `EPD_SCLK` |
+| 14 | `SDA` | `EPD_SDIO/MOSI` |
+| 15 | `VDDIO` | mit FPC-Pin 16/`VCI` an `3V3_DISPLAY_SW` |
+| 16 | `VCI` | `3V3_DISPLAY_SW` |
+| 17 | `VSS` | GND |
+| 18 | `VDD` | 1 µF/25 V nach GND gemäß Referenzschaltung; nicht extern speisen |
+| 19 | `VPP` | Testpin; offen lassen |
+| 20 | `VSH1` | Booster-Kondensatornetz gemäß Referenzschaltung |
+| 21 | `VGH` | Booster-Kondensatornetz `PREVGH` gemäß Referenzschaltung |
+| 22 | `VSL` | Booster-Kondensatornetz gemäß Referenzschaltung |
+| 23 | `VGL` | Booster-Kondensatornetz `PREVGL` gemäß Referenzschaltung |
+| 24 | `VCOM` | Booster-Kondensatornetz gemäß Referenzschaltung |
+
+- `VCI` und `VDDIO` haben laut Display-Spezifikation einen Betriebsbereich von 2,2 V bis 3,7 V; beide werden gemeinsam aus `3V3_DISPLAY_SW` gespeist. Die absoluten 4,0-V- beziehungsweise E/A-Grenzen dürfen auch bei Einschalt- und Abschaltvorgängen nicht verletzt werden.
+- Die SSD1680-Booster-/Ladungspumpenbeschaltung muss exakt aus Kapitel 12 der oben verlinkten Spezifikation des konkret beschafften `GDEY029T94-FT01` übernommen werden. Pinfolge, Bauteilwerte, Polaritäten und Spannungsfestigkeiten dürfen nicht von einem ähnlich benannten Panel übernommen werden.
+- Die Referenzschaltung fordert insbesondere eine 47-µH-Induktivität mit 500-mA-Eignung, drei `MBR0530`-Dioden oder vollständig gleichwertige Typen, einen `Si1308EDL`-MOSFET oder vollständig gleichwertigen Typ, 1 MΩ und 2,2 Ω mit 1 % sowie X5R-/X7R-Kondensatoren in 0603/0805 mit mindestens 25 V. Gleichwertigkeit ist gegen alle in der Hersteller-Tabelle genannten Grenzwerte nachzuweisen.
+- Der Booster-Hot-Loop, `GDR`, `RESE`, Induktivität, MOSFET, Dioden und zugehörige Kondensatoren sind kompakt und abseits von Touch, RTC, USB und Antennenkoax zu platzieren. Die Hochspannungsnetze dürfen nicht unter Touch-FPC oder Touch-Sensorfläche geführt werden.
+- Im Schreibbetrieb darf `EPD_SCLK` 20 MHz nicht überschreiten. Falls die bidirektionale Lesefunktion verwendet wird, darf der Lesetakt 2,5 MHz nicht überschreiten. Die Daten werden beim Schreiben an der steigenden SCLK-Flanke übernommen.
+- Solange `EPD_BUSY` HIGH ist, dürfen keine neuen Befehle gesendet und keine laufenden Displayoperationen unterbrochen werden.
 - Die Displaydomäne muss im Deep-Sleep vollständig abschaltbar sein, ohne Rückspeisung über SPI/Steuersignale.
+- Alle MCU-Signale zum E-Paper müssen vor und während abgeschalteter `3V3_DISPLAY_SW` auf einem nicht rückspeisenden LOW-Zustand liegen oder durch Bauteile mit nachgewiesener Power-off-Isolation getrennt sein.
 - SPI-Leitungen sind kurz über einer durchgehenden Referenzfläche zu führen. Serien-Dämpfungsfootprints sind nahe am ESP32 vorzusehen.
-- Testpunkte: Displayversorgung, SCLK, MOSI, CS, RESET und BUSY.
+- Testpunkte: Displayversorgung, SCLK, SDIO/MOSI, CS, RESET und BUSY.
 
 ### 10.3 Kapazitiver Touch
 
-- Touch-Controller: `FT6336U`, Versorgung 2,8 V bis 3,6 V, I2C bis 400 kHz.
+- Touch-Controller: `FT6336U`. Der spezifizierte Betriebsbereich für VDDA/VDD3 beträgt 2,8 V bis 3,3 V; 3,6 V ist nur die absolute Maximalgrenze und kein freigegebener Dauerbetriebswert. `3V3_TOUCH` muss am FPC unter allen Toleranzen innerhalb 2,8 V bis 3,3 V bleiben.
+- Der 6-polige Touch-FPC wird gemäß Herstellerzeichnung belegt: Pin 1 `GND`, Pin 2 `TOUCH_INT_N`, Pin 3 `TOUCH_RESET_N`, Pin 4 `3V3_TOUCH`, Pin 5 `I2C_SCL`, Pin 6 `I2C_SDA`.
+- I2C darf gemäß FT6336U-Datenblatt zwischen 10 kHz und 400 kHz betrieben werden.
 - Touch teilt SDA und SCL mit der RTC. Es darf nur ein abgestimmter Satz Bus-Pull-ups auf der dauerhaft versorgten Seite existieren.
+- Pull-up-Spannung, ESP32-Eingangspegel und die am integrierten Touch-FPC nicht separat herausgeführte IOVCC-Versorgung müssen zueinander kompatibel sein. Keine Touch-Leitung darf die aktuelle `3V3_TOUCH`-Versorgung übersteigen oder den unversorgten Controller über Schutzdioden speisen.
 - `TOUCH_INT_N` wird direkt auf einen Deep-Sleep-wake-fähigen RTC-GPIO des ESP32-S3 aus dem Bereich GPIO0 bis GPIO21 geführt; Strapping- und USB-Pins sind ausgeschlossen.
-- `TOUCH_RESET_N` wird direkt von einem GPIO angesteuert und erhält einen definierten Hardware-Resetpegel.
-- Im Komfort-Standby muss eine Berührung den ESP32 aus Deep-Sleep wecken können.
-- Der Hersteller nennt 55 µA Touch-Standby-Strom. Der konkrete Modus, die INT-Polarität, die Pegelhaltezeit und das tatsächliche Aufwachverhalten müssen mit dem beschafften Display geprüft werden.
+- Das FocalTech-Datenblatt bezeichnet das Signal als `/INT`; `TOUCH_INT_N` wird deshalb als active LOW ausgelegt. Das Datenblatt garantiert in der vorliegenden Fassung jedoch weder Ausgangstopologie noch minimale LOW-Pulsdauer. Der Schaltplan muss einen Serienwiderstand und bestückbare schwache Pull-up-/Pull-down-Optionen vorsehen; ein Open-Drain-Ausgang darf nicht ungeprüft angenommen werden.
+- `TOUCH_RESET_N` wird direkt von einem GPIO angesteuert und erhält einen externen Hardware-Pull-down nach GND. Dadurch bleibt Reset vor und während des Einschaltens LOW. Die Touch-seitigen INT-, SDA- und SCL-Pins dürfen vor anliegender `3V3_TOUCH` nicht HIGH getrieben werden; bei unabhängigem Einschalten der Touch-Domäne ist dies durch Power-off-Isolation sicherzustellen.
+- Im Komfort-Standby muss der FT6336U im **Monitor-Modus** bleiben. In diesem Modus scannt er laut Datenblatt standardmäßig mit 25 Bildern/s, erkennt eine Berührung, wechselt in den Active-Modus und kann über `/INT` den ESP32 wecken. Der typische Strom beträgt 220 µA bei 2,8 V und 25 °C.
+- Der im Datenblatt mit typisch 55 µA angegebene Sleep-/Hibernation-Modus reagiert nur auf ein hostseitiges RESET-/Wakeup-Signal. Eine Berührung weckt ihn nicht. Dieser Modus ist deshalb nur für den Minimal-Standby ohne Touch-Wakeup zulässig; nach Taster-Wakeup des ESP32 wird der Touch-Controller hostseitig aufgeweckt beziehungsweise zurückgesetzt.
 - Falls Touch-INT im vorgesehenen Standby-Modus nicht lang genug pegelaktiv bleibt, muss vor Fertigungsfreigabe ein stromarmer Wake-Latch oder eine gleichwertige zuverlässige Lösung in den Schaltplan aufgenommen werden.
-- Touch muss für den Minimal-Standby abschaltbar beziehungsweise in einen vom ESP32 nicht rückgespeisten Tiefstverbrauchszustand versetzbar sein.
+- Bei jedem Power-on des FT6336U muss die Versorgung von 0,1 VDD auf 0,9 VDD in höchstens 3 ms ansteigen. `TOUCH_RESET_N` bleibt nach Power-on mindestens 1 ms LOW. Nach Freigabe von Reset sind mindestens 300 ms bis zum ersten I2C-Zugriff beziehungsweise zuverlässigen Touch-Report einzuplanen.
+- Ein Resetimpuls muss mindestens 5 ms LOW dauern; danach sind wiederum mindestens 300 ms bis zur Kommunikation einzuplanen.
+- Für einen vollständigen Power-Cycle muss `3V3_TOUCH` unter 0,3 V fallen und dort mindestens 5 ms verbleiben. Während abgeschalteter Touch-Versorgung müssen SDA, SCL, INT und RESET durch Power-off-Isolation oder gleichwertige Schaltung gegen Rückspeisung gesperrt sein.
+- Da der Touch-Controller während seiner Start-/Resetsequenz den gemeinsamen I2C-Bus vorübergehend LOW halten kann, darf die Hardware keine RTC-Transaktion in dieser Phase voraussetzen. Die Firmware darf frühestens 300 ms nach Resetfreigabe auf den Touch zugreifen; die tatsächliche Zeit bis zur Busfreigabe ist am Muster zu messen, weil das Datenblatt dafür keinen Maximalwert nennt.
+- Normal- und Monitorstrom, Hibernationstrom, INT-Polarität/-Pulsdauer, Wake-Zuverlässigkeit und das Verhalten am gemeinsamen I2C-Bus müssen am beschafften Display gemessen werden.
 - Touch-Wakeup ist außerhalb des spezifizierten Betriebstemperaturbereichs der Displaybaugruppe nicht garantiert. Der externe Taster bleibt die zuverlässige Kaltstart-Wake-Quelle.
 
 ### 10.4 Frontlicht
 
-- Das integrierte Frontlicht besitzt laut Hersteller vier parallele weiße LEDs.
-- Zulässige Versorgung: 2,8 V bis 3,3 V; Gesamtstrom maximal 60 mA.
-- Es ist ein strombegrenzter, PWM-fähiger Treiber vorzusehen. Ein reiner Vorwiderstand ist nur zulässig, wenn Worst-Case-Strom und Helligkeit über alle Versorgung-, Temperatur- und LED-Toleranzen nachgewiesen werden.
+- Das integrierte Frontlicht besitzt laut Hersteller vier intern parallel geschaltete weiße LED-Dies. Die Herstellerzeichnung nennt eine Durchlassspannung von 2,75 V minimal, 2,9 V typisch und 3,0 V maximal sowie einen Gesamtstrom von 60 mA. Diese Spannungswerte sind LED-Durchlassspannungen und kein zulässiger Versorgungsspannungsbereich.
+- Der 6-polige Frontlicht-FPC wird belegt: Pins 1 und 2 gemeinsam `FRONTLIGHT_LED_PLUS`, Pins 3 und 4 offen/`NC`, Pins 5 und 6 gemeinsam `FRONTLIGHT_LED_MINUS`. Beide Plus- und beide Minuskontakte sind mit kurzen, symmetrischen Leiterwegen anzuschließen; die NC-Pins dürfen nicht verbunden werden.
+- Es ist ein stromgeregelter, PWM-fähiger Treiber mit Hardware-Abschaltung vorzusehen. Der Gesamtstrom aller vier LED-Dies darf unter keiner Kombination aus Versorgung, Temperatur, Bauteiltoleranz und PWM-Zustand 60 mA überschreiten. Der Sollstrom muss über einen BOM-Wert anpassbar sein.
+- Versorgung und Treibertopologie müssen bei 3,0 V maximaler LED-Durchlassspannung und minimaler speisender Spannung noch ausreichend Regelreserve besitzen. Eine verlustreiche lineare Speisung direkt aus dem bis 14 V reichenden `VIN_SYS` ist nicht zulässig.
 - Hardware-Default bei Reset, Boot und Deep-Sleep ist AUS.
 - Testpunkt beziehungsweise Messmöglichkeit für den Gesamtstrom ist vorzusehen.
 
@@ -309,6 +357,13 @@ Für J4 darf zur sicheren mechanischen Unterscheidung ein 5-poliges Gehäuse ver
 - Vom Hersteller spezifizierte Displaylagerung: **−25 °C bis +70 °C**.
 - Displayaktualisierungen außerhalb 0 °C bis +50 °C sind softwareseitig zu sperren. Bei −15 °C wird keine Aktualisierung erwartet; Bedienung bleibt über Taster und WLAN möglich.
 - Das E-Paper darf seinen letzten Bildinhalt ohne Versorgung behalten.
+- Nach höchstens fünf aufeinanderfolgenden Fast- oder Partial-Refresh-Vorgängen ist laut Hersteller ein Full Refresh vorzusehen, um Artefaktansammlung zu reduzieren. Dies ist eine dokumentierte Firmwareabhängigkeit.
+
+### 10.6 Handhabung und mechanischer Schutz
+
+- Die drei FPC-Verbindungen dürfen nicht bei versorgtem E-Paper, Touch oder Frontlicht gesteckt oder getrennt werden.
+- Das Gehäuse darf keinen punktuellen Druck auf das E-Paper ausüben. Displayauflage, Toleranzen und Befestigung müssen thermische Ausdehnung ohne Verspannung zulassen.
+- Die ungeschützten FPC-/Bondingbereiche dürfen weder als Griff- noch als Klemmfläche verwendet werden und sind gegen Kontakt mit Gehäusekanten zu schützen.
 
 ## 11. Externer Taster und weiße Ring-LED
 
@@ -402,6 +457,8 @@ Espressif empfiehlt für den generischen vierlagigen Aufbau keine Bauteile auf L
 - Im WROOM-Bereich dürfen auf der gegenüberliegenden PCB-Seite keine Schaltregler, Induktivitäten oder schnellen Signale angeordnet werden. Die Rückstromfläche unter den digitalen Modulanschlüssen muss zusammenhängend bleiben.
 - Der Bereich unter dem auf dem WROOM-1U integrierten U.FL-/MHF-I-Antennenstecker und dessen internem RF-Pfad ist entsprechend dem offiziellen Landpattern auf allen Lagen freizuhalten. Koaxstecker, Modul und umgebendes Metall/Gehäuse sind mechanisch und HF-gerecht anzuordnen.
 - Am E-Paper-SPI-Takt ist nahe am ESP32 ein bestückbarer Serienwiderstand oder Ferrit sowie ein optionaler, zunächst unbestückter Kondensator nach GND vorzusehen. Entsprechende Dämpfungsfootprints sollen, sofern der Platz reicht, auch für die übrigen SPI-Signale vorgesehen werden.
+- Booster-MOSFET, 47-µH-Induktivität, drei Dioden und Hochspannungs-Kondensatoren des E-Papers sind unmittelbar am 24-poligen FPC-Stecker gemäß Good-Display-Referenzschaltung zu gruppieren. Booster-Schleifen und -Kupferflächen sind zu minimieren und von Touch-FPC, I2C, RTC, USB und Antennenkoax fernzuhalten.
+- Die FPC-Steckerbereiche müssen mechanische Keep-outs für Verriegelungsbetätigung, FPC-Einschub und Biegeradius enthalten. Unter den drei FPC-Zungen dürfen keine scharfkantigen Vias, Bauteile oder freiliegenden Kupferkanten liegen.
 - Testpads dürfen keine ungewollten Stubs an USB oder anderen schnellen Signalen erzeugen.
 - Bauteile sollen, sofern funktional und platzmäßig möglich, mindestens 0603 besitzen. Kleinere Bauformen und Spezialgehäuse sind zulässig, wenn sie für die Funktion oder den Bauraum nötig sind.
 - Silkscreen muss Steckerbezeichnungen, Pin 1, Polaritäten, Batteriepolung, BOOT/RESET, PCB-Revision und alle Testpunkte eindeutig kennzeichnen.
@@ -430,7 +487,7 @@ Ohne laufende Firmware sowie während Reset, Boot und Deep-Sleep gelten zwingend
 | vier rote Status-LEDs | aus |
 | DS18B20-Sensorversorgung | aus |
 | Tastereingang | definiert HIGH, Active-Low-wake-fähig |
-| Touch-INT | definierter Pegel, im Komfort-Standby wake-fähig |
+| Touch-INT | im Komfort-Standby durch versorgten FT6336U-Monitor-Modus definiert und active-LOW-wake-fähig; im Minimal-Standby keine Touch-Wake-Anforderung |
 | USB-/12-V-Pfade | gegenseitig rückstromgesperrt |
 
 Diese Zustände müssen durch Hardware-Pull-ups/-downs und Power-Off-Isolation entstehen, nicht allein durch Software.
@@ -445,7 +502,7 @@ Mindestens folgende Netze benötigen zugängliche, beschriftete Testpunkte:
 - AUTOTERM TX/RX auf 3,3-V- und 5-V-Seite, OE und `AUTOTERM_5V`,
 - `1WIRE_DQ`,
 - I2C SDA/SCL, Touch-INT, Touch-RESET und RTC-INT,
-- E-Paper SCLK, MOSI, CS, RESET und BUSY,
+- E-Paper SCLK, SDIO/MOSI, CS, RESET und BUSY,
 - Frontlichtstrom sowie PWM-Signale der beiden Beleuchtungen.
 
 Testpunkte müssen im bestückten, geöffneten Gerät zugänglich sein. Ein zusammenhängendes GND-Testpad für Oszilloskop-Masse ist in der Nähe der Leistungs- und Kommunikationsbereiche vorzusehen.
@@ -461,17 +518,21 @@ Vor Bestellung müssen ERC und DRC ohne ungeklärte Fehler abgeschlossen sein. F
 5. Verpoltest am 12-V-Eingang gemäß Abschnitt 5.1 ohne Schaden.
 6. Lastsprungtest mit aktivem WLAN ohne Brownout; 3,3 V bleibt innerhalb 3,0 V bis 3,6 V.
 7. Gemessener Komfort-Standby-Strom kleiner 0,5 mA bei 12 V.
-8. Wiederholtes Aufwachen aus Deep-Sleep durch externen Taster und durch Touch.
+8. Wiederholtes Aufwachen aus Deep-Sleep durch externen Taster sowie durch Touch im FT6336U-Monitor-Modus. Im Hibernation-Modus darf Touch nicht als Wake-Quelle gewertet werden.
 9. Hardware-Defaultzustände aus Abschnitt 16 bei Power-up, Reset und Deep-Sleep.
 10. UART-Kommunikation mit angeschlossener AUTOTERM-Heizung; bei fehlendem `AUTOTERM_5V` keine Rückspeisung und hochohmiger Heizungs-TX.
 11. Zuverlässiger gleichzeitiger Betrieb aller drei DS18B20 mit dem realen 2-bis-5-m-Kabelbaum.
-12. Display-Voll- und Teilaktualisierung, BUSY/RESET, Touch und PWM-Frontlicht bei Raumtemperatur.
+12. Display-Voll-, Fast- und Teilaktualisierung, `BUSY`-HIGH-Verhalten, Reset, SPI-Schreibbetrieb bis zur freigegebenen Taktgrenze sowie Full Refresh nach fünf Fast-/Partial-Zyklen bei Raumtemperatur.
 13. Dimmbereich und Maximalstrom der weißen externen Taster-LED.
 14. RTC-Betrieb über I2C, Umschaltung auf BR1225, Backupstrommessung und rechnerischer Nachweis von mindestens vier Wochen Pufferzeit.
 15. Oszilloskopprüfung von `3V3_CORE` und `CHIP_PU/EN` bei 12-V-Einschalten/-Ausschalten, USB-Einschalten/-Ausschalten, Quellenwechsel, Brownout und schnell wiederkehrender Versorgung.
 16. Manueller Recovery-Test: BOOT gedrückt halten, RESET auslösen und erfolgreichen USB-Download-Boot nachweisen; GPIO46 bleibt dabei LOW.
 17. Prüfung aller extern wirksamen Enable-, TX- und LED-Ausgänge während Power-up, Reset und den dokumentierten GPIO-Einschaltimpulsen.
 18. WLAN-Reichweiten- und Durchsatztest im finalen Gehäuse am vorgesehenen Einbauort.
+19. Durchgangs- und Pin-1-Prüfung aller drei Display-FPC-Verbindungen gegen das Originalmuster; insbesondere darf keine gespiegelte Kontaktseitenzuordnung vorliegen.
+20. Touch-Prüfung bei Power-on und Reset: Anstiegszeit, Reset-LOW-Zeiten, 300-ms-Initialisierungszeit, I2C-Busfreigabe, INT-Polarität/-Pulsdauer sowie Stromaufnahme in Active-, Monitor- und Hibernation-Modus.
+21. Falls Touch vollständig abschaltbar ausgeführt wird: Nachweis von unter 0,3 V für mindestens 5 ms, fehlender Rückspeisung über SDA/SCL/INT/RESET und erfolgreicher Wiederinbetriebnahme.
+22. Frontlichtmessung über den gesamten PWM-Bereich; der Worst-Case-Gesamtstrom bleibt unter 60 mA und der Treiber besitzt bei maximaler LED-Durchlassspannung ausreichende Regelreserve.
 
 EMV-Vorzertifizierung ist für Revision A nicht zwingend, aber Nahfeldprüfung und Kontrolle des Buck-Schaltknotens, der USB-Verbindung, der 1-Wire-Leitung und der 3-m-PWM-/Tasterleitung werden dringend empfohlen.
 
@@ -498,15 +559,16 @@ Bauteilalternativen dürfen nicht nur anhand gleicher Nennwerte ersetzt werden. 
 Diese Punkte blockieren nicht den Beginn von Schaltplan und Platzierung, müssen aber vor der Fertigungsfreigabe abgeschlossen sein:
 
 1. Originalmuster des `GDEY029T94-FT01` beschaffen; alle drei FPCs, Kontaktseiten und Biegeradien gegen Zeichnung und Footprints prüfen.
-2. Touch-Standbymodus, INT-Polarität/-Pegelhaltezeit und Deep-Sleep-Wakeup messen; gegebenenfalls Wake-Latch bestücken.
-3. Exakte Nano-Fit-Header, Gegenstecker, Kontakte und sichere Nichtvertauschbarkeit von J2/J4 festlegen.
-4. APEM-Bestellcode `AV970220000700` durch Hersteller/Distributor bestätigen.
-5. TVS, Verpolschutz-MOSFETs, Filter und `LMR43620-Q1` einschließlich aller Worst-Case-Spannungen und thermischen Reserven berechnen.
-6. Mechanische Platzierung im 98-mm-×-48-mm-Zielumriss als 3D-Modell prüfen; USB, Antennenkoax, Knopfzelle, BOOT/RESET und alle Verriegelungen müssen erreichbar sein.
-7. ESP32-Pin-Matrix und alle sicheren Reset-/Deep-Sleep-Zustände reviewen.
-8. EN-/Resetlösung gegen langsame, unterbrochene und wechselnde Versorgung analysieren; Supervisor beziehungsweise PGOOD-Lösung festlegen.
-9. PCBWay-Stackup, Impedanzregeln, Bauteilverfügbarkeit und beidseitige Bestückbarkeit für fünf Stück bestätigen.
-10. PCBWay-Prozessfolge so bestätigen, dass das WROOM-1U trotz beidseitiger Bestückung genau einen Reflow-Zyklus durchläuft und die MSL-3-Handhabung eingehalten wird.
+2. FT6336U-Monitor-, Hibernation- und optionalen Power-off-Zustand, INT-Polarität/-Pegelhaltezeit, gemeinsamen I2C-Bus und Deep-Sleep-Wakeup messen; gegebenenfalls Wake-Latch beziehungsweise Power-off-Isolation bestücken.
+3. 24-/6-/6-polige FPC-Footprints und komplette E-Paper-Booster-Beschaltung gegen Kapitel 4, 5 und 12 der verlinkten `GDEY029T94-FT01`-Spezifikation unabhängig prüfen.
+4. Exakte Nano-Fit-Header, Gegenstecker, Kontakte und sichere Nichtvertauschbarkeit von J2/J4 festlegen.
+5. APEM-Bestellcode `AV970220000700` durch Hersteller/Distributor bestätigen.
+6. TVS, Verpolschutz-MOSFETs, Filter und `LMR43620-Q1` einschließlich aller Worst-Case-Spannungen und thermischen Reserven berechnen.
+7. Mechanische Platzierung im 98-mm-×-48-mm-Zielumriss als 3D-Modell prüfen; USB, Antennenkoax, Knopfzelle, BOOT/RESET und alle Verriegelungen müssen erreichbar sein.
+8. ESP32-Pin-Matrix und alle sicheren Reset-/Deep-Sleep-Zustände reviewen.
+9. EN-/Resetlösung gegen langsame, unterbrochene und wechselnde Versorgung analysieren; Supervisor beziehungsweise PGOOD-Lösung festlegen.
+10. PCBWay-Stackup, Impedanzregeln, Bauteilverfügbarkeit und beidseitige Bestückbarkeit für fünf Stück bestätigen.
+11. PCBWay-Prozessfolge so bestätigen, dass das WROOM-1U trotz beidseitiger Bestückung genau einen Reflow-Zyklus durchläuft und die MSL-3-Handhabung eingehalten wird.
 
 Es bestehen keine weiteren offenen Funktionsentscheidungen des Auftraggebers. Änderungen an Funktionsumfang, Versorgung, Display, Schnittstellen oder Mechanik bedürfen einer neuen Dokumentrevision.
 
@@ -534,4 +596,6 @@ Vor deren Integration müssen Original-Pinbelegung, elektrische Pegel, Busversor
 - [Molex Nano-Fit](https://www.molex.com/en-us/products/connectors/wire-to-board-connectors/nano-fit-connectors)
 - [APEM AV Illuminated Pushbuttons](https://www.apem.com/api/asset/en/fbCPLUNNnaEJPS7JlAtdy/pusbutton-switches-serie-AV.pdf)
 - [Good Display GDEY029T94-FT01](https://www.good-display.com/product/616.html)
+- [Good Display GDEY029T94-FT01 Specification, Revision 1.0](https://v4.cecdn.yun300.cn/100001_1909185148/GDEY029T94-FT01.pdf)
+- [FocalTech FT6336U Self-Capacitive Touch Panel Controller Datasheet, Version 1.0](https://v4.cecdn.yun300.cn/100001_1909185148/FT6336U-DataSheet-V1.0.pdf)
 - [Analog Devices – Guidelines for Reliable Long-Line 1-Wire Networks](https://www.analog.com/en/resources/technical-articles/guidelines-for-reliable-long-line-1wire-networks.html)
