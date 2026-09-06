@@ -1,10 +1,12 @@
 # Landy Heater Controller – Hardware-Anforderungsspezifikation Revision A
 
-Dokumentversion: 1.2
+Dokumentversion: 1.3
 
 Stand: 2026-09-06
 
 Status: freigegeben als Grundlage für Schaltplan, PCB-Layout und Angebotserstellung; noch keine Fertigungsfreigabe
+
+Änderungsstand 1.3: Systemprüfung nach Integration der Espressif-, Good-Display- und FocalTech-Herstellerangaben. GPIO45- und WROOM-1U-Keep-out-Aussagen korrigiert, USB-C-Stromfreigabe konkretisiert, Touch-/I2C-Spannungsdomäne und Deep-Sleep-Resetzustand eindeutig festgelegt, sichere E-Paper-Signalzustände ergänzt und Status-LEDs bei GPIO-Mangel als verzichtbare Komfortfunktion eingestuft.
 
 Änderungsstand 1.2: Anforderungen der Herstellerunterlagen `GDEY029T94-FT01` Revision 1.0 und `FT6336U` Datasheet Version 1.0 für FPC-Pinout, E-Paper-Referenzschaltung, SPI-Timing, Touch-Betriebsarten, Reset-/Power-Sequenz und Frontlicht konkretisiert. Insbesondere ist Touch-Wakeup nur im FT6336U-Monitor-Modus, nicht im 55-µA-Hibernation-Modus, gefordert.
 
@@ -108,9 +110,11 @@ VBCS und Smart-Shunt sind nur als mögliche Funktionen einer späteren Leiterpla
 ### 5.2 USB-C-Versorgung
 
 - USB-C muss das komplette Logikboard ohne anliegende 12 V versorgen können, einschließlich ESP32, Display, Touch, RTC, 1-Wire-Sensorversorgung und Frontlicht.
-- Für uneingeschränkten USB-Betrieb ist eine 5-V-Quelle mit mindestens **1 A** vorzusehen.
+- Für uneingeschränkten USB-Betrieb ist eine 5-V-USB-C-Quelle erforderlich, die über CC mindestens **1,5 A** ankündigt. Die Auslegung des Boards darf davon höchstens 1 A verwenden.
 - Das Board arbeitet als USB-2.0-Gerät/Sink ohne USB-PD.
-- CC1 und CC2 erhalten die normgerechten separaten Rd-Widerstände.
+- CC1 und CC2 erhalten jeweils eine normgerechte Rd-Terminierung. Diese darf durch separate Widerstände oder durch die nachgewiesen normgerechte interne Terminierung des gewählten Type-C-Sink-Controllers realisiert werden; eine Doppelterminierung ist unzulässig.
+- Eine USB-Type-C-Sink-/Stromankündigungserkennung ohne USB-PD oder eine vollständig gleichwertige Lösung muss die über CC angebotene Stromstufe auswerten. Bei lediglich angekündigtem USB-Default-Current muss natives USB-Flashing zuverlässig möglich sein; Frontlicht, Sensorversorgung und andere nicht notwendige Lasten sind hardware- oder firmwaregestützt so zu sperren beziehungsweise zu begrenzen, dass die zulässige Stromaufnahme einschließlich Einschaltstrom nicht überschritten wird.
+- Das Ergebnis der CC-Stromerkennung muss dem ESP32 zur Verfügung stehen oder die Lastbegrenzung muss unabhängig vom ESP32 hardwareseitig erfolgen. Ruhestrom, Startverhalten ohne laufende Firmware und GPIO-Bedarf der gewählten Lösung sind zu dokumentieren.
 - USB-VBUS und D+/D− erhalten geeigneten ESD-Schutz; die VBUS-Eingangskapazität muss USB-konform sein.
 - In D− und D+ ist jeweils unmittelbar am ESP32-Modul ein bestückbarer Serienwiderstand vorzusehen. Anfangswert: 22 Ω oder 33 Ω gemäß Espressif; der endgültige Wert wird nach Signalintegritätsprüfung festgelegt.
 - Hinter den Serienwiderständen ist je Leitung ein optionaler, standardmäßig nicht bestückter Kondensator-Footprint nach GND vorzusehen. ESD-Schutz und optionale Kondensatoren müssen so kapazitätsarm gewählt werden, dass das USB-Full-Speed-Signal nicht unzulässig belastet wird.
@@ -128,6 +132,8 @@ Die verbindliche Funktionskette lautet:
 
 `VIN_SYS -> Low-IQ-Buck 3,3 V / 2 A -> 3V3_CORE`
 
+`3V3_CORE -> Low-IQ-LDO nominal 3,0 V -> 3V0_TOUCH_AON`
+
 - Bei gleichzeitigem Anschluss von 12 V und USB muss der 12-V-Pfad Vorrang haben.
 - Beide Quellen müssen gegeneinander rückstromgesperrt sein.
 - Der 3,3-V-Regler wird mit dem automotive-qualifizierten `LMR43620-Q1`, 3,3-V-/2-A-Ausführung, realisiert. Die genaue bestellbare Variante und Schaltfrequenz werden anhand von Wirkungsgrad, EMI und PCBWay-Verfügbarkeit festgelegt und in der BOM genannt.
@@ -144,8 +150,8 @@ Die verbindliche Funktionskette lautet:
 
 Folgende Netze sind getrennt und eindeutig zu benennen:
 
-- `3V3_CORE`: ESP32, I2C-Bus und dauerhaft benötigte Logik.
-- `3V3_TOUCH`: FT6336U-Versorgung im Bereich 2,8 V bis 3,3 V am Touch-FPC unter Berücksichtigung aller Regler-, Last- und Temperaturtoleranzen. Normalbetrieb und Komfort-Standby nutzen diese Versorgung; im Minimal-Standby wird der FT6336U in Hibernation versetzt. Vollständiges Abschalten ist nur mit Power-off-Isolation aller Touch-Signale und Einhaltung der Reset-/Power-Sequenz aus Abschnitt 10.3 zulässig.
+- `3V3_CORE`: ESP32, RV-3028-Hauptversorgung und dauerhaft benötigte 3,3-V-Logik. Die I2C-Pull-ups liegen nicht an diesem Netz.
+- `3V0_TOUCH_AON`: separate, rauscharme und ruhestromarme nominelle 3,0-V-Versorgung für FT6336U und den gemeinsamen I2C-Bus. Am Touch-FPC muss sie unter allen Regler-, Last- und Temperaturtoleranzen zwischen 2,8 V und 3,3 V bleiben. Die I2C-Pull-ups werden ausschließlich an dieses Netz angeschlossen. ESP32- und RV-3028-Eingangspegel müssen bei den Worst-Case-Spannungen nachweislich kompatibel sein. Normalbetrieb, Komfort-Standby und Minimal-Standby nutzen diese Versorgung; im Minimal-Standby wird der FT6336U in Hibernation versetzt. Vollständiges Abschalten ist nur mit Power-off-Isolation aller Touch-Signale und Einhaltung der Reset-/Power-Sequenz aus Abschnitt 10.3 zulässig.
 - `3V3_DISPLAY_SW`: E-Paper-Logik und Booster-Beschaltung; im Deep-Sleep aus.
 - `3V3_SENSOR_SW`: externe DS18B20-Versorgung; im Deep-Sleep aus.
 - `VIN_SYS`: strombegrenzte Versorgung der externen weißen Taster-LED, damit sie sowohl bei 12-V- als auch bei USB-Versorgung betrieben werden kann.
@@ -180,7 +186,7 @@ Schaltbare Domänen dürfen bei ausgeschaltetem Zustand weder über GPIO-Schutzd
 - GPIO19 und GPIO20 sind für natives USB D−/D+ reserviert.
 - GPIO0 dient ausschließlich der BOOT-Funktion. GPIO3, GPIO45 und GPIO46 dürfen nicht für externe Schnittstellen, Wake-Signale oder Signale mit problematischem Einschaltpegel verwendet werden.
 - GPIO0 erhält einen externen 10-kΩ-Pull-up nach 3,3 V und den BOOT-Taster nach GND. An GPIO0 darf kein großer Kondensator vorgesehen werden.
-- GPIO45 muss während Reset LOW bleiben, damit VDD_SPI beim N16R8 in der vorgesehenen 3,3-V-Konfiguration bleibt. GPIO45 und GPIO46 dürfen keinen externen Pull-up erhalten; GPIO46 muss für den gemeinsamen USB-/UART-Download-Boot LOW bleiben können.
+- Beim N16R8 ist VDD_SPI für das integrierte PSRAM werkseitig per eFuse auf 3,3 V festgelegt; der GPIO45-Pegel beeinflusst VDD_SPI bei dieser Modulvariante nicht. GPIO45 bleibt dennoch wegen seiner Strapping-Funktion unbenutzt und erhält keinen externen Pull-up. Auch GPIO46 darf keinen externen Pull-up erhalten und muss für den gemeinsamen USB-/UART-Download-Boot LOW bleiben können.
 - Die Strapping-Pegel müssen mindestens 3 ms nach dem Anstieg von `CHIP_PU/EN` unverändert gültig bleiben.
 - eFuses für VDD_SPI, Bootmodus, ROM-Ausgabe, USB-JTAG oder JTAG dürfen während Fertigung und Prototypentest nicht programmiert werden, sofern dies nicht ausdrücklich dokumentiert und freigegeben wurde.
 - GPIO47 und GPIO48 sollen frei bleiben, solange dadurch kein anderer Designnachteil entsteht.
@@ -225,7 +231,7 @@ Die Nummerierung ist elektrisch verbindlich. Die mechanische Draufsicht muss in 
 |  | 2 | `GND` | gemeinsame Signalmasse |
 |  | 3 | `CTRL_TX_TO_HEATER` | Ausgang des Controllers zur Heizung |
 |  | 4 | `CTRL_RX_FROM_HEATER` | Eingang des Controllers von der Heizung |
-| J3 1-Wire, 3-polig | 1 | `+3V3_SENSOR` | geschaltete, strombegrenzte Sensorversorgung |
+| J3 1-Wire, 3-polig | 1 | `3V3_SENSOR_SW` | geschaltete, strombegrenzte Sensorversorgung |
 |  | 2 | `1WIRE_DQ` | gemeinsame Datenleitung der drei Sensoren |
 |  | 3 | `GND` | Sensormasse |
 | J4 Taster/LED, elektrisch 4-polig | 1 | `BUTTON_N` | Active-Low-Tastereingang |
@@ -256,10 +262,10 @@ Für J4 darf zur sicheren mechanischen Unterscheidung ein 5-poliges Gehäuse ver
 - Die drei Sensorleitungen sind jeweils etwa 2 m bis 5 m lang.
 - Betrieb ist ausschließlich dreidrahtig mit 3,3-V-Versorgung; parasitäre Versorgung ist nicht vorgesehen.
 - `1WIRE_DQ` wird direkt mit **GPIO4** des ESP32-S3 verbunden, entsprechend dem bestehenden und elektrisch geprüften Software-/Testaufbau.
-- Standard-Pull-up: 4,7 kΩ von `1WIRE_DQ` nach `+3V3_SENSOR`.
+- Standard-Pull-up: 4,7 kΩ von `1WIRE_DQ` nach `3V3_SENSOR_SW`.
 - Zwischen Steckverbinder und GPIO ist ein bestückter 0-Ω-Serienwiderstand vorzusehen. Footprint und Testpunkt müssen eine spätere Anpassung zur Dämpfung ohne PCB-Änderung erlauben.
 - Am Steckverbinder ist ein niederkapazitiver ESD-Schutz vorzusehen. Zusätzliche Kapazität auf DQ muss klein bleiben.
-- `+3V3_SENSOR` muss im Deep-Sleep abschaltbar und gegen Kurzschluss beziehungsweise übermäßigen Kabelstrom begrenzt sein. Ein externer Kurzschluss darf `3V3_CORE` nicht zusammenbrechen lassen.
+- `3V3_SENSOR_SW` muss im Deep-Sleep abschaltbar und gegen Kurzschluss beziehungsweise übermäßigen Kabelstrom begrenzt sein. Ein externer Kurzschluss darf `3V3_CORE` nicht zusammenbrechen lassen.
 - Die bewährte gemeinsame Bus-Topologie darf in Revision A nicht durch Multiplexer oder einzeln geschaltete Sensorzweige ersetzt werden.
 - Im Kabelbaum sollen `1WIRE_DQ` und GND gemeinsam geführt werden.
 
@@ -274,7 +280,7 @@ Für J4 darf zur sicheren mechanischen Unterscheidung ein 5-poliges Gehäuse ver
 - Aktive Fläche: 66,896 mm × 29,056 mm.
 - Das Display wird über seine originalen FPCs direkt mit der Hauptplatine verbunden. Verlängerungskabel sind nicht zulässig.
 - Es sind drei separate FPC-Steckverbinder vorzusehen: 24-polig/0,5 mm für E-Paper, 6-polig/0,5 mm für Touch und 6-polig/0,5 mm für Frontlicht. Die Herstellerzeichnung nennt für alle drei FPC-Enden 0,30 mm ± 0,03 mm Dicke.
-- Exakte Pinfolge, Raster, Kontaktseite, Steckverbinderhöhe und FPC-Austrittsrichtung müssen aus der aktuellen Herstellerzeichnung übernommen und an einem Originalmuster geprüft werden.
+- Exakte Pinfolge, Raster und Kontaktseite werden verbindlich aus der aktuellen Herstellerzeichnung übernommen. Steckverbinderhöhe, FPC-Austrittsrichtung und mechanische Passung werden im 3D-Modell festgelegt. Ein Originalmuster dient vor Fertigungsfreigabe als unabhängige Kontrolle von Footprint, Kontaktseite und Mechanik, ist aber keine Voraussetzung für den Beginn des Schaltplanentwurfs.
 - Good Display weist darauf hin, dass Touch- und Frontlicht-FPC in umgekehrter Orientierung angeschlossen werden. Diese Angabe darf nicht aus einer Produktabbildung interpretiert werden; maßgeblich sind aktuelle Zeichnung, Datenblatt und physisches Muster.
 - Die Steckverbinder sind unmittelbar an den FPC-Austritten zu platzieren. Mindestbiegeradius, Entriegelungsweg und beschädigungsfreie Demontage sind im 3D-Modell nachzuweisen.
 - Die Pin-1-Ansicht der Herstellerzeichnung darf im Footprint nicht gespiegelt werden. Schaltplan, PCB-Footprint, 3D-Modell und Bestückungszeichnung müssen dieselbe Kontaktseitenansicht verwenden.
@@ -318,26 +324,29 @@ Für J4 darf zur sicheren mechanischen Unterscheidung ein 5-poliges Gehäuse ver
 - Im Schreibbetrieb darf `EPD_SCLK` 20 MHz nicht überschreiten. Falls die bidirektionale Lesefunktion verwendet wird, darf der Lesetakt 2,5 MHz nicht überschreiten. Die Daten werden beim Schreiben an der steigenden SCLK-Flanke übernommen.
 - Solange `EPD_BUSY` HIGH ist, dürfen keine neuen Befehle gesendet und keine laufenden Displayoperationen unterbrochen werden.
 - Die Displaydomäne muss im Deep-Sleep vollständig abschaltbar sein, ohne Rückspeisung über SPI/Steuersignale.
-- Alle MCU-Signale zum E-Paper müssen vor und während abgeschalteter `3V3_DISPLAY_SW` auf einem nicht rückspeisenden LOW-Zustand liegen oder durch Bauteile mit nachgewiesener Power-off-Isolation getrennt sein.
+- Bei abgeschalteter `3V3_DISPLAY_SW` müssen alle MCU-Signale zum E-Paper hochohmig beziehungsweise nicht rückspeisend sein oder durch Bauteile mit nachgewiesener Power-off-Isolation getrennt werden.
+- Sobald `3V3_DISPLAY_SW` eingeschaltet ist, aber bevor die Firmware den Displaycontroller initialisiert, gelten folgende sichere Pegel: `EPD_CS_N` HIGH/inaktiv, `EPD_RESET_N` LOW/Reset aktiv sowie `EPD_SCLK`, `EPD_SDIO/MOSI` und `EPD_DC` LOW. Pull-Widerstände und gegebenenfalls Isolation sind auf der jeweils versorgten Seite anzuordnen, sodass diese Zustände auch bei ESP32-Reset entstehen.
 - SPI-Leitungen sind kurz über einer durchgehenden Referenzfläche zu führen. Serien-Dämpfungsfootprints sind nahe am ESP32 vorzusehen.
-- Testpunkte: Displayversorgung, SCLK, SDIO/MOSI, CS, RESET und BUSY.
+- Testpunkte: Displayversorgung, SCLK, SDIO/MOSI, CS, D/C, RESET und BUSY.
 
 ### 10.3 Kapazitiver Touch
 
-- Touch-Controller: `FT6336U`. Der spezifizierte Betriebsbereich für VDDA/VDD3 beträgt 2,8 V bis 3,3 V; 3,6 V ist nur die absolute Maximalgrenze und kein freigegebener Dauerbetriebswert. `3V3_TOUCH` muss am FPC unter allen Toleranzen innerhalb 2,8 V bis 3,3 V bleiben.
-- Der 6-polige Touch-FPC wird gemäß Herstellerzeichnung belegt: Pin 1 `GND`, Pin 2 `TOUCH_INT_N`, Pin 3 `TOUCH_RESET_N`, Pin 4 `3V3_TOUCH`, Pin 5 `I2C_SCL`, Pin 6 `I2C_SDA`.
+- Touch-Controller: `FT6336U`. Der spezifizierte Betriebsbereich für VDDA/VDD3 beträgt 2,8 V bis 3,3 V; 3,6 V ist nur die absolute Maximalgrenze und kein freigegebener Dauerbetriebswert. `3V0_TOUCH_AON` muss am FPC unter allen Toleranzen innerhalb 2,8 V bis 3,3 V bleiben.
+- Der 6-polige Touch-FPC wird gemäß Herstellerzeichnung belegt: Pin 1 `GND`, Pin 2 `TOUCH_INT_N`, Pin 3 `TOUCH_RESET_N`, Pin 4 `3V0_TOUCH_AON`, Pin 5 `I2C_SCL`, Pin 6 `I2C_SDA`.
 - I2C darf gemäß FT6336U-Datenblatt zwischen 10 kHz und 400 kHz betrieben werden.
 - Touch teilt SDA und SCL mit der RTC. Es darf nur ein abgestimmter Satz Bus-Pull-ups auf der dauerhaft versorgten Seite existieren.
-- Pull-up-Spannung, ESP32-Eingangspegel und die am integrierten Touch-FPC nicht separat herausgeführte IOVCC-Versorgung müssen zueinander kompatibel sein. Keine Touch-Leitung darf die aktuelle `3V3_TOUCH`-Versorgung übersteigen oder den unversorgten Controller über Schutzdioden speisen.
+- Pull-up-Spannung, ESP32-Eingangspegel, RV-3028-Eingangspegel und die am integrierten Touch-FPC nicht separat herausgeführte IOVCC-Versorgung müssen zueinander kompatibel sein. Keine Touch-Leitung darf die aktuelle `3V0_TOUCH_AON`-Versorgung übersteigen oder den unversorgten Controller über Schutzdioden speisen.
 - `TOUCH_INT_N` wird direkt auf einen Deep-Sleep-wake-fähigen RTC-GPIO des ESP32-S3 aus dem Bereich GPIO0 bis GPIO21 geführt; Strapping- und USB-Pins sind ausgeschlossen.
 - Das FocalTech-Datenblatt bezeichnet das Signal als `/INT`; `TOUCH_INT_N` wird deshalb als active LOW ausgelegt. Das Datenblatt garantiert in der vorliegenden Fassung jedoch weder Ausgangstopologie noch minimale LOW-Pulsdauer. Der Schaltplan muss einen Serienwiderstand und bestückbare schwache Pull-up-/Pull-down-Optionen vorsehen; ein Open-Drain-Ausgang darf nicht ungeprüft angenommen werden.
-- `TOUCH_RESET_N` wird direkt von einem GPIO angesteuert und erhält einen externen Hardware-Pull-down nach GND. Dadurch bleibt Reset vor und während des Einschaltens LOW. Die Touch-seitigen INT-, SDA- und SCL-Pins dürfen vor anliegender `3V3_TOUCH` nicht HIGH getrieben werden; bei unabhängigem Einschalten der Touch-Domäne ist dies durch Power-off-Isolation sicherzustellen.
+- `TOUCH_RESET_N` wird über eine zu `3V0_TOUCH_AON` pegelkompatible Ansteuerung mit definiertem Einschaltzustand geführt. Vor und während des Einschaltens bleibt Reset hardwareseitig LOW. Nach der softwaregesteuerten Freigabe wird `TOUCH_RESET_N` ausschließlich auf `3V0_TOUCH_AON` hochgezogen beziehungsweise pegelbegrenzt; ein direkter 3,3-V-Push-Pull-HIGH-Pegel ist ohne Worst-Case-Nachweis nicht zulässig.
+- Im Komfort-Standby muss `TOUCH_RESET_N` während des gesamten ESP32-Deep-Sleep zuverlässig HIGH bleiben, damit der FT6336U im Monitor-Modus weiterarbeitet. Wird dafür ESP32-Pad-Hold verwendet, sind die notwendigen Funktionen `gpio_hold_en()` und `gpio_deep_sleep_hold_en()` beziehungsweise deren aktuelle ESP-IDF-Entsprechungen, der Zustand beim Eintritt und Aufwachen sowie das Verhalten bei Reset am Prototyp nachzuweisen. Alternativ ist eine stromarme Hardware-Halteschaltung zulässig.
+- Die Touch-seitigen INT-, SDA- und SCL-Pins dürfen vor anliegender `3V0_TOUCH_AON` nicht HIGH getrieben werden; bei unabhängigem Einschalten oder vollständigem Abschalten der Touch-Domäne ist dies durch Power-off-Isolation sicherzustellen.
 - Im Komfort-Standby muss der FT6336U im **Monitor-Modus** bleiben. In diesem Modus scannt er laut Datenblatt standardmäßig mit 25 Bildern/s, erkennt eine Berührung, wechselt in den Active-Modus und kann über `/INT` den ESP32 wecken. Der typische Strom beträgt 220 µA bei 2,8 V und 25 °C.
 - Der im Datenblatt mit typisch 55 µA angegebene Sleep-/Hibernation-Modus reagiert nur auf ein hostseitiges RESET-/Wakeup-Signal. Eine Berührung weckt ihn nicht. Dieser Modus ist deshalb nur für den Minimal-Standby ohne Touch-Wakeup zulässig; nach Taster-Wakeup des ESP32 wird der Touch-Controller hostseitig aufgeweckt beziehungsweise zurückgesetzt.
 - Falls Touch-INT im vorgesehenen Standby-Modus nicht lang genug pegelaktiv bleibt, muss vor Fertigungsfreigabe ein stromarmer Wake-Latch oder eine gleichwertige zuverlässige Lösung in den Schaltplan aufgenommen werden.
 - Bei jedem Power-on des FT6336U muss die Versorgung von 0,1 VDD auf 0,9 VDD in höchstens 3 ms ansteigen. `TOUCH_RESET_N` bleibt nach Power-on mindestens 1 ms LOW. Nach Freigabe von Reset sind mindestens 300 ms bis zum ersten I2C-Zugriff beziehungsweise zuverlässigen Touch-Report einzuplanen.
 - Ein Resetimpuls muss mindestens 5 ms LOW dauern; danach sind wiederum mindestens 300 ms bis zur Kommunikation einzuplanen.
-- Für einen vollständigen Power-Cycle muss `3V3_TOUCH` unter 0,3 V fallen und dort mindestens 5 ms verbleiben. Während abgeschalteter Touch-Versorgung müssen SDA, SCL, INT und RESET durch Power-off-Isolation oder gleichwertige Schaltung gegen Rückspeisung gesperrt sein.
+- Für einen vollständigen Power-Cycle muss `3V0_TOUCH_AON` unter 0,3 V fallen und dort mindestens 5 ms verbleiben. Während abgeschalteter Touch-Versorgung müssen SDA, SCL, INT und RESET durch Power-off-Isolation oder gleichwertige Schaltung gegen Rückspeisung gesperrt sein.
 - Da der Touch-Controller während seiner Start-/Resetsequenz den gemeinsamen I2C-Bus vorübergehend LOW halten kann, darf die Hardware keine RTC-Transaktion in dieser Phase voraussetzen. Die Firmware darf frühestens 300 ms nach Resetfreigabe auf den Touch zugreifen; die tatsächliche Zeit bis zur Busfreigabe ist am Muster zu messen, weil das Datenblatt dafür keinen Maximalwert nennt.
 - Normal- und Monitorstrom, Hibernationstrom, INT-Polarität/-Pulsdauer, Wake-Zuverlässigkeit und das Verhalten am gemeinsamen I2C-Bus müssen am beschafften Display gemessen werden.
 - Touch-Wakeup ist außerhalb des spezifizierten Betriebstemperaturbereichs der Displaybaugruppe nicht garantiert. Der externe Taster bleibt die zuverlässige Kaltstart-Wake-Quelle.
@@ -383,7 +392,7 @@ Für J4 darf zur sicheren mechanischen Unterscheidung ein 5-poliges Gehäuse ver
 
 ## 12. RTC und Backup-Batterie
 
-- RTC: **Micro Crystal `RV-3028-C7`** am gemeinsamen 3,3-V-I2C-Bus.
+- RTC: **Micro Crystal `RV-3028-C7`** mit Hauptversorgung aus `3V3_CORE` am gemeinsamen I2C-Bus. Die Bus-Pull-ups liegen gemäß Abschnitt 5.4 an `3V0_TOUCH_AON`.
 - Backupquelle: austauschbare **BR1225**-Lithium-Primärzelle in einem vibrationsfesten, auf dem Board montierten Halter.
 - Der Halter muss verpolungssicher beziehungsweise eindeutig markiert und im geöffneten Gehäuse austauschbar sein.
 - Die RTC muss bei fehlender 12-V- und USB-Versorgung mindestens vier Wochen weiterlaufen. Dies ist durch Worst-Case-Stromrechnung und Messung des Backupstroms nachzuweisen.
@@ -392,14 +401,14 @@ Für J4 darf zur sicheren mechanischen Unterscheidung ein 5-poliges Gehäuse ver
 - Der RTC-Interrupt darf zu einem Testpunkt und einem freien RTC-GPIO geführt werden. RTC-Alarm ist jedoch keine geforderte Wake-Funktion von Revision A und kein Abnahmekriterium.
 - Die bestehende Software verwendet teilweise einen DS3231-Adapter. Die Umstellung auf RV-3028 ist eine Softwareaufgabe; eine elektrische DS3231-Kompatibilität ist nicht gefordert.
 
-## 13. Status-LEDs
+## 13. Optionale Status-LEDs
 
-- Auf dem Board sind genau vier einzeln steuerbare **rote** Status-LEDs vorzusehen.
-- Jede LED erhält eine eigene Strombegrenzung.
-- Direktansteuerung oder ein stromarmer Treiber sind zulässig; die vier Funktionen dürfen nicht von einem I2C-Portexpander abhängig gemacht werden.
+- Vier einzeln steuerbare **rote** Status-LEDs sind als gemeinsamer Funktionsblock gewünscht, aber optional und kein Abnahmekriterium. Revision A wird entweder mit allen vier LEDs oder ohne Status-LEDs ausgeführt; eine Teilbestückung ist nicht vorgesehen.
+- Funktionale Schnittstellen, beide Wake-Eingänge, sichere Rail-/Reset-Steuerungen, natives USB und die geforderten Diagnosemöglichkeiten haben bei der GPIO-Zuteilung Vorrang. Zeigt die vollständige Pin-Matrix nicht genügend geeignete GPIOs, werden die vier Status-LEDs vollständig weggelassen; hierfür darf kein I2C-Portexpander ergänzt und keine sicherheits- oder diagnosebezogene Funktion eingeschränkt werden.
+- Werden die vier LEDs umgesetzt, erhält jede eine eigene Strombegrenzung. Direktansteuerung oder ein stromarmer Treiber sind zulässig; die Funktionen dürfen nicht von einem I2C-Portexpander abhängig gemacht werden.
 - Hardware-Default bei Reset, Boot und Deep-Sleep ist AUS.
 - Es gibt keine dauerhaft leuchtende Power-LED.
-- Die LEDs müssen im montierten Zustand sichtbar sein oder über definierte Lichtleiterpositionen verfügen; dies wird beim Platzierungsreview festgelegt.
+- Umgesetzte LEDs müssen im montierten Zustand sichtbar sein oder über definierte Lichtleiterpositionen verfügen; dies wird beim Platzierungsreview festgelegt.
 
 ## 14. GPIO- und Bussystemregeln
 
@@ -408,6 +417,7 @@ Für J4 darf zur sicheren mechanischen Unterscheidung ein 5-poliges Gehäuse ver
 - AUTOTERM verwendet eine Hardware-UART ungleich UART0; Signale dürfen über die ESP32-GPIO-Matrix auf geeignete Pins gelegt werden.
 - 1-Wire ist fest GPIO4 zugeordnet.
 - Taster und Touch-INT müssen direkte ESP32-Wake-Eingänge sein und dürfen nicht über Portexpander geführt werden.
+- Die vollständige Pin-Matrix wird vor Auswahl beziehungsweise Freigabe der optionalen Status-LEDs erstellt. GPIO47/48, U0TXD/U0RXD, Wake-Fähigkeit und sichere Einschaltzustände sind ausdrücklich in die Bilanz aufzunehmen.
 - Rail-Enables, Pegelwandler-OE, LED-Treiber und sonstige Ausgänge erhalten externe Pull-ups/-downs für einen sicheren Zustand vor Firmwareinitialisierung.
 - Die Pinplanung muss die von Espressif dokumentierten Einschaltimpulse berücksichtigen. GPIO1 bis GPIO17 können beim Einschalten etwa 60 µs LOW sein; GPIO18 kann LOW- und HIGH-Impulse zeigen. GPIO18 darf deshalb nicht für ein ungefiltertes Active-High-Enable einer externen Last verwendet werden.
 - Unbenutzte GPIOs dürfen nicht dauerhaft floaten. Sie erhalten einen geeigneten externen Pull-Widerstand oder werden nach dem Booten per Firmware mit einem internen Pull definiert. Strapping-Pins dürfen dadurch nicht verändert werden.
@@ -455,7 +465,7 @@ Espressif empfiehlt für den generischen vierlagigen Aufbau keine Bauteile auf L
 - Ob das zentrale EPAD verlötet wird, ist im Fertigungsdatensatz ausdrücklich festzulegen. Bei verlötetem EPAD muss die Pastenöffnung so begrenzt werden, dass das Modul nicht angehoben wird und sämtliche seitlichen Pads zuverlässig verlötet werden.
 - Das ESP32-S3-WROOM-1U und USB müssen auf L1 unmittelbar über der durchgehenden L2-GND-Fläche liegen. Eine Platzierung des Moduls auf L4 ist nur zulässig, wenn der Stackup gespiegelt wird und die unmittelbar benachbarte Innenlage eine ungeteilte GND-Fläche bildet.
 - Im WROOM-Bereich dürfen auf der gegenüberliegenden PCB-Seite keine Schaltregler, Induktivitäten oder schnellen Signale angeordnet werden. Die Rückstromfläche unter den digitalen Modulanschlüssen muss zusammenhängend bleiben.
-- Der Bereich unter dem auf dem WROOM-1U integrierten U.FL-/MHF-I-Antennenstecker und dessen internem RF-Pfad ist entsprechend dem offiziellen Landpattern auf allen Lagen freizuhalten. Koaxstecker, Modul und umgebendes Metall/Gehäuse sind mechanisch und HF-gerecht anzuordnen.
+- Das WROOM-1U besitzt laut Espressif keine Antennen-Keep-out-Zone auf dem Basis-PCB. Es darf daher kein vom WROOM-1-Modul mit PCB-Antenne übernommener Kupfer-Keep-out verwendet werden. Das offizielle WROOM-1U-Landpattern bleibt unverändert; über und um den U.FL-/MHF-I-Stecker ist mechanischer Freiraum für Gegenstecker, Koaxkabel und zulässigen Biegeradius vorzusehen. Modul, Koaxkabel und umgebendes Metall/Gehäuse sind mechanisch und HF-gerecht anzuordnen.
 - Am E-Paper-SPI-Takt ist nahe am ESP32 ein bestückbarer Serienwiderstand oder Ferrit sowie ein optionaler, zunächst unbestückter Kondensator nach GND vorzusehen. Entsprechende Dämpfungsfootprints sollen, sofern der Platz reicht, auch für die übrigen SPI-Signale vorgesehen werden.
 - Booster-MOSFET, 47-µH-Induktivität, drei Dioden und Hochspannungs-Kondensatoren des E-Papers sind unmittelbar am 24-poligen FPC-Stecker gemäß Good-Display-Referenzschaltung zu gruppieren. Booster-Schleifen und -Kupferflächen sind zu minimieren und von Touch-FPC, I2C, RTC, USB und Antennenkoax fernzuhalten.
 - Die FPC-Steckerbereiche müssen mechanische Keep-outs für Verriegelungsbetätigung, FPC-Einschub und Biegeradius enthalten. Unter den drei FPC-Zungen dürfen keine scharfkantigen Vias, Bauteile oder freiliegenden Kupferkanten liegen.
@@ -484,25 +494,27 @@ Ohne laufende Firmware sowie während Reset, Boot und Deep-Sleep gelten zwingend
 | E-Paper-Versorgung | aus |
 | Frontlicht | aus |
 | externe weiße Taster-LED | aus |
-| vier rote Status-LEDs | aus |
+| optionale rote Status-LEDs, sofern umgesetzt | aus |
 | DS18B20-Sensorversorgung | aus |
 | Tastereingang | definiert HIGH, Active-Low-wake-fähig |
 | Touch-INT | im Komfort-Standby durch versorgten FT6336U-Monitor-Modus definiert und active-LOW-wake-fähig; im Minimal-Standby keine Touch-Wake-Anforderung |
+| Touch-RESET | bei Power-up/ESP32-Reset LOW; nach Freigabe im Normalbetrieb und während Komfort-Standby HIGH an `3V0_TOUCH_AON` |
+| E-Paper-Signale | bei ausgeschalteter Displaydomäne hochohmig/nicht rückspeisend; bei eingeschalteter Domäne vor Initialisierung CS HIGH, RESET LOW, SCLK/SDIO/D/C LOW |
 | USB-/12-V-Pfade | gegenseitig rückstromgesperrt |
 
-Diese Zustände müssen durch Hardware-Pull-ups/-downs und Power-Off-Isolation entstehen, nicht allein durch Software.
+Die sicheren Power-up-, Reset- und Power-off-Zustände müssen durch Hardware-Pull-ups/-downs und Power-Off-Isolation entstehen, nicht allein durch Software. Ein nach expliziter Softwarefreigabe absichtlich gehaltener Betriebszustand während Deep-Sleep, insbesondere `TOUCH_RESET_N` HIGH im Komfort-Standby, darf die dokumentierte ESP32-Pad-Hold-Funktion verwenden und muss nach Abschnitt 18 verifiziert werden.
 
 ## 17. Testpunkte und Design-for-Test
 
 Mindestens folgende Netze benötigen zugängliche, beschriftete Testpunkte:
 
-- `BATT_12V_IN`, geschützter 12-V-Pfad, `VIN_SYS`, `3V3_CORE`, alle geschalteten 3,3-V-Domänen und GND,
+- `BATT_12V_IN`, geschützter 12-V-Pfad, `VIN_SYS`, `3V3_CORE`, `3V0_TOUCH_AON`, alle geschalteten 3,3-V-Domänen und GND,
 - USB D+/D− nur als messgerechte Pads ohne problematischen Stub,
 - `CHIP_PU`, GPIO0/BOOT, U0TXD, U0RXD,
 - AUTOTERM TX/RX auf 3,3-V- und 5-V-Seite, OE und `AUTOTERM_5V`,
 - `1WIRE_DQ`,
 - I2C SDA/SCL, Touch-INT, Touch-RESET und RTC-INT,
-- E-Paper SCLK, SDIO/MOSI, CS, RESET und BUSY,
+- E-Paper SCLK, SDIO/MOSI, CS, D/C, RESET und BUSY,
 - Frontlichtstrom sowie PWM-Signale der beiden Beleuchtungen.
 
 Testpunkte müssen im bestückten, geöffneten Gerät zugänglich sein. Ein zusammenhängendes GND-Testpad für Oszilloskop-Masse ist in der Nähe der Leistungs- und Kommunikationsbereiche vorzusehen.
@@ -513,12 +525,12 @@ Vor Bestellung müssen ERC und DRC ohne ungeklärte Fehler abgeschlossen sein. F
 
 1. Sichtprüfung, Polarität, Bestückung und Kurzschlusstest aller Versorgungsschienen.
 2. Start und stabiler Betrieb bei 10 V, 12 V und 14 V Eingang.
-3. USB-only-Betrieb ohne 12 V; Flashen und native USB-Kommunikation funktionieren.
+3. USB-only-Betrieb ohne 12 V: Flashen und native USB-Kommunikation funktionieren bei USB-Default-Current. Uneingeschränkter Betrieb wird nur bei erkannter CC-Ankündigung von mindestens 1,5 A freigegeben; die gemessene Boardaufnahme bleibt in beiden Fällen innerhalb der jeweils erlaubten Grenze.
 4. Gleichzeitiger Anschluss von 12 V und USB ohne Rückspeisung in USB, Fahrzeugkreis oder AUTOTERM-Port.
 5. Verpoltest am 12-V-Eingang gemäß Abschnitt 5.1 ohne Schaden.
 6. Lastsprungtest mit aktivem WLAN ohne Brownout; 3,3 V bleibt innerhalb 3,0 V bis 3,6 V.
 7. Gemessener Komfort-Standby-Strom kleiner 0,5 mA bei 12 V.
-8. Wiederholtes Aufwachen aus Deep-Sleep durch externen Taster sowie durch Touch im FT6336U-Monitor-Modus. Im Hibernation-Modus darf Touch nicht als Wake-Quelle gewertet werden.
+8. Wiederholtes Aufwachen aus Deep-Sleep durch externen Taster sowie durch Touch im FT6336U-Monitor-Modus. `TOUCH_RESET_N` bleibt während des gesamten Komfort-Standby HIGH. Im Hibernation-Modus darf Touch nicht als Wake-Quelle gewertet werden.
 9. Hardware-Defaultzustände aus Abschnitt 16 bei Power-up, Reset und Deep-Sleep.
 10. UART-Kommunikation mit angeschlossener AUTOTERM-Heizung; bei fehlendem `AUTOTERM_5V` keine Rückspeisung und hochohmiger Heizungs-TX.
 11. Zuverlässiger gleichzeitiger Betrieb aller drei DS18B20 mit dem realen 2-bis-5-m-Kabelbaum.
@@ -529,8 +541,8 @@ Vor Bestellung müssen ERC und DRC ohne ungeklärte Fehler abgeschlossen sein. F
 16. Manueller Recovery-Test: BOOT gedrückt halten, RESET auslösen und erfolgreichen USB-Download-Boot nachweisen; GPIO46 bleibt dabei LOW.
 17. Prüfung aller extern wirksamen Enable-, TX- und LED-Ausgänge während Power-up, Reset und den dokumentierten GPIO-Einschaltimpulsen.
 18. WLAN-Reichweiten- und Durchsatztest im finalen Gehäuse am vorgesehenen Einbauort.
-19. Durchgangs- und Pin-1-Prüfung aller drei Display-FPC-Verbindungen gegen das Originalmuster; insbesondere darf keine gespiegelte Kontaktseitenzuordnung vorliegen.
-20. Touch-Prüfung bei Power-on und Reset: Anstiegszeit, Reset-LOW-Zeiten, 300-ms-Initialisierungszeit, I2C-Busfreigabe, INT-Polarität/-Pulsdauer sowie Stromaufnahme in Active-, Monitor- und Hibernation-Modus.
+19. Durchgangs- und Pin-1-Prüfung aller drei nach Herstellerzeichnung erstellten Display-FPC-Verbindungen gegen das Originalmuster; insbesondere darf keine gespiegelte Kontaktseitenzuordnung vorliegen.
+20. Touch-Prüfung bei Power-on, Reset und Deep-Sleep: Spannung und Anstiegszeit von `3V0_TOUCH_AON`, Worst-Case-I2C-HIGH-Pegel an ESP32/RV-3028/FT6336U, Reset-LOW-Zeiten, `TOUCH_RESET_N`-Haltezustand, 300-ms-Initialisierungszeit, I2C-Busfreigabe, INT-Polarität/-Pulsdauer sowie Stromaufnahme in Active-, Monitor- und Hibernation-Modus.
 21. Falls Touch vollständig abschaltbar ausgeführt wird: Nachweis von unter 0,3 V für mindestens 5 ms, fehlender Rückspeisung über SDA/SCL/INT/RESET und erfolgreicher Wiederinbetriebnahme.
 22. Frontlichtmessung über den gesamten PWM-Bereich; der Worst-Case-Gesamtstrom bleibt unter 60 mA und der Treiber besitzt bei maximaler LED-Durchlassspannung ausreichende Regelreserve.
 
@@ -559,18 +571,18 @@ Bauteilalternativen dürfen nicht nur anhand gleicher Nennwerte ersetzt werden. 
 Diese Punkte blockieren nicht den Beginn von Schaltplan und Platzierung, müssen aber vor der Fertigungsfreigabe abgeschlossen sein:
 
 1. Originalmuster des `GDEY029T94-FT01` beschaffen; alle drei FPCs, Kontaktseiten und Biegeradien gegen Zeichnung und Footprints prüfen.
-2. FT6336U-Monitor-, Hibernation- und optionalen Power-off-Zustand, INT-Polarität/-Pegelhaltezeit, gemeinsamen I2C-Bus und Deep-Sleep-Wakeup messen; gegebenenfalls Wake-Latch beziehungsweise Power-off-Isolation bestücken.
+2. `3V0_TOUCH_AON`, FT6336U-Monitor-, Hibernation- und optionalen Power-off-Zustand, `TOUCH_RESET_N`-Hold, INT-Polarität/-Pegelhaltezeit, gemeinsamen I2C-Bus und Deep-Sleep-Wakeup messen; gegebenenfalls Wake-Latch beziehungsweise Power-off-Isolation bestücken.
 3. 24-/6-/6-polige FPC-Footprints und komplette E-Paper-Booster-Beschaltung gegen Kapitel 4, 5 und 12 der verlinkten `GDEY029T94-FT01`-Spezifikation unabhängig prüfen.
 4. Exakte Nano-Fit-Header, Gegenstecker, Kontakte und sichere Nichtvertauschbarkeit von J2/J4 festlegen.
 5. APEM-Bestellcode `AV970220000700` durch Hersteller/Distributor bestätigen.
 6. TVS, Verpolschutz-MOSFETs, Filter und `LMR43620-Q1` einschließlich aller Worst-Case-Spannungen und thermischen Reserven berechnen.
 7. Mechanische Platzierung im 98-mm-×-48-mm-Zielumriss als 3D-Modell prüfen; USB, Antennenkoax, Knopfzelle, BOOT/RESET und alle Verriegelungen müssen erreichbar sein.
-8. ESP32-Pin-Matrix und alle sicheren Reset-/Deep-Sleep-Zustände reviewen.
+8. ESP32-Pin-Matrix und alle sicheren Reset-/Deep-Sleep-Zustände reviewen. Reichen geeignete GPIOs nicht aus, sind die optionalen Status-LEDs gemäß Abschnitt 13 vollständig zu entfernen.
 9. EN-/Resetlösung gegen langsame, unterbrochene und wechselnde Versorgung analysieren; Supervisor beziehungsweise PGOOD-Lösung festlegen.
 10. PCBWay-Stackup, Impedanzregeln, Bauteilverfügbarkeit und beidseitige Bestückbarkeit für fünf Stück bestätigen.
 11. PCBWay-Prozessfolge so bestätigen, dass das WROOM-1U trotz beidseitiger Bestückung genau einen Reflow-Zyklus durchläuft und die MSL-3-Handhabung eingehalten wird.
 
-Es bestehen keine weiteren offenen Funktionsentscheidungen des Auftraggebers. Änderungen an Funktionsumfang, Versorgung, Display, Schnittstellen oder Mechanik bedürfen einer neuen Dokumentrevision.
+Es bestehen keine weiteren offenen Funktionsentscheidungen des Auftraggebers. Die in diesem Abschnitt genannten Bauteil-, Schaltungs-, GPIO- und Layoutentscheidungen des PCB-Designers bleiben bis zu ihrer dokumentierten Verifikation offen. Änderungen am vorgegebenen Funktionsumfang, an Versorgung, Display, Schnittstellen oder Mechanik bedürfen einer neuen Dokumentrevision.
 
 ## 21. Spätere Revisionen – nicht Teil des Auftrags
 
@@ -587,6 +599,8 @@ Vor deren Integration müssen Original-Pinbelegung, elektrische Pegel, Busversor
 - [Espressif ESP32-S3-WROOM-1/1U Datasheet](https://documentation.espressif.com/esp32-s3-wroom-1_wroom-1u_datasheet_en.pdf)
 - [Espressif ESP32-S3 Schematic Checklist](https://docs.espressif.com/projects/esp-hardware-design-guidelines/en/latest/esp32s3/schematic-checklist.html)
 - [Espressif ESP32-S3 PCB Layout Design](https://docs.espressif.com/projects/esp-hardware-design-guidelines/en/latest/esp32s3/pcb-layout-design.html)
+- [Espressif ESP32-S3 Sleep Modes und EXT1-Wakeup](https://docs.espressif.com/projects/esp-idf/en/stable/esp32s3/api-reference/system/sleep_modes.html)
+- [USB-IF USB Type-C Specification Release 2.0](https://www.usb.org/sites/default/files/USB%20Type-C%20Spec%20R2.0%20-%20August%202019.pdf)
 - [Predictable Designs PCB Layout Rules Checklist](https://predictabledesigns.com/pcb-layout-rules-checklist.pdf)
 - [TI LMR43620-Q1](https://www.ti.com/product/LMR43620-Q1)
 - [TI LM74502-Q1](https://www.ti.com/product/LM74502-Q1)
