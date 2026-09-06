@@ -4,14 +4,17 @@ Hardwareentwicklung für das Landy-Heater-Steuergerät auf Basis des `ESP32-S3-W
 
 ## Aktueller Stand
 
-Revision A hat Phase 0 und Phase 1 abgeschlossen. Der erste automatisch erzeugte Phase-2-Schaltplan hat den Lesbarkeitsreview nicht bestanden und wird als echter, funktionsorientierter KiCad-Schaltplan neu aufgebaut. Die verbindliche Grundlage bleibt Dokumentversion 1.5 mit den zugehörigen Entwicklungsunterlagen:
+Revision A hat Phase 0 und Phase 1 abgeschlossen. Der Phase-2-Schaltplan wurde nach dem zurückgewiesenen rasterartigen Erstentwurf funktionsorientiert neu aufgebaut, elektrisch gegengeprüft und automatisiert gegen seine exportierte Netzliste auditiert. Die normative Grundlage ist Dokumentversion 1.6. Phase 2 bleibt wegen der im Review dokumentierten Mess-, Transienten-, FPC- und Footprint-Gates **nicht freigegeben**; Phase 3 wurde nicht begonnen.
 
 - [Hardware-Anforderungsspezifikation Revision A](docs/Hardware-Anforderungsspezifikation_Revision_A.md)
 - [Ergebnisbericht Phase 0](docs/Phase_0_KiCad-Arbeitsumgebung.md)
 - [Phase 1 – Architektur und Bauteilfestlegung](docs/Phase_1_Architektur-und-Bauteilfestlegung.md)
 - [Phase 2 – KiCad-Schaltplan und Review](docs/Phase_2_Schaltplanreview.md)
+- [Phase 2 – Anforderungs- und Schnittstellenliste](docs/Phase_2_Anforderungs-und-Schnittstellenliste.md)
+- [Phase 2 – Quellen und Rückverfolgbarkeit](docs/Phase_2_Quellen-und-Rueckverfolgbarkeit.md)
 - [GPIO-Matrix Revision A](docs/GPIO-Matrix_Revision_A.md)
 - [Leistungs- und Ruhestrombudget Revision A](calculations/Leistungs-und-Ruhestrombudget_Revision_A.md)
+- [Phase 2 – Worst-Case-Berechnungen](calculations/Phase_2_Worst-Case-Berechnungen.md)
 - [Schaltplan-PDF Phase 2](output/pdf/LandyHeater-Board-schematic-Phase2.pdf)
 - [Vorläufige BOM Phase 2](output/bom/LandyHeater-Board-BOM-Phase2.csv)
 
@@ -54,7 +57,7 @@ Jede Phase wird einzeln beauftragt, geprüft und freigegeben. Mit der nächsten 
 
 **Freigabepunkt:** Schaltplanreview abgeschlossen, ERC ohne ungeklärte Fehler und alle Hersteller-Pinouts unabhängig geprüft.
 
-**Status:** In Überarbeitung seit 06.09.2026. Der erste ERC-fehlerfreie Entwurf wurde wegen überlagerter Labels, rasterartiger Platzierung und unzureichend erkennbarer Schaltungszusammenhänge im Review zurückgewiesen. Phase 2 ist nicht freigegeben.
+**Status:** Neuaufbau und elektrischer Review abgeschlossen. ERC und exportierter Netzlisten-/BOM-Audit sind fehlerfrei. Phase 2 ist dennoch nicht freigegeben, bis die in `docs/Phase_2_Schaltplanreview.md` aufgeführten Freigabesperren geschlossen und ausdrücklich abgenommen sind.
 
 ### Phase 3 – Mechanik und Platzierung
 

@@ -7,5 +7,6 @@ Berechnungen beginnen in Phase 1. Annahmen, Formelquellen, Bauteiltoleranzen und
 Vorhanden:
 
 - [Leistungs-, USB- und Ruhestrombudget Revision A](Leistungs-und-Ruhestrombudget_Revision_A.md)
+- [Phase 2 – Worst-Case-Berechnungen Revision A](Phase_2_Worst-Case-Berechnungen.md)
 
-Die detaillierte TVS-/Eingangsschutz-, Buck-, eFuse-, Frontlicht- und Diagnosezweigberechnung folgt mit den finalen Passivwerten in Phase 2.
+Die Phase-2-Rechnung trennt nachgewiesene Grenzwerte ausdrücklich von noch nicht verifizierten Transienten-, Stabilitäts-, Thermik- und Messpunkten.

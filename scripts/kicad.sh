@@ -107,8 +107,11 @@ export_phase2() {
 		--output "$report_dir/phase2.net" \
 		"$schematic"
 
+	python3 "$script_dir/audit_phase2.py"
+
 	printf 'Phase-2-PDF: %s\n' "$output_pdf_dir/$project_name-schematic-Phase2.pdf"
 	printf 'Phase-2-BOM: %s\n' "$output_bom_dir/$project_name-BOM-Phase2.csv"
+	printf 'Phase-2-Audit: %s\n' "$report_dir/phase2-audit.txt"
 }
 
 export_review() {

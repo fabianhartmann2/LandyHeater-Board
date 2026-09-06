@@ -1,4 +1,4 @@
-.PHONY: doctor sch-check check export-phase2 export-review clean
+.PHONY: doctor sch-check check export-phase2 phase2-audit export-review clean
 
 doctor:
 	./scripts/kicad.sh doctor
@@ -11,6 +11,9 @@ sch-check:
 
 export-phase2:
 	./scripts/kicad.sh export-phase2
+
+phase2-audit:
+	python3 scripts/audit_phase2.py
 
 export-review:
 	./scripts/kicad.sh export-review

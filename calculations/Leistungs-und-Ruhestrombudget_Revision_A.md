@@ -2,7 +2,7 @@
 
 Stand: 2026-09-06
 
-Status: Phase-1-Auslegung; in Phase 2 mit den finalen Passivwerten und in Phase 6 durch Messung zu bestätigen
+Status: Phase-2-Reviewstand; garantierter Ruhestrom und dynamische Lastfälle in Phase 6 durch Messung zu bestätigen
 
 ## 1. Ziele
 
@@ -92,7 +92,7 @@ Die externe 1-A-Sicherung besitzt somit reichlich Betriebsreserve. Sie schützt 
 | zwei Schutz-MOSFETs | 0,30 A, je 26 mΩ max. | ca. 4,7 mW |
 | TPS259470 eFuse | 0,65 A, 28,3 mΩ typ. | ca. 12 mW |
 | Frontlichttreiber | 0,15 W LED-Leistung, 80 % | ca. 38 mW |
-| Ring-LED-Konstantstromquelle | 14 V, VF = 3 V, 10 mA | ca. 110 mW in CCR/MOSF |
+| Ring-LED-Konstantstromquelle | 14 V, VF = 2,6 V, 11 mA oberer Rechenwert | ca. 125 mW im BCR421 |
 | 3,0-V-LDO | 10 mA aktiv, 0,3 V Drop | ca. 3 mW |
 
 Die Buckverluste sind der thermisch dominante normale Rechenfall. Das Layout muss das Exposed Pad nach Herstellerempfehlung anbinden. In Phase 2 werden Datenblatt-/Herstellertoolwerte über 10 V, 12 V, 14 V und USB sowie Temperatur und Bauteiltoleranz gerechnet; in Phase 6 folgen Wärmebild beziehungsweise Temperaturmessung im Gehäuse.
@@ -106,8 +106,10 @@ Displayrail, Sensorrail, Frontlicht, Ring-LED, Diagnoseanzeige und AUTOTERM-OE s
 | Anteil | Budget bei 12 V |
 |---|---:|
 | LM74720-Q1, Datenblatt-Maximum | 38 µA |
+| AL8861Q abgeschaltet, Datenblatt-Maximum | 100 µA |
+| BCR421 und Diagnosezweig aus, Leckstromreserve | 10 µA |
 | TVS, eFuse-Rückseite und Eingangsfilter-Leckage | 5 µA |
-| **Zwischensumme vor Buck** | **43 µA** |
+| **Zwischensumme vor Buck** | **153 µA** |
 
 ### 5.2 Lasten hinter dem Buck, auf 3,3 V äquivalent
 
@@ -128,18 +130,18 @@ Für die Umrechnung wird wegen des sehr kleinen Lastpunkts bewusst nur 65 % PFM-
 ```text
 I_12V,hinter Buck = 0,594 mA × 3,3 V / (12 V × 0,65) + 0,003 mA
                   = 0,254 mA
-I_12V,Komfort = 0,254 mA + 0,043 mA = 0,297 mA
+I_12V,Komfort = 0,254 mA + 0,153 mA = 0,407 mA
 ```
 
-Das Rechenbudget liegt rund 0,20 mA unter dem Ziel von 0,5 mA. Es ist dennoch nicht als garantierter Worst Case zu verstehen, weil der FT6336U keine maximale Monitorstromangabe enthält und der tatsächliche Buck-Wirkungsgrad im Sub-mA-Bereich vom Aufbau abhängt. Der Abnahmewert wird daher ausschließlich durch Messung aller fünf Prototypen bei 12 V bestimmt.
+Das Rechenbudget liegt nur rund 0,09 mA unter dem Ziel von 0,5 mA. Es ist nicht als garantierter Worst Case zu verstehen, weil der FT6336U keine maximale Monitorstromangabe enthält, der BCR421-Aus-Leckstrom noch nicht als vollständiger Temperatur-Worst-Case eingesetzt ist und der tatsächliche Buck-Wirkungsgrad im Sub-mA-Bereich vom Aufbau abhängt. Der Abnahmewert wird daher ausschließlich durch Messung aller fünf Prototypen bei 12 V bestimmt. Falls das Ziel verfehlt wird, ist ein Lastschalter für den AL8861-Zweig eine mögliche Revision-B-Maßnahme.
 
 ## 6. Minimal-Standby
 
 Für FT6336U-Hibernation werden vorsichtshalber 2 × 55 µA bei 3,0 V angesetzt, entsprechend 100 µA auf 3,3 V umgerechnet. Gegenüber dem Komfort-Standby sinkt die äquivalente Bucklast damit um etwa 300 µA:
 
 ```text
-I_12V,Minimal ≈ 43 µA + ((294 µA × 3,3 V) / (12 V × 0,65) + 3 µA)
-               ≈ 170 µA
+I_12V,Minimal ≈ 153 µA + ((294 µA × 3,3 V) / (12 V × 0,65) + 3 µA)
+               ≈ 280 µA
 ```
 
 Das Ergebnis ist ein Zielwert, kein Abnahmemaximum. Touch kann in diesem Zustand nicht wecken; der externe Taster bleibt aktiv.
@@ -165,6 +167,8 @@ Selbst diese starke Derating-Annahme übertrifft die geforderten vier Wochen um 
 7. Rückstrom in USB-, Batterie- und AUTOTERM-Port in jeder Quellenfolge messen.
 8. Temperatur von Buck, Schutz-MOSFETs, eFuse, Frontlichttreiber und Ring-LED-CCR im finalen Gehäuse prüfen.
 9. RTC-Backupstrom messen und Backupzeit mit Zellen-Derating neu berechnen.
+
+Die detaillierten Grenzwertrechnungen und offenen Nachweise stehen in [Phase 2 – Worst-Case-Berechnungen](Phase_2_Worst-Case-Berechnungen.md).
 
 ## 9. Datenblätter
 

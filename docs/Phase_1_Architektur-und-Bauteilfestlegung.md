@@ -4,7 +4,7 @@ Stand: 2026-09-06
 
 Projektstatus: technisch abgeschlossen und durch Auftraggeber am 06.09.2026 freigegeben
 
-Normative Grundlage: [Hardware-Anforderungsspezifikation Revision A](Hardware-Anforderungsspezifikation_Revision_A.md), Dokumentversion 1.5
+Normative Grundlage: [Hardware-Anforderungsspezifikation Revision A](Hardware-Anforderungsspezifikation_Revision_A.md), Dokumentversion 1.6
 
 ## 1. Ergebnis und Geltungsbereich
 
@@ -48,7 +48,7 @@ Der 12-V- und der USB-Pfad werden als echte rückstromsperrende Ideal-Diodenpfad
 
 - `USB4105-GF-A-120` ist der seitliche USB-2.0-Type-C-Stecker.
 - `TUSB321AIRWBR` arbeitet als UFP/Sink, stellt die beiden Rd-Terminierungen bereit und erkennt den angekündigten Quellstrom. Separate 5,1-kΩ-Rd-Widerstände dürfen deshalb nicht zusätzlich bestückt werden.
-- `OUT1` wird als `USB_HIGH_CURRENT_N` an GPIO40 geführt: HIGH bedeutet USB-Default-Current, LOW mindestens 1,5 A. `OUT2` liegt als Testpunkt vor und unterscheidet 1,5 A von 3 A. Beide Open-Drain-Ausgänge erhalten die vom TUSB321AI-Datenblatt geforderten hochohmigen Pull-ups von mindestens 200 kΩ; der unversorgte USB-Zustand und ein mögliches Rückspeisen über OUT1 werden in Phase 2 geprüft. Firmware darf die erweiterten Lasten nur bei erkanntem `OUT1 = LOW` freigeben.
+- `OUT1` wird ausschließlich nach `USB_VBUS` hochgezogen und über einen `2N7002KQ-13` in die 3,3-V-Domäne entkoppelt. GPIO40 heißt deshalb `USB_HIGH_CURRENT`: HIGH bedeutet mindestens 1,5 A angekündigt oder kein USB, LOW bedeutet USB-Default-Current. `OUT2` bleibt im USB-Bereich und liegt nur an einem Testpunkt. Diese Schaltung verhindert Rückspeisung aus 3V3 in einen unversorgten TUSB321AI. Firmware sperrt Zusatzlasten bei LOW; ein gleichzeitiger 12-V-/Default-USB-Betrieb wird damit absichtlich konservativ behandelt.
 - `TPS259470LRPWR` begrenzt Einschalt- und Fehlerstrom und sperrt Rückstrom zu USB. `RILM` wird in Phase 2 auf nominal 1 A ausgelegt. Weil TI die ±10-%-Genauigkeit erst für Einstellungen oberhalb 1 A spezifiziert, ist die eFuse kein Präzisionsnachweis für die 1-A-Betriebsgrenze; diese wird durch das auf etwa 0,65 A begrenzte Lastbudget und Messung nachgewiesen.
 - `TPD2EUSB30DRTR` schützt D+ und D−. `ESD5Z5.0T1G` schützt VBUS. USB-Differenzpaar und ESD-Ableitweg bleiben kurz und stubfrei.
 - Bei USB-Default-Current bleiben Frontlicht, externe Taster-LED, Display-Aktualisierung und Sensorversorgung zunächst aus. USB-Flashing einschließlich WLAN-Startspitze bleibt innerhalb des in der Berechnung angesetzten 500-mA-Rahmens.
@@ -90,7 +90,7 @@ GPIO4 führt über einen anpassbaren Serienwiderstand, `PESD3V3S2UT-Q` und J3 zu
 ### 3.5 Beleuchtung
 
 - `AL8861QMP-13` speist das Frontlicht aus `VIN_SYS` als Abwärts-Konstantstromtreiber. Nennstrom ist 50 mA; bei 0,1-V-Strommessschwelle ergibt sich als Startwert 2,0 Ω/1 %. Der Maximalstrom einschließlich Widerstandstoleranz bleibt unter 60 mA. GPIO21 steuert PWM; ein Hardware-Pulldown hält das Licht aus.
-- `BCR420UW6Q-7` begrenzt die weiße Ring-LED des externen Tasters im erforderlichen 5-V-/12-V-Bereich auf nominal 10 mA. `2N7002KQ-13` schaltet den PWM-Rückleiter über GPIO38; ein Gate-Pulldown hält die LED aus. Die Verlustleistung des linearen Konstantstromreglers bei 14 V wird thermisch geprüft.
+- `BCR421UW6Q-7` begrenzt die weiße Ring-LED des externen Tasters auf nominal 10 mA und übernimmt die Low-Side-PWM direkt über seinen EN-Pin. GPIO38 führt über 100 Ω auf EN; 100 kΩ nach GND hält die LED ohne Firmware aus. Die PWM bleibt unter 25 kHz. Spannungsreserve und Verlustleistung werden mit dem realen APEM-Taster bei 5 V und 14 V geprüft.
 
 ### 3.6 RTC und Backup
 
@@ -124,6 +124,8 @@ J4-Pin 5 bleibt NC. Falls der verwendete Sensorkabelquerschnitt größer als 24 
 | Dualer Schutz-MOSFET | `IPG20N06S4L-26` | TDSON-8, 60 V, AEC-Q101 | LCSC `C112995`, Bestand erneut prüfen |
 | Eingangs-TVS | `TPSMB18CA-VR` | DO-214AA, 18 V, 600 W, AEC-Q101 | RFQ/Beistellung; Bestand schwankend |
 | 3,3-V-Buck | `LMR43620MSC3RPERQ1` | VQFN-HR, −40…+150 °C, AEC-Q100 | LCSC `C3190193`, Bestand erneut prüfen |
+| Buckinduktivität | `XAL4020-222MEC` | 2,2 µH ±20 %, Isat 5,6 A | Angebot/Bestand vor Bestellung |
+| Buck-Eingangskondensator | `GCJ32ER71H475KA12` | 4,7 µF/50 V/X7R/1210, AEC-Q200 | DC-Bias-Kurve prüfen |
 | USB-eFuse | `TPS259470LRPWR` | WQFN 2×2 mm, −40…+125 °C | LCSC `C3662793`, Bestand erneut prüfen |
 | Type-C-Erkennung | `TUSB321AIRWBR` | X2QFN-12, −40…+85 °C | PCBWay-/LCSC-Angebot vor Bestellung |
 | USB-C-Stecker | `USB4105-GF-A-120` | SMT + Halteanker, −40…+85 °C | LCSC `C5184243`, Bestand erneut prüfen |
@@ -142,8 +144,11 @@ J4-Pin 5 bleibt NC. Falls der verwendete Sensorkabelquerschnitt größer als 24 
 | E-Paper-Booster-MOSFET | `SI1308EDL-T1-GE3` | SOT-323, 30 V, −55…+150 °C | LCSC `C469327`/RFQ |
 | E-Paper-Boosterdiode | `MBR0530T1G` | SOD-123, 30 V, 0,5 A | PCBWay-/LCSC-Angebot vor Bestellung |
 | Frontlichttreiber | `AL8861QMP-13` | MSOP-8EP, −40…+125 °C, AEC-Q100 | LCSC `C2678638`, Bestand erneut prüfen |
-| Taster-LED-Konstantstrom | `BCR420UW6Q-7` | SOT-26, 1,4…40 V, 10 mA ±10 %, AEC-Q101 | LCSC `C531174`, Bestand erneut prüfen |
-| Taster-LED-MOSFET | `2N7002KQ-13` | SOT-23, 60 V, AEC-Q101 | LCSC `C526325`, Bestand erneut prüfen |
+| Display-/Frontlichtinduktivität | `LQH3NPZ470MJR` | 47 µH, mindestens 570 mA, 3-mm-Klasse | Footprint/Bestellsuffix offen |
+| Frontlichtdiode | `B140Q-13-F` | SMA, 1 A/40 V, automotive | Bestand erneut prüfen |
+| Frontlicht-Eingangskondensator | `CGA6P1X7R2A106K250AC` | 10 µF/100 V/X7R/1210, AEC-Q200 | DC-Bias-Kurve prüfen |
+| Taster-LED-Konstantstrom/PWM | `BCR421UW6Q-7` | SOT-26, direkter EN-/PWM-Eingang, nominal 10 mA, AEC-Q101 | Bestand und Herstellerfreigabe erneut prüfen |
+| USB-Stromsignal-Entkopplung/Diagnose-MOSFET | `2N7002KQ-13` | SOT-23, 60 V, AEC-Q101 | LCSC `C526325`, Bestand erneut prüfen |
 | RTC | `RV-3028-C7-32.768kHz-1ppm-TA-QC` | C7, −40…+85 °C | LCSC `C3019759`/RFQ; MPN prüfen |
 | Batteriesperrdiode | `BAS116,215` | SOT-23, AEC-Q101, Low Leakage | LCSC `C48502`, Bestand erneut prüfen |
 | Knopfzelle | Panasonic `BR1225` | 12,5×2,5 mm, −30…+85 °C | Nicht durch PCBA-Reflow; separat einsetzen |
@@ -223,7 +228,7 @@ Das WROOM-Modul darf nur einen Reflow-Zyklus erhalten. PCBWay muss bestätigen, 
 - [TI TPS25947](https://www.ti.com/product/TPS25947)
 - [TI TUSB321](https://www.ti.com/product/TUSB321)
 - [TI TXU0202-Q1](https://www.ti.com/product/TXU0202-Q1)
-- [Diodes Incorporated BCR420UW6Q](https://www.diodes.com/part/view/BCR420UW6Q)
+- [Diodes Incorporated BCR420/BCR421UW6Q](https://www.diodes.com/datasheet/download/BCR420UW6Q.pdf)
 - [Good Display GDEY029T94-FT01 specification](https://v4.cecdn.yun300.cn/100001_1909185148/GDEY029T94-FT01.pdf)
 - [FocalTech FT6336U datasheet](https://v4.cecdn.yun300.cn/100001_1909185148/FT6336U-DataSheet-V1.0.pdf)
 - [Micro Crystal RV-3028-C7](https://www.microcrystal.com/en/products/real-time-clock-rtc-modules/rv-3028-c7)

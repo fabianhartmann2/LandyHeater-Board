@@ -1,10 +1,12 @@
 # Landy Heater Controller – Hardware-Anforderungsspezifikation Revision A
 
-Dokumentversion: 1.5
+Dokumentversion: 1.6
 
 Stand: 2026-09-06
 
-Status: freigegeben als Grundlage für Schaltplan, PCB-Layout und Angebotserstellung; noch keine Fertigungsfreigabe
+Status: freigegeben als normative Grundlage für den Phase-2-Schaltplan; Layout- und Fertigungsfreigabe gesperrt, solange die dokumentierten Phase-2-Gates offen sind
+
+Änderungsstand 1.6: Ergebnisse des unabhängigen Phase-2-Schaltplanreviews eingearbeitet. Dazu gehören die korrekte LM74720-Q1-Anlauf-/Gatebeschaltung mit 18-V-VGS-Klemme, die 2,2-µH-Buckinduktivität gemäß aktueller TI-Auslegung, korrigierte Common-Anode-ESD-Array-Pinouts, galvanische Pegelentkopplung des TUSB321-Stromsignals, `BCR421UW6Q-7` als direkt PWM-fähiger Ring-LED-Treiber sowie konkrete Eingangs- und Frontlichtkondensatoren. `USB_HIGH_CURRENT` ist nach der Entkopplung active HIGH. Verbleibende Footprint-, Transienten-, FPC- und Messgates sind ausdrücklich keine stillschweigenden Annahmen.
 
 Änderungsstand 1.5: Phase-1-Architektur, vollständige GPIO-Matrix, Leistungs-/Ruhestrombudget sowie exakte Herstellerteilenummern für die wesentlichen aktiven Bauteile, Schutzbauteile, Nano-Fit-Anschlüsse und vorläufigen FPC-Stecker festgelegt. Der 12-V-Schutz wurde auf `LM74720-Q1` mit Back-to-back-MOSFETs korrigiert, die USB-Stromerkennung und -Rückstromsperre konkretisiert und GPIO47 begründet für `AUTOTERM_OE` zugeordnet. Die mechanische FPC-Kontaktseite und das Touch-Wake-Latch bleiben messpflichtige Verifikationspunkte.
 
@@ -121,7 +123,7 @@ VBCS und Smart-Shunt sind nur als mögliche Funktionen einer späteren Leiterpla
 - Für uneingeschränkten USB-Betrieb ist eine 5-V-USB-C-Quelle erforderlich, die über CC mindestens **1,5 A** ankündigt. Die Auslegung des Boards darf davon höchstens 1 A verwenden.
 - Das Board arbeitet als USB-2.0-Gerät/Sink ohne USB-PD. USB-C-Stecker ist `USB4105-GF-A-120`.
 - CC1 und CC2 erhalten jeweils eine normgerechte Rd-Terminierung. Diese darf durch separate Widerstände oder durch die nachgewiesen normgerechte interne Terminierung des gewählten Type-C-Sink-Controllers realisiert werden; eine Doppelterminierung ist unzulässig.
-- `TUSB321AIRWBR` arbeitet als UFP/Sink, stellt die normgerechten Rd-Terminierungen bereit und wertet die angebotene Stromstufe aus. Separate Rd-Widerstände dürfen nicht parallel ergänzt werden. `OUT1` geht als `USB_HIGH_CURRENT_N` an den ESP32; `OUT2` erhält einen Testpunkt. Beide Open-Drain-Ausgänge erhalten mindestens 200-kΩ-Pull-ups gemäß Datenblatt. Bei lediglich angekündigtem USB-Default-Current muss natives USB-Flashing zuverlässig möglich sein; Frontlicht, Sensorversorgung und andere nicht notwendige Lasten sind hardware- und firmwaregestützt so zu sperren beziehungsweise zu begrenzen, dass die zulässige Stromaufnahme einschließlich Einschaltstrom nicht überschritten wird.
+- `TUSB321AIRWBR` arbeitet als UFP/Sink, stellt die normgerechten Rd-Terminierungen bereit und wertet die angebotene Stromstufe aus. Separate Rd-Widerstände dürfen nicht parallel ergänzt werden. `OUT1` und `OUT2` erhalten ihre mindestens 200-kΩ-Pull-ups ausschließlich aus `USB_VBUS`. `OUT1` wird über einen `2N7002KQ-13` in die 3,3-V-Domäne entkoppelt und liegt am ESP32 als `USB_HIGH_CURRENT`: HIGH bedeutet mindestens 1,5 A angekündigt **oder USB nicht vorhanden**, LOW bedeutet USB vorhanden mit Default Current. `OUT2` erhält nur einen 5-V-Domänen-Testpunkt. Damit darf bei lediglich angekündigtem USB-Default-Current natives USB-Flashing zuverlässig möglich sein; Frontlicht, Sensorversorgung und andere nicht notwendige Lasten sind softwaregestützt zu sperren. Im gleichzeitigen 12-V-/USB-Betrieb ist ein LOW konservativ und darf die Zusatzlasten ebenfalls sperren.
 - Das Ergebnis der CC-Stromerkennung muss dem ESP32 zur Verfügung stehen oder die Lastbegrenzung muss unabhängig vom ESP32 hardwareseitig erfolgen. Ruhestrom, Startverhalten ohne laufende Firmware und GPIO-Bedarf der gewählten Lösung sind zu dokumentieren.
 - `TPS259470LRPWR` übernimmt strombegrenztes Einschalten, Fehlerstrombegrenzung und echte Rückstromsperre des USB-Pfads; `RILM` wird nominal auf 1 A ausgelegt. Da TI die ±10-%-Genauigkeit erst oberhalb 1 A spezifiziert, wird die höchstens 1 A betragende normale Boardaufnahme durch das Lastbudget und den Abnahmetest, nicht durch eine vermeintlich präzise eFuse-Abschaltschwelle, nachgewiesen. USB-VBUS erhält `ESD5Z5.0T1G`, D+/D− erhalten den kapazitätsarmen `TPD2EUSB30DRTR`; die VBUS-Eingangskapazität muss USB-konform sein.
 - In D− und D+ ist jeweils unmittelbar am ESP32-Modul ein bestückbarer Serienwiderstand vorzusehen. Anfangswert: 22 Ω oder 33 Ω gemäß Espressif; der endgültige Wert wird nach Signalintegritätsprüfung festgelegt.
@@ -406,10 +408,10 @@ Falls der reale J3-Sensorkabelquerschnitt größer als 24 AWG ist, ist dort eben
 - `BUTTON_N` ist Active-Low und wird direkt auf einen Deep-Sleep-wake-fähigen RTC-GPIO geführt.
 - Der Eingang erhält am PCB-Stecker ESD-Schutz, Serienwiderstand, externen Pull-up und ein angemessenes RC-Filter. Die Filterung darf zuverlässiges Aufwachen nicht verhindern.
 - Die Taster-LED besitzt keinen eingebauten Vorwiderstand und darf nicht direkt von einem GPIO oder unstrombegrenzt aus 3,3 V/12 V gespeist werden.
-- Zielnennstrom der weißen LED: etwa **10 mA**, auf jeden Fall unterhalb der vom Tasterhersteller zulässigen 20 mA. `BCR420UW6Q-7` ist der automotive-qualifizierte 1,4-bis-40-V-Konstantstromregler; seine Verlustleistung wird für 14 V thermisch geprüft.
-- Die Helligkeit wird durch GPIO38-PWM über den automotive-qualifizierten Low-Side-MOSFET `2N7002KQ-13` geregelt.
+- Zielnennstrom der weißen LED: etwa **10 mA**, auf jeden Fall unterhalb der vom Tasterhersteller zulässigen 20 mA. `BCR421UW6Q-7` ist der automotive-qualifizierte Konstantstromregler mit eigenem Enable-/PWM-Eingang; seine Verlustleistung wird für 14 V thermisch geprüft.
+- Die Helligkeit wird direkt über den `EN`-Eingang des `BCR421UW6Q-7` durch GPIO38-PWM geregelt. Ein 100-Ω-Serienwiderstand und 100-kΩ-Pulldown am Enable sorgen für AUS ohne Firmware. Die PWM-Frequenz muss unter 25 kHz bleiben.
 - `LED_CC_PLUS` wird aus `VIN_SYS` über eine für 5-V- und 12-V-Eingang geeignete Strombegrenzung gespeist.
-- Ein Hardware-Pull-down am Gate stellt AUS bei Reset, Boot und Deep-Sleep sicher.
+- Ein Hardware-Pull-down am `BCR421`-Enable stellt AUS bei Reset, Boot und Deep-Sleep sicher.
 - Die PWM-Führung und Filterung muss Einkopplung in den parallelen Tastereingang vermeiden.
 
 ## 12. RTC und Backup-Batterie
@@ -663,7 +665,7 @@ Vor deren Integration müssen Original-Pinbelegung, elektrische Pegel, Busversor
 - [TI TPS7A02](https://www.ti.com/product/TPS7A02)
 - [TI TPS22919-Q1](https://www.ti.com/product/TPS22919-Q1)
 - [TI TXU0202-Q1](https://www.ti.com/product/TXU0202-Q1)
-- [Diodes Incorporated BCR420UW6Q](https://www.diodes.com/part/view/BCR420UW6Q)
+- [Diodes Incorporated BCR420/BCR421UW6Q](https://www.diodes.com/datasheet/download/BCR420UW6Q.pdf)
 - [Micro Crystal RV-3028-C7](https://www.microcrystal.com/en/products/real-time-clock-rtc-modules/rv-3028-c7)
 - [Panasonic BR1225](https://industrial.panasonic.com/ww/products/pt/lithium-batteries/models/BR1225)
 - [Molex Nano-Fit](https://www.molex.com/en-us/products/connectors/wire-to-board-connectors/nano-fit-connectors)

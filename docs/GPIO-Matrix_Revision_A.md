@@ -43,9 +43,9 @@ GPIO35, GPIO36 und GPIO37 sind beim N16R8 intern durch das Octal-PSRAM belegt. D
 | 28 | 35 | nicht verfügbar | – | intern Octal-PSRAM | – | – | – |
 | 29 | 36 | nicht verfügbar | – | intern Octal-PSRAM | – | – | – |
 | 30 | 37 | nicht verfügbar | – | intern Octal-PSRAM | – | – | – |
-| 31 | 38 | `BUTTON_LED_PWM` | Ausgang/PWM | 100 kΩ Gate-Pulldown; Serien-R | LOW | LOW, Ring-LED AUS | nein |
+| 31 | 38 | `BUTTON_LED_PWM` | Ausgang/PWM | 100 Ω zum `BCR421`-EN; 100 kΩ EN-Pulldown | LOW | LOW, Ring-LED AUS | nein |
 | 32 | 39 | `DIAG_RUN` | Ausgang | 100 kΩ Pulldown; isolierter Diagnosezweig | LOW | LOW, RUN AUS | nein |
-| 33 | 40 | `USB_HIGH_CURRENT_N` | Eingang | TUSB321AI `OUT1`; mindestens 200 kΩ nach 3V3, Serien-R | HIGH wenn USB fehlt/default; Vollbetrieb gesperrt | HIGH/irrelevant | nein |
+| 33 | 40 | `USB_HIGH_CURRENT` | Eingang | TUSB321AI `OUT1` mit 220 kΩ nach USB_VBUS; `2N7002KQ-13`-Domänenentkopplung; 100 kΩ nach 3V3 | HIGH bei ≥1,5 A oder fehlendem USB; LOW bei USB Default Current | HIGH/irrelevant | nein |
 | 34 | 41 | `STATUS_LED_1` optional | Ausgang | LED-Vorwiderstand; Pulldown falls Treiberstufe | LOW | LOW, AUS | nein |
 | 35 | 42 | `STATUS_LED_2` optional | Ausgang | LED-Vorwiderstand; Pulldown falls Treiberstufe | LOW | LOW, AUS | nein |
 | 37 | 43 | `U0TXD_TEST` | Ausgang/Testpad | 499 Ω nahe Modul | ROM-/Boot-Ausgaben möglich | nur Testpad | nein |
