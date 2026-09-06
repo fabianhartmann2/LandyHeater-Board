@@ -4,7 +4,7 @@ Stand: 2026-09-06
 
 Modul: `ESP32-S3-WROOM-1U-N16R8`
 
-Status: Phase-1-Festlegung; verbindliche Eingabe für den Schaltplan
+Status: in Phase 2 umgesetzt; GPIO18 ergänzt die DNP-Wake-Latch-Option
 
 ## 1. Ergebnis
 
@@ -20,7 +20,7 @@ GPIO35, GPIO36 und GPIO37 sind beim N16R8 intern durch das Octal-PSRAM belegt. D
 |---:|---:|---|---|---|---|---|---|
 | 27 | 0 | `BOOT_N` | Eingang | 10 kΩ nach 3V3, Taster nach GND; kein großer C | Strapping; HIGH für Normalboot | HIGH | nein |
 | 39 | 1 | `BUTTON_N` | Eingang | 10 kΩ nach 3V3; Serien-R und RC/ESD am J4 | etwa 60 µs LOW möglich; externer Pull stellt HIGH wieder her | Eingang HIGH, Taster zieht LOW | EXT1 ANY_LOW |
-| 38 | 2 | `TOUCH_INT_N` | Eingang | Serien-R; 10-kΩ-Pull-up als Startwert, alternative Pull- und Latch-Bestückung | etwa 60 µs LOW möglich | FT6336U Monitor, active LOW | EXT1 ANY_LOW |
+| 38 | 2 | `TOUCH_INT_N` | Eingang | Serien-R; 10-kΩ-Pull-up als Startwert, alternative Pull- und Latch-Bestückung | etwa 60 µs LOW möglich | FT6336U beziehungsweise `Q_N` des optionalen Latch, jeweils active LOW | EXT1 ANY_LOW |
 | 15 | 3 | unbenutzt | Eingang | kein externer Pull; Firmware definiert nach Boot | Strapping `JTAG_SEL_ENABLE` | unbenutzt | nein |
 | 4 | 4 | `1WIRE_DQ` | bidirektional Open-Drain | 4,7 kΩ nach `3V3_SENSOR_SW`, Serien-R/ESD | etwa 60 µs LOW möglich; Sensorrail AUS | Z, Sensorrail AUS | nein |
 | 5 | 5 | `I2C_SDA` | bidirektional Open-Drain | 4,7 kΩ Startwert nach `3V0_TOUCH_AON` | etwa 60 µs LOW möglich | HIGH über AON-Pull-up | nein |
@@ -36,7 +36,7 @@ GPIO35, GPIO36 und GPIO37 sind beim N16R8 intern durch das Octal-PSRAM belegt. D
 | 8 | 15 | `SENSOR_EN` | Ausgang | 100 kΩ Pulldown | etwa 60 µs LOW; sicher | LOW, Sensoren AUS | nein |
 | 9 | 16 | `AUTOTERM_TX_3V3` | Ausgang | Serien-R; TXU-Ausgang durch OE isoliert | etwa 60 µs LOW, aber TXU deaktiviert | Z zur Heizung | nein |
 | 10 | 17 | `AUTOTERM_RX_3V3` | Eingang | Serien-R; TXU VCC-Isolation | etwa 60 µs LOW möglich | Eingang/Z | nein |
-| 11 | 18 | unbenutzt | Eingang | kein externer Pull; Firmware definiert | dokumentierter LOW- und HIGH-Impuls möglich | unbenutzt | nein |
+| 11 | 18 | `LATCH_CLR_GPIO_N` optional | Ausgang | 100-Ω-DNP-Serienwiderstand zum optionalen Wake-Latch; kein Außenanschluss | dokumentierter LOW- und HIGH-Impuls möglich; nur Latch-Reset und deshalb sicher | Standard unbenutzt; mit Latch kurzer LOW-Löschpuls nach INT-Freigabe | nein |
 | 13 | 19 | `USB_D_N` | USB-D− | 22/33 Ω Serien-R nahe Modul, ESD am Stecker | USB-JTAG/ROM-Aktivität möglich | gemäß USB-Peripherie | nein |
 | 14 | 20 | `USB_D_P` | USB-D+ | 22/33 Ω Serien-R nahe Modul, ESD am Stecker | USB-JTAG/ROM-Aktivität möglich | gemäß USB-Peripherie | nein |
 | 23 | 21 | `FRONTLIGHT_PWM` | Ausgang/PWM | 100 kΩ Pulldown am Treiber; Serien-R | LOW durch Hardware | LOW, Frontlicht AUS | nein |
@@ -72,12 +72,14 @@ GPIO0 bleibt durch 10 kΩ normalerweise HIGH. Für manuellen Download-Boot wird 
 
 ### 3.3 Deep-Sleep-Wakeup
 
-GPIO1 und GPIO2 gehören zum RTC-fähigen Bereich GPIO0 bis GPIO21. Beide werden gemeinsam über EXT1 mit `ANY_LOW` aktiviert:
+GPIO1 und GPIO2 gehören zum RTC-fähigen Bereich GPIO0 bis GPIO21. In der Standardbestückung werden beide gemeinsam über EXT1 mit `ANY_LOW` aktiviert:
 
 - GPIO1 wird vom externen Schließertaster nach GND gezogen.
 - GPIO2 wird vom FT6336U im Komfort-Standby active LOW angesteuert.
 
 Im Minimal-Standby ist der Touch im Hibernation-Modus und nur GPIO1 gilt als zuverlässige Wake-Quelle. Nach jedem Wake liest die Firmware den EXT1-Status, bevor sie die Peripherie neu konfiguriert.
+
+Falls die DNP-Latch-Option nach Prototypmessung aktiviert wird, setzt Touch-INT das Latch asynchron und dessen invertierter Ausgang `Q_N` hält GPIO2 LOW. GPIO18 löscht das Latch erst, nachdem die Firmware den Touch-Status gelesen hat und FT6336U-INT wieder HIGH ist. Taster und Touch behalten damit dieselbe EXT1-`ANY_LOW`-Polarität.
 
 ## 4. Buszuordnung
 
@@ -96,9 +98,9 @@ ESP32-Peripheriesignale werden über die GPIO-Matrix zugeordnet; die Software da
 | Kategorie | Anzahl |
 |---|---:|
 | Pflichtsignale einschließlich USB, BOOT und UART0-Testpads | 26 |
-| optionale Status-LEDs | 2 |
+| optionale Status-LEDs und optionaler Latch-Clear | 3 |
 | intern durch PSRAM belegt | 3 |
-| bewusst unbenutzte Strapping-/Glitch-Pins | 4 |
+| bewusst unbenutzte Strapping-/Glitch-Pins | 3 |
 | freie Reserve | 1 (`GPIO48`) |
 
 Die optionalen Status-LEDs können somit in Revision A bestückt werden. Sie bleiben dennoch optional, falls der mechanische Platzierungsreview ihre Entfernung erfordert.

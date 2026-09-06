@@ -2,7 +2,7 @@
 
 Stand: 2026-09-06
 
-Projektstatus: technisch abgeschlossen, Freigabe durch Auftraggeber ausstehend
+Projektstatus: technisch abgeschlossen und durch Auftraggeber am 06.09.2026 freigegeben
 
 Normative Grundlage: [Hardware-Anforderungsspezifikation Revision A](Hardware-Anforderungsspezifikation_Revision_A.md), Dokumentversion 1.5
 
@@ -213,7 +213,7 @@ Das WROOM-Modul darf nur einen Reflow-Zyklus erhalten. PCBWay muss bestätigen, 
 - [x] Aktive Bauteile, Schutzbauteile, Nano-Fit und vorläufige FPC-Stecker mit vollständiger MPN festgelegt
 - [x] Temperaturbereiche, Footprintregeln und Beschaffungsrisiken dokumentiert
 - [x] Offene Punkte als mess- oder prüfbare Verifikationspunkte klassifiziert
-- [ ] Phase 1 durch Auftraggeber freigegeben
+- [x] Phase 1 durch Auftraggeber am 06.09.2026 freigegeben
 
 ## 11. Herstellerreferenzen
 

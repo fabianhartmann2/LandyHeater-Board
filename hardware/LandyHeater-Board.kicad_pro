@@ -164,7 +164,7 @@
   "sheets": [],
   "text_variables": {
     "PROJECT_REVISION": "A",
-    "PROJECT_STATUS": "PHASE_0_SCAFFOLD",
+    "PROJECT_STATUS": "PHASE_2_REVIEW",
     "TARGET_BOARD_SIZE": "98 x 48 mm"
   }
 }

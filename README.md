@@ -4,13 +4,16 @@ Hardwareentwicklung für das Landy-Heater-Steuergerät auf Basis des `ESP32-S3-W
 
 ## Aktueller Stand
 
-Revision A hat die Schaltungsarchitektur- und Bauteilauswahlphase technisch abgeschlossen. Phase 0 ist durch den Auftraggeber freigegeben; Phase 1 wartet auf dessen Review. Die verbindliche Grundlage für den folgenden Schaltplan ist Dokumentversion 1.5 mit den zugehörigen Phase-1-Unterlagen:
+Revision A hat den vollständigen KiCad-Schaltplan technisch abgeschlossen. Phase 0 und Phase 1 sind durch den Auftraggeber freigegeben; Phase 2 wartet auf den Schaltplanreview. Die verbindliche Grundlage ist Dokumentversion 1.5 mit den zugehörigen Entwicklungsunterlagen:
 
 - [Hardware-Anforderungsspezifikation Revision A](docs/Hardware-Anforderungsspezifikation_Revision_A.md)
 - [Ergebnisbericht Phase 0](docs/Phase_0_KiCad-Arbeitsumgebung.md)
 - [Phase 1 – Architektur und Bauteilfestlegung](docs/Phase_1_Architektur-und-Bauteilfestlegung.md)
+- [Phase 2 – KiCad-Schaltplan und Review](docs/Phase_2_Schaltplanreview.md)
 - [GPIO-Matrix Revision A](docs/GPIO-Matrix_Revision_A.md)
 - [Leistungs- und Ruhestrombudget Revision A](calculations/Leistungs-und-Ruhestrombudget_Revision_A.md)
+- [Schaltplan-PDF Phase 2](output/pdf/LandyHeater-Board-schematic-Phase2.pdf)
+- [Vorläufige BOM Phase 2](output/bom/LandyHeater-Board-BOM-Phase2.csv)
 
 Die Spezifikation definiert Funktionsumfang, Schnittstellen, Versorgung, Mechanik, sichere Hardwarezustände, Layoutregeln, Fertigungsunterlagen und Abnahmetests. Die darin aufgeführten Verifikationspunkte müssen vor der Fertigungsfreigabe abgeschlossen werden.
 
@@ -39,7 +42,7 @@ Jede Phase wird einzeln beauftragt, geprüft und freigegeben. Mit der nächsten 
 
 **Freigabepunkt:** Architektur, GPIO-Matrix, Bauteilauswahl und Berechnungen sind nachvollziehbar dokumentiert; offene Punkte für den Schaltplan sind geschlossen oder ausdrücklich als Verifikationspunkte gekennzeichnet.
 
-**Status:** Technisch abgeschlossen am 06.09.2026; Freigabe durch den Auftraggeber ausstehend.
+**Status:** Technisch abgeschlossen und durch den Auftraggeber am 06.09.2026 mit dem Auftrag zum Beginn von Phase 2 freigegeben.
 
 ### Phase 2 – KiCad-Schaltplan
 
@@ -50,6 +53,8 @@ Jede Phase wird einzeln beauftragt, geprüft und freigegeben. Mit der nächsten 
 - Schaltplan-PDF und vorläufige BOM für den Review erzeugen.
 
 **Freigabepunkt:** Schaltplanreview abgeschlossen, ERC ohne ungeklärte Fehler und alle Hersteller-Pinouts unabhängig geprüft.
+
+**Status:** Technisch abgeschlossen am 06.09.2026; ERC mit 0 Fehlern und 0 Warnungen, Review-PDF und vorläufige BOM erzeugt. Freigabe durch den Auftraggeber ausstehend.
 
 ### Phase 3 – Mechanik und Platzierung
 

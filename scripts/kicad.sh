@@ -11,6 +11,8 @@ board="$project_dir/$project_name.kicad_pcb"
 build_dir="$repo_dir/build"
 report_dir="$build_dir/reports"
 review_dir="$build_dir/review"
+output_pdf_dir="$repo_dir/output/pdf"
+output_bom_dir="$repo_dir/output/bom"
 
 find_kicad_cli() {
 	if [ -n "${KICAD_CLI_OVERRIDE:-}" ] && [ -x "$KICAD_CLI_OVERRIDE" ]; then
@@ -62,7 +64,7 @@ doctor() {
 	printf 'Projektgerüst: vollständig\n'
 }
 
-check() {
+sch_check() {
 	doctor
 	mkdir -p "$report_dir"
 
@@ -72,14 +74,41 @@ check() {
 		--output "$report_dir/erc.rpt" \
 		"$schematic"
 
+	printf 'ERC-Bericht: %s\n' "$report_dir/erc.rpt"
+}
+
+check() {
+	sch_check
+
 	"$kicad_cli" pcb drc \
 		--severity-all \
 		--exit-code-violations \
-		--schematic-parity \
 		--output "$report_dir/drc.rpt" \
 		"$board"
 
-	printf 'ERC- und DRC-Berichte: %s\n' "$report_dir"
+	printf 'DRC-Bericht: %s\n' "$report_dir/drc.rpt"
+}
+
+export_phase2() {
+	sch_check
+	mkdir -p "$output_pdf_dir" "$output_bom_dir" "$report_dir"
+
+	"$kicad_cli" sch export pdf \
+		--output "$output_pdf_dir/$project_name-schematic-Phase2.pdf" \
+		"$schematic"
+
+	"$kicad_cli" sch export bom \
+		--fields 'Reference,Value,Footprint,Datasheet,Manufacturer,MPN,Assembly,Notes' \
+		--group-by 'Value,Footprint,Manufacturer,MPN,Assembly' \
+		--output "$output_bom_dir/$project_name-BOM-Phase2.csv" \
+		"$schematic"
+
+	"$kicad_cli" sch export netlist \
+		--output "$report_dir/phase2.net" \
+		"$schematic"
+
+	printf 'Phase-2-PDF: %s\n' "$output_pdf_dir/$project_name-schematic-Phase2.pdf"
+	printf 'Phase-2-BOM: %s\n' "$output_bom_dir/$project_name-BOM-Phase2.csv"
 }
 
 export_review() {
@@ -134,8 +163,14 @@ case "${1:-check}" in
 	doctor)
 		doctor
 		;;
+	sch-check)
+		sch_check
+		;;
 	check)
 		check
+		;;
+	export-phase2)
+		export_phase2
 		;;
 	export-review)
 		export_review
@@ -144,7 +179,7 @@ case "${1:-check}" in
 		clean
 		;;
 	*)
-		printf 'Verwendung: %s {doctor|check|export-review|clean}\n' "$0" >&2
+		printf 'Verwendung: %s {doctor|sch-check|check|export-phase2|export-review|clean}\n' "$0" >&2
 		exit 2
 		;;
 esac

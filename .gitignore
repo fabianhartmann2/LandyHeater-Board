@@ -12,6 +12,8 @@ fp-info-cache
 
 # Reproducible generated output
 /build/
+/tmp/
+__pycache__/
 
 # macOS metadata
 .DS_Store
