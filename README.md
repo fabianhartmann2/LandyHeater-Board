@@ -4,10 +4,13 @@ Hardwareentwicklung für das Landy-Heater-Steuergerät auf Basis des `ESP32-S3-W
 
 ## Aktueller Stand
 
-Revision A befindet sich in der Schaltungsarchitektur- und Bauteilauswahlphase. Phase 0, KiCad-Arbeitsumgebung und Projektgerüst, ist technisch abgeschlossen und wartet auf die Freigabe des Auftraggebers. Die verbindliche Grundlage für die Beauftragung und Prüfung des PCB-Designs ist aktuell Dokumentversion 1.4:
+Revision A hat die Schaltungsarchitektur- und Bauteilauswahlphase technisch abgeschlossen. Phase 0 ist durch den Auftraggeber freigegeben; Phase 1 wartet auf dessen Review. Die verbindliche Grundlage für den folgenden Schaltplan ist Dokumentversion 1.5 mit den zugehörigen Phase-1-Unterlagen:
 
 - [Hardware-Anforderungsspezifikation Revision A](docs/Hardware-Anforderungsspezifikation_Revision_A.md)
 - [Ergebnisbericht Phase 0](docs/Phase_0_KiCad-Arbeitsumgebung.md)
+- [Phase 1 – Architektur und Bauteilfestlegung](docs/Phase_1_Architektur-und-Bauteilfestlegung.md)
+- [GPIO-Matrix Revision A](docs/GPIO-Matrix_Revision_A.md)
+- [Leistungs- und Ruhestrombudget Revision A](calculations/Leistungs-und-Ruhestrombudget_Revision_A.md)
 
 Die Spezifikation definiert Funktionsumfang, Schnittstellen, Versorgung, Mechanik, sichere Hardwarezustände, Layoutregeln, Fertigungsunterlagen und Abnahmetests. Die darin aufgeführten Verifikationspunkte müssen vor der Fertigungsfreigabe abgeschlossen werden.
 
@@ -24,7 +27,7 @@ Jede Phase wird einzeln beauftragt, geprüft und freigegeben. Mit der nächsten 
 
 **Freigabepunkt:** Das Projekt lässt sich ohne fehlende Bibliotheken öffnen und die automatischen KiCad-Prüfwerkzeuge sind verfügbar.
 
-**Status:** Technisch abgeschlossen am 06.09.2026; Freigabe durch den Auftraggeber ausstehend.
+**Status:** Technisch abgeschlossen und durch den Auftraggeber am 06.09.2026 mit dem Auftrag zum Beginn von Phase 1 freigegeben.
 
 ### Phase 1 – Schaltungsarchitektur und Bauteilfestlegung
 
@@ -35,6 +38,8 @@ Jede Phase wird einzeln beauftragt, geprüft und freigegeben. Mit der nächsten 
 - Footprints, Pinouts, Temperaturbereiche und PCBWay-Beschaffbarkeit vorprüfen.
 
 **Freigabepunkt:** Architektur, GPIO-Matrix, Bauteilauswahl und Berechnungen sind nachvollziehbar dokumentiert; offene Punkte für den Schaltplan sind geschlossen oder ausdrücklich als Verifikationspunkte gekennzeichnet.
+
+**Status:** Technisch abgeschlossen am 06.09.2026; Freigabe durch den Auftraggeber ausstehend.
 
 ### Phase 2 – KiCad-Schaltplan
 

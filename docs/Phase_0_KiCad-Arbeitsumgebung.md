@@ -2,7 +2,7 @@
 
 Stand: 2026-09-06
 
-Projektstatus: abgeschlossen, Freigabe durch Auftraggeber ausstehend
+Projektstatus: abgeschlossen und am 2026-09-06 durch den Auftraggeber freigegeben
 
 ## Werkzeugstand
 
@@ -82,7 +82,7 @@ KICAD_CLI_OVERRIDE=/vollständiger/pfad/kicad-cli make check
 - [x] Projekt ohne fehlende Bibliotheken in der KiCad-GUI geöffnet
 - [x] ERC und DRC ohne ungeklärte Fehler
 - [x] Review-Exporte reproduzierbar erzeugt und visuell geprüft
-- [ ] Phase 0 durch Auftraggeber freigegeben
+- [x] Phase 0 durch Auftraggeber am 06.09.2026 mit dem Auftrag zum Beginn von Phase 1 freigegeben
 
 ## Prüfergebnis
 
