@@ -17,6 +17,8 @@ Revision A hat Phase 0 und Phase 1 abgeschlossen. Der Phase-2-Schaltplan wurde n
 - [Phase 2 – Worst-Case-Berechnungen](calculations/Phase_2_Worst-Case-Berechnungen.md)
 - [Schaltplan-PDF Phase 2](output/pdf/LandyHeater-Board-schematic-Phase2.pdf)
 - [Vorläufige BOM Phase 2](output/bom/LandyHeater-Board-BOM-Phase2.csv)
+- [ERC-Bericht Phase 2](output/reports/LandyHeater-Board-ERC-Phase2.rpt)
+- [Netzlisten-/BOM-Audit Phase 2](output/reports/LandyHeater-Board-Audit-Phase2.txt)
 
 Die Spezifikation definiert Funktionsumfang, Schnittstellen, Versorgung, Mechanik, sichere Hardwarezustände, Layoutregeln, Fertigungsunterlagen und Abnahmetests. Die darin aufgeführten Verifikationspunkte müssen vor der Fertigungsfreigabe abgeschlossen werden.
 

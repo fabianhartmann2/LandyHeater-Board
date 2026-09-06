@@ -1,0 +1,24 @@
+ERC report (2026-09-06T23:13:38, Encoding UTF8)
+Report includes: Errors, Warnings, Exclusions
+
+***** Sheet /
+
+***** Sheet /Power input, USB-C and 3.3 V/
+
+***** Sheet /ESP32-S3, native USB, reset and boot/
+
+***** Sheet /E-paper power and interface/
+
+***** Sheet /Touch always-on rail and RTC/
+
+***** Sheet /AUTOTERM UART and 1-Wire/
+
+***** Sheet /External controls, lighting and diagnostics/
+
+ ** ERC messages: 0  Errors 0  Warnings 0
+
+ ** Ignored checks:
+    - Global label only appears once in the schematic
+    - Four connection points are joined together
+    - SPICE model issue
+    - Assigned footprint doesn't match footprint filters

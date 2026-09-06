@@ -15,6 +15,7 @@ ROOT = Path(__file__).resolve().parents[1]
 BOM = ROOT / "output" / "bom" / "LandyHeater-Board-BOM-Phase2.csv"
 NETLIST = ROOT / "build" / "reports" / "phase2.net"
 REPORT = ROOT / "build" / "reports" / "phase2-audit.txt"
+OUTPUT_REPORT = ROOT / "output" / "reports" / "LandyHeater-Board-Audit-Phase2.txt"
 
 
 def balanced_blocks(text: str, marker: str) -> list[str]:
@@ -137,7 +138,10 @@ def main() -> int:
         "Hinweis: Ein fehlerfreier Struktur-Audit ersetzt weder Worst-Case-Auslegung, Layoutreview noch Prototypmessungen.",
     ]
     REPORT.parent.mkdir(parents=True, exist_ok=True)
-    REPORT.write_text("\n".join(report_lines) + "\n", encoding="utf-8")
+    rendered = "\n".join(report_lines) + "\n"
+    REPORT.write_text(rendered, encoding="utf-8")
+    OUTPUT_REPORT.parent.mkdir(parents=True, exist_ok=True)
+    OUTPUT_REPORT.write_text(rendered, encoding="utf-8")
     print(f"Phase-2-Audit: {REPORT}")
     if failures:
         print("\n".join(failures), file=sys.stderr)

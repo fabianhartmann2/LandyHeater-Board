@@ -1,0 +1,23 @@
+LandyHeater Revision A – Phase-2-Audit
+========================================
+Definitionen: 232 Referenzen, davon 56 DNP
+BOM-Gruppen: 141
+Strukturelle Fehler: 0
+Dokumentierte Freigabesperren: 10
+
+Ergebnis: BOM und exportierte Netzliste stimmen strukturell mit der geprüften Definition überein.
+
+PROVISORISCHE FOOTPRINTS / FREIGABESPERREN
+------------------------------------------
+- Q1: LandyHeater:PROVISIONAL_Infineon_PG-TDSON-8-4_Dual – Provisional 8-pad footprint; replace with official split-exposed-pad PG-TDSON-8-4 land pattern before layout freeze
+- L1: Inductor_SMD:L_0805_2012Metric_Pad1.05x1.20mm_HandSolder – PROVISIONAL generic footprint; verify against Coilcraft land pattern before Phase 3
+- U3: Package_DFN_QFN:LQFN-10-1EP_2x2mm_P0.5mm_EP0.7x0.7mm – PROVISIONAL generic RPW footprint; verify/replace from official TI ECAD before Phase 3
+- U4: LandyHeater:Texas_RPE0009A_VQFN-HR-9_2x2mm – PROVISIONAL project-local RPE footprint; verify/replace from official TI ECAD before Phase 3
+- J6: Connector_FFC-FPC:Hirose_FH12-24S-0.5SH_1x24-1MP_P0.50mm_Horizontal – PROVISIONAL bottom-contact; verify original display
+- L3: LandyHeater:PROVISIONAL_Murata_LQH3NPZ_JR – Good Display chapter 12; footprint is provisional pending official ECAD/land-pattern verification
+- J7: Connector_FFC-FPC:Hirose_FH12-6S-0.5SH_1x06-1MP_P0.50mm_Horizontal – PROVISIONAL pin/contact orientation; verify display
+- U14: LandyHeater:RV-3028-C7 – PROVISIONAL project-local footprint; verify against current Micro Crystal ECAD before Phase 3
+- L4: LandyHeater:PROVISIONAL_Murata_LQH3NPZ_JR – AL8861 33..100uH range; footprint provisional pending official ECAD/land-pattern verification
+- J8: Connector_FFC-FPC:Hirose_FH12-6S-0.5SH_1x06-1MP_P0.50mm_Horizontal – PROVISIONAL pin/contact orientation; verify display
+
+Hinweis: Ein fehlerfreier Struktur-Audit ersetzt weder Worst-Case-Auslegung, Layoutreview noch Prototypmessungen.

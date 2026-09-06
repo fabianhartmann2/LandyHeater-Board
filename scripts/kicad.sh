@@ -13,6 +13,7 @@ report_dir="$build_dir/reports"
 review_dir="$build_dir/review"
 output_pdf_dir="$repo_dir/output/pdf"
 output_bom_dir="$repo_dir/output/bom"
+output_report_dir="$repo_dir/output/reports"
 
 find_kicad_cli() {
 	if [ -n "${KICAD_CLI_OVERRIDE:-}" ] && [ -x "$KICAD_CLI_OVERRIDE" ]; then
@@ -91,7 +92,13 @@ check() {
 
 export_phase2() {
 	sch_check
-	mkdir -p "$output_pdf_dir" "$output_bom_dir" "$report_dir"
+	mkdir -p "$output_pdf_dir" "$output_bom_dir" "$output_report_dir" "$report_dir"
+
+	"$kicad_cli" sch erc \
+		--severity-all \
+		--exit-code-violations \
+		--output "$output_report_dir/$project_name-ERC-Phase2.rpt" \
+		"$schematic"
 
 	"$kicad_cli" sch export pdf \
 		--output "$output_pdf_dir/$project_name-schematic-Phase2.pdf" \
@@ -112,6 +119,7 @@ export_phase2() {
 	printf 'Phase-2-PDF: %s\n' "$output_pdf_dir/$project_name-schematic-Phase2.pdf"
 	printf 'Phase-2-BOM: %s\n' "$output_bom_dir/$project_name-BOM-Phase2.csv"
 	printf 'Phase-2-Audit: %s\n' "$report_dir/phase2-audit.txt"
+	printf 'Phase-2-ERC-Kopie: %s\n' "$output_report_dir/$project_name-ERC-Phase2.rpt"
 }
 
 export_review() {
