@@ -10,6 +10,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from pathlib import Path
+import heapq
 import re
 import uuid
 
@@ -47,6 +48,7 @@ class Part:
     dnp: bool = False
     x: float = 0
     y: float = 0
+    rotation: int = 0
     key: str = field(init=False)
 
     def __post_init__(self) -> None:
@@ -372,9 +374,9 @@ def pages() -> list[tuple[str, str, list[Part], list[str]]]:
         ("Power input, USB-C and 3.3 V", "01_Power_Input_USB.kicad_sch", power, ["12 V protected input", "USB-C sink and reverse blocking", "3.3 V automotive buck"]),
         ("ESP32-S3, native USB, reset and boot", "02_ESP32_USB_Reset.kicad_sch", esp, ["N16R8 octal-PSRAM pins reserved", "Native USB GPIO19/20", "Manual BOOT and RESET"]),
         ("E-paper power and interface", "03_Display_EPaper.kicad_sch", display, ["Write-only SPI", "Power-off isolation", "FPC orientation remains a physical sample gate"]),
-        ("Touch always-on rail and RTC", "04_Touch_RTC.kicad_sch", touch_rtc, ["Touch can wake in comfort standby", "Wake-latch option DNP pending pulse measurement", "BR1225 is non-rechargeable"]),
+        ("Touch always-on rail and RTC", "04_Touch_RTC.kicad_sch", touch_rtc, ["Touch wake", "Optional latch DNP", "BR1225 backup"]),
         ("AUTOTERM UART and 1-Wire", "05_AUTOTERM_1Wire.kicad_sch", external, ["Heater-side 5 V powers level shifter B side", "Three parallel DS18B20 on one 2-5 m trunk"]),
-        ("External controls, lighting and diagnostics", "06_Controls_Diagnostics.kicad_sch", controls, ["3 m external pushbutton cable", "PWM white ring and frontlight", "Energy-flow LEDs only while DIAG is pressed"]),
+        ("External controls, lighting and diagnostics", "06_Controls_Diagnostics.kicad_sch", controls, ["3 m button", "Dimmable white LEDs", "DIAG-gated flow LEDs"]),
     ]
 
 
@@ -404,10 +406,13 @@ PIN_SIDE_OVERRIDES: dict[str, dict[str, str]] = {
     "U17": {"1": "right"},
     "U18": {"2": "right", "3": "right", "5": "right"},
     "U19": {"5": "right", "6": "right"},
+    "Q1": {"1": "left", "2": "left", "3": "right", "4": "left", "5": "right", "6": "right", "7": "right", "8": "right"},
 }
 
 
 def symbol_style(part: Part) -> str:
+    if part.ref == "Q1":
+        return "dual_fet"
     if part.ref.startswith("TP"):
         return "testpoint"
     if part.ref.startswith("LED"):
@@ -473,10 +478,19 @@ def pin_positions(part: Part) -> tuple[float, float, list[tuple[float, float, in
         return 5.08, 5.08, [(-2.54, 0.0, 0)]
     if style == "transistor":
         return 10.16, 10.16, [(-7.62, 0.0, 0), (7.62, 2.54, 180), (7.62, -2.54, 180)]
+    if style == "dual_fet":
+        # S1/G1/G2 on the control/input side; S2 and the four common-drain
+        # package pads on the output/sense side.
+        return 17.78, 17.78, [
+            (-11.43, 5.08, 0), (-11.43, 0.0, 0), (11.43, 5.08, 180), (-11.43, -5.08, 0),
+            (11.43, 2.54, 180), (11.43, 0.0, 180), (11.43, -2.54, 180), (11.43, -5.08, 180),
+        ]
     if style == "connector":
         rows = len(part.pins)
         h = max(7.62, (rows - 1) * 2.54 + 5.08)
-        side = "left" if part.ref in {"J6", "J7", "J8"} else "right"
+        # Connectors at the right-hand edge expose their pins to the left;
+        # source-side connectors J1/J4/J5 expose their pins to the right.
+        side = "left" if part.ref in {"J2", "J3", "J6", "J7", "J8"} else "right"
         x, angle = (-7.62, 0) if side == "left" else (7.62, 180)
         return 10.16, h, [(x, (rows - 1) * 1.27 - i * 2.54, angle) for i in range(rows)]
 
@@ -518,6 +532,13 @@ def shape_lines(part: Part, name: str, width: float, height: float) -> list[str]
         return [f"        (circle (center 0 0) (radius 1.27) {stroke} {fill})"]
     if style == "transistor":
         return [f"        (rectangle (start -5.08 -5.08) (end 5.08 5.08) {stroke} (fill (type background)))", f"        (text {q('MOSFET')} (at 0 0 0) (effects (font (size 0.9 0.9))))"]
+    if style == "dual_fet":
+        return [
+            f"        (rectangle (start -8.89 -8.89) (end 8.89 8.89) {stroke} (fill (type background)))",
+            f"        (polyline (pts (xy -5.08 -3.81) (xy -1.27 -3.81) (xy 1.27 0) (xy 5.08 0)) {stroke} {fill})",
+            f"        (polyline (pts (xy 5.08 3.81) (xy 1.27 3.81) (xy -1.27 0) (xy -5.08 0)) {stroke} {fill})",
+            f"        (text {q('BACK-TO-BACK FET')} (at 0 7.0 0) (effects (font (size 0.75 0.75))))",
+        ]
     if style == "connector":
         return [f"        (rectangle (start -5.08 {-height/2:.2f}) (end 5.08 {height/2:.2f}) {stroke} (fill (type background)))"]
     if style in {"battery", "nettie"}:
@@ -541,8 +562,8 @@ def lib_symbol(part: Part, embedded: bool) -> str:
     lines += ["      )", f'      (symbol {q(name + "_1_1")}']
     for (number, pin_name, _), (x, y, angle) in zip(part.pins, positions):
         lines += [f"        (pin {pin_etype(part, pin_name)} line (at {x:.2f} {y:.2f} {angle}) (length 2.54)",
-                  f"          (name {q(pin_name)} (effects (font (size 0.72 0.72))))",
-                  f"          (number {q(number)} (effects (font (size 0.72 0.72))))",
+                  f"          (name {q(pin_name)} (effects (font (size 0.58 0.58))))",
+                  f"          (number {q(number)} (effects (font (size 0.58 0.58))))",
                   "        )"]
     lines += ["      )", "    )"]
     return "\n".join(lines)
@@ -551,7 +572,32 @@ def lib_symbol(part: Part, embedded: bool) -> str:
 def endpoint(part: Part, pin_index: int) -> tuple[float, float, int]:
     _w, _h, positions = pin_positions(part)
     px, py, angle = positions[pin_index]
-    return part.x + px, part.y - py, angle
+    # KiCad's schematic Y axis points down while library-symbol Y points up.
+    # Rotate in sheet coordinates so vertical passives can be routed exactly.
+    radians = part.rotation * 3.141592653589793 / 180.0
+    cos_a = round(__import__("math").cos(radians))
+    sin_a = round(__import__("math").sin(radians))
+    x = part.x + px * cos_a - py * sin_a
+    y = part.y - px * sin_a - py * cos_a
+    return x, y, (angle + part.rotation) % 360
+
+
+def short_value(part: Part) -> str:
+    """Human-readable label; the full Value property remains in the BOM."""
+    aliases = {
+        "J1": "12 V INPUT", "J2": "AUTOTERM", "J3": "1-WIRE", "J4": "BUTTON / RING LED",
+        "J5": "USB-C", "J6": "E-PAPER FPC", "J7": "TOUCH FPC", "J8": "FRONTLIGHT FPC",
+        "NT1": "POWER OR", "BT1": "BR1225",
+    }
+    if part.ref in aliases:
+        value = aliases[part.ref]
+    elif part.mpn:
+        value = part.mpn
+    else:
+        value = part.value
+    if len(value) > 28:
+        value = value[:26] + ".."
+    return value + (" [DNP]" if part.dnp else "")
 
 
 def part_instance(part: Part, page_file: str, sheet_id: str) -> tuple[str, list[str], str]:
@@ -559,12 +605,16 @@ def part_instance(part: Part, page_file: str, sheet_id: str) -> tuple[str, list[
     u = uid(page_file, part.ref)
     x, y = part.x, part.y
     prop_values = [("Reference", part.ref), ("Value", part.value), ("Footprint", part.footprint), ("Datasheet", part.datasheet), ("Manufacturer", part.manufacturer), ("MPN", part.mpn), ("Assembly", part.assembly), ("Notes", part.note)]
-    lines = [f"  (symbol (lib_id {q('LandyHeater:' + part.key)}) (at {x:.2f} {y:.2f} 0) (unit 1)", "    (exclude_from_sim no) (in_bom yes) (on_board yes)", f"    (dnp {'yes' if part.dnp else 'no'})", f"    (uuid {u})"]
+    lines = [f"  (symbol (lib_id {q('LandyHeater:' + part.key)}) (at {x:.2f} {y:.2f} {part.rotation}) (unit 1)", "    (exclude_from_sim no) (in_bom yes) (on_board yes)", f"    (dnp {'yes' if part.dnp else 'no'})", f"    (uuid {u})"]
     for idx, (name, value) in enumerate(prop_values):
-        hide = " hide" if idx >= 2 else ""
-        py = y - height / 2 - 3.2 + idx * 1.5 if idx < 2 else y
-        size = 0.85 if idx == 1 else 1.0
+        hide = " hide" if idx >= 1 else ""
+        py = y - height / 2 - 2.8 if idx == 0 else y
+        size = 0.75 if idx == 0 else 0.8
         lines.append(f"    (property {q(name)} {q(value)} (id {idx}) (at {x:.2f} {py:.2f} 0) (effects (font (size {size} {size})){hide}))")
+    if not part.ref.startswith("TP"):
+        label_id = len(prop_values)
+        label_y = y + height / 2 + 2.7
+        lines.append(f"    (property {q('Circuit label')} {q(short_value(part))} (id {label_id}) (at {x:.2f} {label_y:.2f} 0) (effects (font (size 0.68 0.68))))")
     auxiliaries: list[str] = []
     for index, ((number, _pin_name, net), _position) in enumerate(zip(part.pins, positions)):
         lines.append(f'    (pin {q(number)} (uuid {uid(page_file, part.ref, "pin", number)}))')
@@ -576,64 +626,69 @@ def part_instance(part: Part, page_file: str, sheet_id: str) -> tuple[str, list[
     return "\n".join(lines), auxiliaries, instance
 
 
-LAYOUT: dict[str, dict[str, tuple[float, float]]] = {
+LAYOUT: dict[str, dict[str, tuple[float, float] | tuple[float, float, int]]] = {
     "01_Power_Input_USB.kicad_sch": {
-        "J1": (25, 50), "D1": (50, 75), "C3": (75, 75), "U1": (90, 48), "Q1": (135, 48),
-        "L1": (90, 85), "C1": (120, 85), "C2": (150, 85), "R1": (55, 105), "R2": (85, 105),
-        "R3": (130, 105), "D17": (150, 80), "R74": (150, 105), "C4": (175, 105), "FB1": (190, 48), "C5": (210, 75), "C6": (240, 75),
-        "TP1": (25, 100), "TP3": (250, 48),
-        "J5": (30, 165), "R68": (60, 220), "D2": (85, 220), "U2": (90, 160), "R4": (60, 130),
-        "R5": (125, 130), "R6": (155, 130), "Q8": (150, 160), "R72": (150, 190), "R73": (185, 160),
-        "C7": (115, 220), "U3": (220, 165), "R7": (210, 130), "R8": (240, 130), "R9": (215, 205),
-        "C8": (245, 205), "NT1": (285, 165), "TP2": (30, 125),
-        "U4": (330, 160), "L2": (365, 160), "C9": (345, 200), "C10": (315, 210), "C11": (285, 220),
-        "C12": (285, 240), "C13": (365, 200), "C14": (395, 200), "R10": (330, 235), "TP4": (395, 160), "TP5": (395, 240),
+        "J1": (18, 47), "D1": (38, 68, 90), "C3": (50, 68, 90), "U1": (68, 52), "Q1": (116, 47),
+        "L1": (91, 77), "C1": (109, 77), "C2": (130, 77, 90), "R1": (43, 83), "R2": (56, 94, 90),
+        "R3": (102, 85), "D17": (137, 69, 90), "R74": (128, 85), "C4": (148, 94, 90),
+        "FB1": (158, 47), "C5": (174, 68, 90), "C6": (189, 68, 90), "TP1": (28, 31), "TP3": (196, 47),
+        "J5": (18, 130), "R68": (43, 151), "D2": (56, 151, 90), "U2": (80, 116), "R4": (60, 94, 90),
+        "R5": (105, 94, 90), "R6": (119, 94, 90), "Q8": (119, 116), "R72": (119, 137, 90), "R73": (139, 116),
+        "C7": (69, 151, 90), "U3": (164, 125), "R7": (151, 101), "R8": (151, 151, 90), "R9": (178, 151, 90),
+        "C8": (190, 151, 90), "NT1": (202, 125), "TP2": (48, 103),
+        "U4": (229, 48), "L2": (258, 45), "C9": (247, 71, 90), "C10": (220, 74, 90), "C11": (205, 74, 90),
+        "C12": (211, 91, 90), "C13": (264, 68, 90), "C14": (277, 68, 90), "R10": (244, 88, 90),
+        "TP4": (281, 45), "TP5": (286, 92),
     },
     "02_ESP32_USB_Reset.kicad_sch": {
-        "U5": (205, 135), "C15": (45, 45), "C16": (80, 45), "C17": (115, 45),
-        "U6": (60, 95), "R11": (100, 75), "C18": (100, 95), "C19": (100, 115), "SW1": (60, 125), "R12": (25, 95),
-        "SW2": (60, 155), "R13": (25, 155), "U7": (75, 205), "R14": (120, 195), "R15": (120, 215),
-        "C40": (155, 195), "C41": (155, 215), "R16": (285, 230),
-        "R54": (300, 70), "R55": (300, 95), "R56": (300, 120), "R57": (300, 145), "R58": (300, 170), "R59": (300, 195),
-        "C42": (345, 70), "C43": (345, 95), "C44": (345, 120), "C45": (345, 145), "C46": (345, 170),
-        "TP6": (325, 230), "TP7": (355, 230), "TP8": (385, 230), "TP9": (385, 250), "TP23": (150, 75), "TP24": (100, 155),
+        "U5": (152.4, 96.52), "C15": (132, 38, 90), "C16": (145, 38, 90), "C17": (158, 38, 90),
+        "U6": (57, 45), "R11": (86, 40, 90), "C18": (99, 55, 90), "C19": (112, 40, 90),
+        "SW1": (57, 72), "R12": (37, 62, 90), "SW2": (57, 94), "R13": (37, 90, 90),
+        "U7": (52, 139), "R14": (88, 137), "R15": (88, 143), "C40": (109, 151, 90), "C41": (121, 151, 90),
+        "R16": (199, 153), "R54": (213, 66), "R55": (213, 69), "R56": (213, 72), "R57": (213, 75), "R58": (213, 78), "R59": (116, 106),
+        "C42": (235, 88, 90), "C43": (244, 88, 90), "C44": (253, 88, 90), "C45": (262, 88, 90), "C46": (271, 88, 90),
+        "TP6": (226, 153), "TP7": (248, 153), "TP8": (269, 139), "TP9": (269, 153), "TP23": (114, 56), "TP24": (84, 94),
     },
     "03_Display_EPaper.kicad_sch": {
-        "U8": (45, 50), "R17": (45, 80), "C20": (80, 35), "C21": (80, 55), "C47": (110, 35), "C48": (110, 55), "C53": (110, 75),
-        "U9": (100, 115), "R18": (55, 100), "Q2": (55, 125), "U10": (100, 185), "C49": (55, 175), "C50": (55, 195), "R19": (145, 185),
-        "J6": (380, 135), "R20": (205, 65), "R21": (205, 85), "C22": (335, 45), "C23": (335, 60), "C24": (335, 75), "C25": (335, 90),
-        "Q3": (240, 90), "L3": (275, 65), "D3": (310, 110), "D4": (280, 135), "D5": (310, 150), "C26": (245, 135),
-        "C27": (335, 110), "C36": (335, 130), "C37": (335, 150), "C38": (335, 170),
-        "R60": (220, 200), "R61": (250, 200), "R62": (280, 200), "R63": (310, 200), "R64": (340, 200),
-        "TP13": (205, 230), "TP14": (235, 230), "TP15": (265, 230), "TP16": (295, 230), "TP17": (325, 230), "TP18": (355, 230), "TP19": (385, 230), "TP34": (60, 150),
+        "U8": (34, 37), "R17": (34, 57, 90), "C20": (58, 35, 90), "C21": (71, 35, 90),
+        "C47": (79, 57, 90), "C48": (91, 57, 90), "C53": (103, 57, 90),
+        "U9": (91.44, 88.9), "R18": (42, 79, 90), "Q2": (57, 86), "U10": (145, 86),
+        "C49": (125, 115, 90), "C50": (137, 115, 90), "R19": (166, 113, 90),
+        "J6": (280, 95.25), "R20": (231, 68.58), "R21": (231, 71.12), "C22": (254, 76, 90),
+        "C23": (218, 42, 90), "C24": (230, 124, 90), "C25": (242, 124, 90),
+        "Q3": (192, 72), "L3": (164, 62), "D3": (214, 88, 90), "D4": (199, 111), "D5": (219, 111), "C26": (181, 111),
+        "C27": (254, 112, 90), "C36": (265, 124, 90), "C37": (254, 139, 90), "C38": (276, 139, 90),
+        "R60": (191, 137, 90), "R61": (203, 137, 90), "R62": (215, 137, 90), "R63": (227, 151, 90), "R64": (239, 151, 90),
+        "TP13": (111, 33), "TP14": (176, 154), "TP15": (188, 154), "TP16": (200, 154), "TP17": (212, 154), "TP18": (224, 154), "TP19": (156, 102), "TP34": (57, 68),
     },
     "04_Touch_RTC.kicad_sch": {
-        "U11": (45, 45), "C28": (80, 35), "C29": (80, 55), "R24": (120, 35), "R25": (150, 35),
-        "U12": (230, 65), "R26": (190, 55), "R27": (270, 55), "J7": (375, 70),
-        "R28": (305, 100), "R29": (305, 120), "R71": (335, 120), "R30": (335, 100),
-        "U13": (230, 155), "R31": (185, 140), "C39": (185, 160), "R69": (185, 180), "R70": (280, 155),
-        "U14": (105, 215), "C30": (55, 215), "BT1": (245, 215), "D6": (285, 215),
-        "TP10": (145, 245), "TP30": (175, 245), "TP31": (205, 245), "TP32": (310, 245), "TP33": (340, 245),
+        "U11": (38, 38), "C28": (66, 38, 90), "C29": (79, 38, 90), "R24": (96, 42, 90), "R25": (109, 42, 90),
+        "U12": (150, 55), "R26": (120, 53), "R27": (181, 55), "J7": (273, 58),
+        "R28": (207, 78), "R29": (227, 78, 90), "R71": (241, 94, 90), "R30": (254, 78),
+        "U13": (161, 105), "R31": (127, 94, 90), "C39": (127, 116, 90), "R69": (127, 130), "R70": (202, 105),
+        "U14": (74, 142), "C30": (42, 142, 90), "BT1": (174, 143), "D6": (205, 143),
+        "TP10": (108, 142), "TP30": (102, 158), "TP31": (116, 158), "TP32": (239, 116), "TP33": (222, 55),
     },
     "05_AUTOTERM_1Wire.kicad_sch": {
-        "J2": (380, 75), "U15": (290, 45), "C31": (245, 35), "C32": (330, 35), "U16": (170, 80), "C51": (130, 45),
-        "R32": (130, 110), "R33": (235, 70), "R34": (235, 95), "D7": (300, 85),
-        "TP11": (330, 120), "TP25": (110, 70), "TP26": (110, 95), "TP27": (335, 70), "TP28": (335, 95),
-        "J3": (380, 195), "U17": (95, 185), "R35": (55, 205), "C33": (55, 165), "C34": (135, 165),
-        "R36": (190, 165), "R37": (235, 195), "D8": (300, 195), "TP12": (330, 225), "TP29": (150, 225),
+        "J2": (274, 58), "U15": (215, 38), "C31": (190, 32, 90), "C32": (238, 32, 90), "U16": (116, 58), "C51": (84, 38, 90),
+        "R32": (92, 72, 90), "R33": (175, 59), "R34": (160, 57, 180), "D7": (235, 66),
+        "TP11": (244, 48), "TP25": (85, 44), "TP26": (85, 52), "TP27": (217, 59), "TP28": (217, 62),
+        "J3": (274, 128), "U17": (55, 125), "R35": (28, 137, 90), "C33": (28, 112, 90), "C34": (84, 145, 90),
+        "R36": (150, 116, 90), "R37": (175, 128), "D8": (228, 128), "TP12": (247, 145), "TP29": (112, 116),
     },
     "06_Controls_Diagnostics.kicad_sch": {
-        "J4": (30, 60), "R38": (90, 40), "R39": (130, 30), "C35": (130, 50), "D9": (90, 65),
-        "D16": (90, 95), "U18": (150, 95), "R40": (180, 120), "R41": (215, 125), "R65": (90, 110),
-        "U19": (140, 155), "C52": (95, 145), "R42": (95, 170), "L4": (205, 145), "D10": (205, 170), "R43": (255, 135), "R44": (295, 135), "J8": (380, 150), "TP20": (325, 125), "TP35": (105, 190),
-        "SW3": (285, 205), "R45": (325, 220), "R75": (345, 185), "R66": (245, 185), "R67": (275, 185), "Q7": (325, 185), "Q5": (365, 205),
-        "LED1": (55, 205), "R46": (105, 205), "D11": (155, 205),
-        "LED2": (55, 220), "R47": (105, 220), "D12": (155, 220),
-        "LED3": (55, 235), "R48": (105, 235), "D13": (155, 235),
-        "LED4": (55, 250), "R49": (105, 250), "D14": (155, 250),
-        "LED5": (55, 265), "R50": (105, 265), "Q6": (145, 265), "D15": (190, 265), "R51": (245, 265),
-        "R52": (325, 245), "LED6": (365, 245), "R53": (325, 265), "LED7": (365, 265),
-        "TP21": (245, 220), "TP22": (275, 220), "TP36": (165, 40), "TP37": (245, 120), "TP38": (275, 265),
+        "J4": (20, 52), "R38": (58, 47), "R39": (83, 35, 90), "C35": (96, 55, 90), "D9": (70, 68, 90),
+        "D16": (57, 80, 90), "U18": (116, 72), "R40": (87, 87), "R41": (103, 96, 90), "R65": (57, 59),
+        "U19": (185, 56), "C52": (158, 55, 90), "R42": (158, 76, 90), "L4": (220, 56), "D10": (220, 76, 90),
+        "R43": (244, 43), "R44": (264, 43), "J8": (280, 59), "TP20": (249, 78), "TP35": (174, 77),
+        "SW3": (235, 138), "R45": (273, 155, 90), "R75": (245, 141), "R66": (180, 138), "R67": (205, 138), "Q7": (220, 138), "Q5": (273, 138),
+        "LED1": (29, 137), "R46": (54, 137), "D11": (79, 137),
+        "LED2": (29, 145), "R47": (54, 145), "D12": (79, 145),
+        "LED3": (29, 153), "R48": (54, 153), "D13": (79, 153),
+        "LED4": (29, 161), "R49": (54, 161), "D14": (79, 161),
+        "LED5": (104, 158), "R50": (126, 158), "Q6": (151, 158), "D15": (174, 158), "R51": (190, 158, 90),
+        "R52": (113, 137), "LED6": (139, 137), "R53": (113, 145), "LED7": (139, 145),
+        "TP21": (165, 138), "TP22": (230, 163), "TP36": (108, 47), "TP37": (77, 87), "TP38": (205, 160),
     },
 }
 
@@ -645,19 +700,69 @@ def place(filename: str, parts: list[Part]) -> None:
     if missing or extra:
         raise ValueError(f"Layout map mismatch for {filename}: missing={missing}, extra={extra}")
     for part in parts:
-        x, y = positions[part.ref]
+        raw = positions[part.ref]
+        x, y = raw[0], raw[1]
+        rotation = raw[2] if len(raw) == 3 else 0
         # All symbol origins and therefore all pin endpoints stay on KiCad's
         # 50-mil (1.27 mm) electrical grid.
         part.x = round(x / 1.27) * 1.27
         part.y = round(y / 1.27) * 1.27
+        part.rotation = int(rotation)
 
 
-PER_PIN_LABEL_NETS = {"GND", "3V3_CORE", "3V0_TOUCH_AON", "3V3_DISPLAY_SW", "3V3_SENSOR_SW", "VIN_SYS", "USB_VBUS"}
+GLOBAL_RAILS = {
+    "GND", "3V3_CORE", "3V0_TOUCH_AON", "3V3_DISPLAY_SW", "VIN_SYS",
+    "USB_VBUS", "VIN_12V_PROTECTED", "AUTOTERM_5V",
+}
 
-# These point-to-point signals leave or enter dense multi-pin symbols.  A named
-# connection is clearer than a wire that would run across neighbouring pins.
-PER_PIN_LABEL_NETS |= {
-    "USB_D_N_CONN", "USB_D_P_CONN", "AUTOTERM_TX_3V3", "AUTOTERM_RX_3V3",
+# On these pages the named rail is itself part of the story and is therefore
+# drawn as one continuous electrical path rather than repeated power ports.
+CONTINUOUS_RAILS: dict[str, set[str]] = {
+    "01_Power_Input_USB.kicad_sch": {
+        "BATT_12V_IN", "VIN_12V_PROTECTED", "VIN_SYS", "USB_VBUS",
+        "USB_PROTECTED", "3V3_CORE",
+    },
+    "05_AUTOTERM_1Wire.kicad_sch": {
+        "AUTOTERM_5V", "AUTOTERM_5V_PROTECTED", "3V3_SENSOR_SW",
+    },
+}
+
+# Reviewed routing anchors for nets with several local branches.  They keep
+# functional buses out of IC bodies and make the drawing deterministic.
+ROUTE_ANCHORS: dict[str, dict[str, tuple[float, float]]] = {
+    "01_Power_Input_USB.kicad_sch": {
+        "BATT_12V_IN": (31.75, 46.99), "FET_COMMON": (101.60, 63.50),
+        "VIN_12V_PROTECTED": (148.59, 46.99), "VIN_SYS": (203.20, 46.99),
+        "USB_VBUS": (137.16, 124.46), "USB_PROTECTED": (187.96, 124.46),
+        "3V3_CORE": (274.32, 44.45), "USB_CURRENT_OUT1": (101.60, 115.57),
+        "OV_SENSE": (55.88, 82.55), "Q2_GATE_FET": (121.92, 83.82),
+        "BUCK_SW": (247.65, 44.45),
+    },
+    "02_ESP32_USB_Reset.kicad_sch": {
+        "CHIP_PU": (114.30, 55.88), "RESET_MR_N": (43.18, 71.12),
+        "BOOT_N": (83.82, 93.98), "USB_D_N_ESP": (119.38, 137.16),
+        "USB_D_P_ESP": (124.46, 143.51),
+    },
+    "03_Display_EPaper.kicad_sch": {
+        "DISPLAY_EN": (57.15, 67.31), "EPD_LEVEL_OE_N": (58.42, 80.01),
+        "EPD_BOOST_SW": (203.20, 86.36), "EPD_NEG_PUMP": (208.28, 110.49),
+        "EPD_PREVGH": (245.11, 111.76), "EPD_PREVGL": (252.73, 137.16),
+    },
+    "04_Touch_RTC.kicad_sch": {
+        "3V0_TOUCH_AON": (120.65, 35.56), "I2C_SDA": (134.62, 66.04),
+        "I2C_SCL": (142.24, 71.12), "TOUCH_INT_PANEL_N": (228.60, 77.47),
+        "TOUCH_INT_N": (241.30, 105.41), "LATCH_CLR_N": (129.54, 104.14),
+    },
+    "05_AUTOTERM_1Wire.kicad_sch": {
+        "AUTOTERM_5V": (226.06, 45.72), "AUTOTERM_5V_PROTECTED": (236.22, 57.15),
+        "CTRL_TX_TO_HEATER": (219.71, 59.69), "CTRL_RX_FROM_HEATER": (219.71, 62.23),
+        "3V3_SENSOR_SW": (111.76, 115.57), "1WIRE_DQ": (213.36, 127.00),
+    },
+    "06_Controls_Diagnostics.kicad_sch": {
+        "BUTTON_N": (107.95, 46.99), "LED_PWM_MINUS": (72.39, 79.99),
+        "FL_LX": (171.45, 118.11), "FL_LED_A": (243.84, 105.41),
+        "DIAG_CATHODE": (88.90, 149.86), "VIN_SYS": (191.77, 135.89),
+    },
 }
 
 
@@ -665,51 +770,367 @@ def wire_segment(filename: str, net: str, index: int, a: tuple[float, float], b:
     return f"  (wire (pts (xy {a[0]:.2f} {a[1]:.2f}) (xy {b[0]:.2f} {b[1]:.2f})) (stroke (width 0) (type default)) (uuid {uid(filename, net, 'wire', index, a, b)}))"
 
 
-def global_label(filename: str, net: str, index: int, point: tuple[float, float], justify: str = "left") -> str:
+def global_label(
+    filename: str,
+    net: str,
+    index: int,
+    point: tuple[float, float],
+    justify: str = "left",
+    font_size: float = 0.62,
+) -> str:
     justification = " (justify right)" if justify == "right" else " (justify left)"
-    return "\n".join([f"  (global_label {q(net)} (shape passive) (at {point[0]:.2f} {point[1]:.2f} 0) (fields_autoplaced)", f"    (effects (font (size 0.72 0.72)){justification})", f"    (uuid {uid(filename, net, 'label', index, point)})", "  )"])
+    return "\n".join([f"  (global_label {q(net)} (shape passive) (at {point[0]:.2f} {point[1]:.2f} 0) (fields_autoplaced)", f"    (effects (font (size {font_size:.2f} {font_size:.2f})){justification})", f"    (uuid {uid(filename, net, 'label', index, point)})", "  )"])
 
 
-def labelled_stub(filename: str, net: str, index: int, endpoint_value: tuple[float, float, int]) -> list[str]:
-    x, y, angle = endpoint_value
-    # Electrical pin angles 0/180 mean that the free connection end points to
-    # the left/right respectively.  Keep the label anchored to the pin (no
-    # dangling wire that might intersect another net) while its text grows
-    # away from the symbol body.
-    return [global_label(filename, net, index, (x, y), "right" if angle == 0 else "left")]
+def graphic_polyline(filename: str, key: str, points: list[tuple[float, float]], width: float = 0.25) -> str:
+    pts = " ".join(f"(xy {x:.2f} {y:.2f})" for x, y in points)
+    return f"  (polyline (pts {pts}) (stroke (width {width:.2f}) (type default)) (fill (type none)) (uuid {uid(filename, 'graphic', key, points)}))"
+
+
+def junction(filename: str, net: str, index: int, point: tuple[float, float]) -> str:
+    return f"  (junction (at {point[0]:.2f} {point[1]:.2f}) (diameter 0) (color 0 0 0 0) (uuid {uid(filename, net, 'junction', index, point)}))"
+
+
+def outward(point: tuple[float, float, int], distance: float = 2.54) -> tuple[float, float]:
+    x, y, angle = point
+    vectors = {0: (-distance, 0), 90: (0, distance), 180: (distance, 0), 270: (0, -distance)}
+    dx, dy = vectors[angle]
+    return x + dx, y + dy
+
+
+def power_port(filename: str, net: str, index: int, endpoints: list[tuple[Part, int, tuple[float, float, int]]]) -> list[str]:
+    """Place a real global power port and a visible symbol at every rail pin.
+
+    Direct attachment is deliberate: it is the standard schematic convention
+    for global rails and cannot form an accidental T-junction through a dense
+    row of neighbouring IC pins.
+    """
+    ground = net == "GND"
+    out: list[str] = []
+    for endpoint_index, (part, _pin, endpoint_value) in enumerate(endpoints):
+        x, y, angle = endpoint_value
+        marker_index = index * 20 + endpoint_index
+        # The graphic marker carries the visual meaning. Keep its global label
+        # compact so repeated rail/GND ports do not dominate a function block.
+        label_size = 0.38 if ground else 0.52
+        out.append(global_label(filename, net, marker_index, (x, y), "right" if angle == 0 else "left", label_size))
+        ox, oy = outward(endpoint_value, 1.8)
+        if ground:
+            out += [
+                graphic_polyline(filename, f"gnd-a-{part.ref}-{endpoint_index}", [(ox - 1.7, oy), (ox + 1.7, oy)]),
+                graphic_polyline(filename, f"gnd-b-{part.ref}-{endpoint_index}", [(ox - 1.1, oy + 0.8), (ox + 1.1, oy + 0.8)]),
+                graphic_polyline(filename, f"gnd-c-{part.ref}-{endpoint_index}", [(ox - 0.5, oy + 1.6), (ox + 0.5, oy + 1.6)]),
+            ]
+        else:
+            out.append(graphic_polyline(filename, f"rail-{net}-{part.ref}-{endpoint_index}", [(ox - 1.2, oy + 1.3), (ox, oy), (ox + 1.2, oy + 1.3)]))
+    return out
+
+
+def labelled_port(filename: str, net: str, index: int, endpoint_value: tuple[float, float, int]) -> list[str]:
+    start = (endpoint_value[0], endpoint_value[1])
+    end = outward(endpoint_value, 5.08)
+    justify = "right" if end[0] < start[0] else "left"
+    return [wire_segment(filename, net, index, start, end), global_label(filename, net, index, end, justify)]
+
+
+def connect_tree(
+    filename: str,
+    net: str,
+    endpoints: list[tuple[Part, int, tuple[float, float, int]]],
+    egress_slots: dict[tuple[str, int, str], int],
+    used_x: set[float],
+    used_y: set[float],
+    forbidden_x: set[float],
+    forbidden_y: set[float],
+) -> tuple[list[str], tuple[float, float]]:
+    points = [entry[2] for entry in endpoints]
+    stubs = [
+        outward(point, 2.54 + egress_slots[(part.ref, point[2], net)] * 1.27)
+        for part, _pin, point in endpoints
+    ]
+    anchor = ROUTE_ANCHORS.get(filename, {}).get(net)
+    if anchor is None:
+        xs = sorted(point[0] for point in stubs)
+        ys = sorted(point[1] for point in stubs)
+        anchor = (xs[len(xs) // 2], ys[len(ys) // 2])
+
+    def free_lane(base: float, used: set[float], forbidden: set[float], low: float, high: float) -> float:
+        base = round(base / 1.27) * 1.27
+        for step in range(80):
+            signed = 0 if step == 0 else ((step + 1) // 2) * (1 if step % 2 else -1)
+            candidate = round((base + signed * 1.27) / 1.27) * 1.27
+            rounded = round(candidate, 2)
+            if low <= candidate <= high and rounded not in used and rounded not in forbidden:
+                used.add(rounded)
+                return candidate
+        raise ValueError(f"No safe routing lane for {filename}:{net}")
+
+    lane_x = free_lane(anchor[0], used_x, forbidden_x, 12.70, 286.00)
+    lane_y = free_lane(anchor[1], used_y, forbidden_y, 24.13, 163.00)
+    anchor = (lane_x, lane_y)
+    out: list[str] = []
+    wire_index = 0
+    for point, stub in zip(points, stubs):
+        start = (point[0], point[1])
+        if point[2] in {0, 180}:
+            # Horizontal pin: fan out horizontally, then turn onto the net's
+            # unique Y lane before entering its unique X trunk.
+            path = [start, stub, (stub[0], lane_y), anchor]
+        else:
+            # Vertical pin: the symmetric construction avoids turning on a
+            # neighbouring horizontal pin row.
+            path = [start, stub, (lane_x, stub[1]), anchor]
+        compact: list[tuple[float, float]] = []
+        for value in path:
+            if not compact or value != compact[-1]:
+                compact.append(value)
+        for a, b in zip(compact, compact[1:]):
+            out.append(wire_segment(filename, net, wire_index, a, b))
+            wire_index += 1
+    if len(endpoints) > 1:
+        out.append(junction(filename, net, 0, anchor))
+    return out, anchor
 
 
 def connect_nets(filename: str, parts: list[Part], net_pages: dict[str, set[str]]) -> list[str]:
-    by_net: dict[str, list[tuple[float, float, int]]] = {}
+    by_net: dict[str, list[tuple[Part, int, tuple[float, float, int]]]] = {}
     for part in parts:
         for index, (_number, _name, net) in enumerate(part.pins):
             if net is not None:
-                by_net.setdefault(net, []).append(endpoint(part, index))
+                by_net.setdefault(net, []).append((part, index, endpoint(part, index)))
+    grid = 1.27
+
+    def cell(point: tuple[float, float] | tuple[float, float, int]) -> tuple[int, int]:
+        return round(point[0] / grid), round(point[1] / grid)
+
+    def xy(value: tuple[int, int]) -> tuple[float, float]:
+        return value[0] * grid, value[1] * grid
+
+    min_x, max_x = cell((6.35, 0))[0], cell((290.83, 0))[0]
+    min_y, max_y = cell((0, 17.78))[1], cell((0, 170.18))[1]
+
+    connected_pins = {
+        cell(entry[2])
+        for endpoints in by_net.values()
+        for entry in endpoints
+    }
+    blocked: set[tuple[int, int]] = set()
+    for part in parts:
+        width, height, _positions = pin_positions(part)
+        if part.rotation in {90, 270}:
+            width, height = height, width
+        x1 = cell((part.x - width / 2, 0))[0]
+        x2 = cell((part.x + width / 2, 0))[0]
+        y1 = cell((0, part.y - height / 2))[1]
+        y2 = cell((0, part.y + height / 2))[1]
+        for gx in range(x1, x2 + 1):
+            for gy in range(y1, y2 + 1):
+                blocked.add((gx, gy))
+    # Connected pin endpoints are the only legal entrances through a symbol's
+    # clearance map.  Unconnected pins remain obstacles.
+    blocked -= connected_pins
+    for part in parts:
+        for pin_index, (_number, _name, net) in enumerate(part.pins):
+            if net is None:
+                blocked.add(cell(endpoint(part, pin_index)))
+
+    pin_owner: dict[tuple[int, int], str] = {}
+    escape_owner: dict[tuple[int, int], str | None] = {}
+    for net, endpoints in by_net.items():
+        for entry in endpoints:
+            pin_owner[cell(entry[2])] = net
+            needs_route = len(endpoints) > 1 and not (
+                net in GLOBAL_RAILS and net not in CONTINUOUS_RAILS.get(filename, set())
+            )
+            if needs_route:
+                escape = cell(outward(entry[2], grid))
+                if escape in escape_owner and escape_owner[escape] != net:
+                    escape_owner[escape] = None
+                else:
+                    escape_owner[escape] = net
+
+    occupied: dict[tuple[int, int], set[str]] = {}
+    occupied_axes: dict[tuple[int, int], dict[str, set[str]]] = {}
+    occupied_nodes: dict[tuple[int, int], set[str]] = {}
+    routed: dict[str, list[list[tuple[int, int]]]] = {}
+    branch_points: dict[str, set[tuple[int, int]]] = {}
+
+    def heuristic(value: tuple[int, int], goals: set[tuple[int, int]]) -> int:
+        return min(abs(value[0] - goal[0]) + abs(value[1] - goal[1]) for goal in goals)
+
+    def find_path(net: str, start: tuple[int, int], goals: set[tuple[int, int]]) -> list[tuple[int, int]]:
+        queue: list[tuple[int, int, tuple[int, int], int]] = []
+        heapq.heappush(queue, (heuristic(start, goals), 0, start, -1))
+        previous: dict[tuple[tuple[int, int], int], tuple[tuple[int, int], int] | None] = {(start, -1): None}
+        best: dict[tuple[tuple[int, int], int], int] = {(start, -1): 0}
+        final_state: tuple[tuple[int, int], int] | None = None
+        directions = ((1, 0), (-1, 0), (0, 1), (0, -1))
+        while queue:
+            _score, cost, current, direction = heapq.heappop(queue)
+            state = (current, direction)
+            if cost != best.get(state):
+                continue
+            if current in goals:
+                final_state = state
+                break
+            crossing_owner = occupied.get(current, set()) - {net}
+            for next_direction, (dx, dy) in enumerate(directions):
+                if crossing_owner and direction != -1 and next_direction != direction:
+                    continue
+                nxt = (current[0] + dx, current[1] + dy)
+                if not (min_x <= nxt[0] <= max_x and min_y <= nxt[1] <= max_y):
+                    continue
+                if nxt in blocked and nxt not in goals and nxt != start:
+                    continue
+                owner = pin_owner.get(nxt)
+                if owner is not None and owner != net and nxt not in goals:
+                    continue
+                wire_owners = occupied.get(nxt, set()) - {net}
+                if wire_owners:
+                    axis = "H" if dy == 0 else "V"
+                    axes = {
+                        value
+                        for wire_owner in wire_owners
+                        for value in occupied_axes.get(nxt, {}).get(wire_owner, set())
+                    }
+                    node_owners = occupied_nodes.get(nxt, set()) - {net}
+                    # A crossing is legal only through the interior of one
+                    # straight, perpendicular wire.  Pins, bends, segment
+                    # ends and branches are never crossed.
+                    if len(axes) != 1 or axis in axes or node_owners:
+                        continue
+                bend = 4 if direction != -1 and direction != next_direction else 0
+                edge = 3 if nxt[0] in {min_x, max_x} or nxt[1] in {min_y, max_y} else 0
+                new_cost = cost + 1 + bend + edge
+                next_state = (nxt, next_direction)
+                if new_cost >= best.get(next_state, 10**9):
+                    continue
+                best[next_state] = new_cost
+                previous[next_state] = state
+                heapq.heappush(queue, (new_cost + heuristic(nxt, goals), new_cost, nxt, next_direction))
+        if final_state is None:
+            neighbours = [(start[0] + dx, start[1] + dy) for dx, dy in directions]
+            raise ValueError(f"Autorouter found no collision-free path for {filename}:{net}; start={start}, goals={sorted(goals)[:4]}, neighbours={neighbours}, blocked={[n in blocked for n in neighbours]}, pins={[pin_owner.get(n) for n in neighbours]}, escapes={[escape_owner.get(n) for n in neighbours]}, wires={[occupied.get(n) for n in neighbours]}")
+        path: list[tuple[int, int]] = []
+        state: tuple[tuple[int, int], int] | None = final_state
+        while state is not None:
+            path.append(state[0])
+            state = previous[state]
+        return list(reversed(path))
+
+    def span(endpoints: list[tuple[Part, int, tuple[float, float, int]]]) -> float:
+        points = [entry[2] for entry in endpoints]
+        return (max(point[0] for point in points) - min(point[0] for point in points)) + (max(point[1] for point in points) - min(point[1] for point in points))
+
+    routable = [
+        (net, endpoints) for net, endpoints in by_net.items()
+        if len(endpoints) > 1 and not (net in GLOBAL_RAILS and net not in CONTINUOUS_RAILS.get(filename, set()))
+    ]
+    # Long/high-fanout rails claim the clean corridors first.
+    priority_names = {
+        "BOOST_LX", "AUTOTERM_RX_PROT", "DIAG_N", "DIAG_BASE",
+        "CTRL_TX_TO_HEATER", "CTRL_RX_FROM_HEATER", "1WIRE_DQ",
+        "BUCK_BOOT", "BUCK_VCC", "OV_TOP", "Q2_DVDT_CAP", "Q2_GATE",
+        "USB_VBUS_DET", "USB_OVLO", "USB_ILM", "USB_DVDT", "USB_SHIELD",
+        "EPD_SCLK", "EPD_SDIO_MOSI", "EPD_CS_N", "EPD_DC",
+        "EPD_BOOST_SW", "EPD_NEG_PUMP", "EPD_PREVGL", "EPD_VDD", "EPD_VSH1",
+        "EPD_BUSY_PANEL", "EPD_CS_PANEL_N", "EPD_SDIO_PANEL",
+        "TOUCH_INT_PANEL_N", "RTC_VBACKUP", "RTC_INT_N",
+        "AUTOTERM_OE", "AUTOTERM_RX_3V3", "AUTOTERM_TX_3V3", "AUTOTERM_TX_PROT",
+        "DIAG_GATE_DRIVE",
+        "LEDHEAT_ISO", "LEDUSB_ISO",
+    }
+    routable.sort(key=lambda item: (
+        item[0] not in priority_names,
+        item[0] not in CONTINUOUS_RAILS.get(filename, set()),
+        -len(item[1]), -span(item[1]), item[0],
+    ))
+    failed_nets: set[str] = set()
+    for net, endpoints in routable:
+        occupied_before = {point: set(owners) for point, owners in occupied.items()}
+        axes_before = {
+            point: {owner: set(axes) for owner, axes in by_owner.items()}
+            for point, by_owner in occupied_axes.items()
+        }
+        nodes_before = {point: set(owners) for point, owners in occupied_nodes.items()}
+        remaining = {cell(entry[2]) for entry in endpoints}
+        first = min(remaining)
+        tree = {first}
+        occupied.setdefault(first, set()).add(net)
+        remaining.remove(first)
+        routed[net] = []
+        branch_points[net] = set()
+        try:
+            while remaining:
+                start = min(remaining, key=lambda value: heuristic(value, tree))
+                path = find_path(net, start, tree)
+                routed[net].append(path)
+                branch_points[net].add(path[-1])
+                for a, b in zip(path, path[1:]):
+                    axis = "H" if a[1] == b[1] else "V"
+                    for point in (a, b):
+                        occupied.setdefault(point, set()).add(net)
+                        occupied_axes.setdefault(point, {}).setdefault(net, set()).add(axis)
+                occupied_nodes.setdefault(path[0], set()).add(net)
+                occupied_nodes.setdefault(path[-1], set()).add(net)
+                last_axis: str | None = None
+                for a, b in zip(path, path[1:]):
+                    axis = "H" if a[1] == b[1] else "V"
+                    if last_axis is not None and axis != last_axis:
+                        occupied_nodes.setdefault(a, set()).add(net)
+                    last_axis = axis
+                for point in path:
+                    tree.add(point)
+                remaining.remove(start)
+        except ValueError:
+            occupied = occupied_before
+            occupied_axes = axes_before
+            occupied_nodes = nodes_before
+            routed.pop(net, None)
+            branch_points.pop(net, None)
+            failed_nets.add(net)
+
     out: list[str] = []
+    if failed_nets:
+        raise ValueError(
+            f"Local nets could not be routed with visible wires on {filename}: "
+            f"{', '.join(sorted(failed_nets))}. Refusing to regenerate a label-based schematic."
+        )
     for net, endpoints in sorted(by_net.items()):
-        if net in PER_PIN_LABEL_NETS:
-            for i, endpoint_value in enumerate(endpoints):
-                out.extend(labelled_stub(filename, net, i, endpoint_value))
+        cross_page = len(net_pages.get(net, set())) > 1
+        continuous = net in CONTINUOUS_RAILS.get(filename, set())
+        if net in GLOBAL_RAILS and not continuous:
+            by_part: dict[str, list[tuple[Part, int, tuple[float, float, int]]]] = {}
+            for entry in endpoints:
+                by_part.setdefault(entry[0].ref, []).append(entry)
+            for i, group in enumerate(by_part.values()):
+                out.extend(power_port(filename, net, i, group))
             continue
-        points = [(x, y) for x, y, _angle in endpoints]
-        crosses_pages = len(net_pages.get(net, set())) > 1
-        # Only draw a wire automatically when all endpoints already form one
-        # unambiguous horizontal signal path.  Earlier generic hub routing
-        # created unintended T-junctions where unrelated nets crossed.  More
-        # complex connections use named labels until they are hand-routed in
-        # a reviewed, circuit-specific map.
-        same_y = len({round(y, 2) for _, y in points}) == 1
-        should_wire = len(points) >= 2 and len(points) <= 4 and same_y and not crosses_pages
-        if should_wire:
-            ordered = sorted(set(points))
-            for wire_index, (a, b) in enumerate(zip(ordered, ordered[1:])):
-                out.append(wire_segment(filename, net, wire_index, a, b))
-            if len(ordered) > 2:
-                for junction_index, point in enumerate(ordered[1:-1]):
-                    out.append(f"  (junction (at {point[0]:.2f} {point[1]:.2f}) (diameter 0) (color 0 0 0 0) (uuid {uid(filename, net, 'junction', junction_index, point)}))")
-        else:
-            for i, endpoint_value in enumerate(endpoints):
-                out.extend(labelled_stub(filename, net, i, endpoint_value))
+        if len(endpoints) == 1:
+            endpoint_value = endpoints[0][2]
+            out.append(global_label(filename, net, 0, (endpoint_value[0], endpoint_value[1]), "right" if endpoint_value[2] == 0 else "left"))
+            continue
+        wire_index = 0
+        for path in routed[net]:
+            # Collapse grid walks to orthogonal segments; all intermediate
+            # cells remain reserved, so no other net can cross or touch them.
+            compressed = [path[0]]
+            last_direction: tuple[int, int] | None = None
+            for a, b in zip(path, path[1:]):
+                direction = (b[0] - a[0], b[1] - a[1])
+                if last_direction is not None and direction != last_direction:
+                    compressed.append(a)
+                last_direction = direction
+            compressed.append(path[-1])
+            for a, b in zip(compressed, compressed[1:]):
+                if a != b:
+                    out.append(wire_segment(filename, net, wire_index, xy(a), xy(b)))
+                    wire_index += 1
+        for junction_index, point in enumerate(sorted(branch_points[net])):
+            out.append(junction(filename, net, junction_index, xy(point)))
+        if cross_page or continuous:
+            label_point = xy(min({cell(entry[2]) for entry in endpoints}))
+            out.append(global_label(filename, net, 1000, label_point, "left"))
     return out
 
 
@@ -718,13 +1139,72 @@ def text_note(filename: str, text_value: str, x: float, y: float, size: float = 
 
 
 PAGE_NOTES: dict[str, list[tuple[str, float, float, float]]] = {
-    "01_Power_Input_USB.kicad_sch": [("12-V INPUT / REVERSE BATTERY / OV CUTOFF", 18, 22, 1.4), ("FLOW: J1 -> TVS + LM74720/Q1 -> FILTER -> VIN_SYS", 18, 28, 1.0), ("USB-C UFP / CURRENT DETECTION / TRUE REVERSE BLOCKING", 18, 120, 1.4), ("FLOW: J5 -> TUSB321 + TPS259470 -> POWER OR -> LMR43620/L2 -> 3V3_CORE", 180, 120, 0.85), ("RTN exposed pad of U1 MUST FLOAT", 105, 115, 1.0)],
-    "02_ESP32_USB_Reset.kicad_sch": [("ESP32-S3-WROOM-1U-N16R8 / SAFE RESET AND BOOT", 18, 22, 1.4), ("FLOW: 3V3 -> TPS3808/RESET -> CHIP_PU | USB J5 -> ESD -> R14/R15 -> GPIO19/20 | GPIO -> SPI SERIES PARTS", 18, 28, 0.95), ("CT open = 20 ms reset delay (TPS3808)", 18, 135, 1.0), ("USB tuning capacitors and SPI tuning capacitors: DNP", 270, 45, 1.0)],
-    "03_Display_EPaper.kicad_sch": [("DISPLAY POWER-OFF ISOLATION", 18, 22, 1.4), ("FLOW: GPIO SPI -> AXC LEVEL/POWER-OFF ISOLATION -> J6 | 3V3_DISPLAY_SW -> BOOSTER -> PANEL RAILS", 18, 28, 0.95), ("GOOD DISPLAY CHAPTER 12 BOOSTER — DO NOT SUBSTITUTE TOPOLOGY", 190, 22, 1.4), ("FPC contact side / pin-1 orientation: NOT VERIFIED until original sample inspection", 170, 255, 1.0)],
-    "04_Touch_RTC.kicad_sch": [("3V0 TOUCH ALWAYS-ON / I2C", 18, 22, 1.4), ("FLOW: 3V3 -> TPS7A02 -> TOUCH + I2C PULL-UPS | TOUCH INT -> GPIO2 WAKE", 18, 28, 0.95), ("DIRECT TOUCH WAKE (DEFAULT)", 280, 88, 1.1), ("WAKE LATCH OPTION — ALL PARTS DNP; mutually exclusive with direct path", 150, 130, 1.0), ("RTC + PRIMARY CELL — internal trickle charger must remain disabled", 18, 190, 1.1)],
-    "05_AUTOTERM_1Wire.kicad_sch": [("AUTOTERM UART — 5-V side powered only by heater", 18, 22, 1.4), ("FLOW: ESP32 UART -> TXU0202 -> SERIES + ESD -> J2", 18, 28, 1.0), ("J2 PIN ORDER: 1=5V, 2=GND, 3=TX TO HEATER, 4=RX FROM HEATER", 245, 115, 1.0), ("1-WIRE — THREE DS18B20 / 2–5 m combined harness", 18, 140, 1.4), ("FLOW: 3V3 -> TPS22945 -> SENSOR SUPPLY | GPIO4 -> 0R + ESD -> J3", 18, 146, 1.0)],
-    "06_Controls_Diagnostics.kicad_sch": [("EXTERNAL BUTTON + WHITE RING LED / 3 m", 18, 22, 1.4), ("FLOW: J4 BUTTON -> FILTER/ESD -> GPIO1 | GPIO38 -> BCR421 PWM -> J4 RING LED", 18, 28, 0.95), ("FRONTLIGHT 50 mA NOMINAL / <60 mA WORST CASE", 18, 135, 1.2), ("FLOW: VIN_SYS -> AL8861/L4/D10 -> J8 FRONTLIGHT", 18, 141, 0.95), ("ENERGY-FLOW DIAGNOSTICS — LEDs only while DIAG is pressed", 18, 190, 1.2)],
+    "01_Power_Input_USB.kicad_sch": [("RTN/EP OF U1 MUST FLOAT", 76, 96, 0.75), ("TRUE REVERSE BLOCKING - 1 A USB LIMIT", 128, 159, 0.72)],
+    "02_ESP32_USB_Reset.kicad_sch": [("CT OPEN = FIXED 20 ms RESET DELAY", 18, 111, 0.72), ("USB AND SPI SHUNT CAPACITORS ARE DNP", 188, 111, 0.72)],
+    "03_Display_EPaper.kicad_sch": [("GOOD DISPLAY CHAPTER 12 REFERENCE BOOSTER - DO NOT SUBSTITUTE TOPOLOGY", 155, 31, 0.68), ("FPC CONTACT SIDE / PIN 1: VERIFY ON PHYSICAL SAMPLE", 151, 166, 0.68)],
+    "04_Touch_RTC.kicad_sch": [("DIRECT TOUCH WAKE IS DEFAULT", 198, 91, 0.72), ("WAKE-LATCH OPTION: ALL PARTS DNP", 119, 133, 0.72), ("RV-3028 TRICKLE CHARGER MUST REMAIN DISABLED", 18, 163, 0.72)],
+    "05_AUTOTERM_1Wire.kicad_sch": [("J2: 1=5V, 2=GND, 3=TX TO HEATER, 4=RX FROM HEATER", 164, 88, 0.72), ("THREE DS18B20 ON ONE 2-5 m COMBINED HARNESS", 18, 158, 0.72)],
+    "06_Controls_Diagnostics.kicad_sch": [("3 m CABLE", 16, 91, 0.72), ("50 mA NOMINAL / <60 mA WORST CASE", 153, 89, 0.72), ("DIAGNOSTIC LEDs ONLY WHILE DIAG IS PRESSED", 16, 166, 0.72)],
 }
+
+
+FUNCTION_FRAMES: dict[str, list[tuple[float, float, float, float, str]]] = {
+    "01_Power_Input_USB.kicad_sch": [
+        (10, 22, 198, 99, "12 V INPUT - TVS - IDEAL DIODE - FILTER"),
+        (200, 22, 289, 99, "VIN_SYS - AUTOMOTIVE BUCK - 3V3_CORE"),
+        (10, 101, 209, 164, "USB-C SINK - CC DETECTION - eFUSE - POWER OR"),
+        (211, 101, 289, 164, "POWER MERGE TO VIN_SYS"),
+    ],
+    "02_ESP32_USB_Reset.kicad_sch": [
+        (10, 22, 122, 110, "RESET / BOOT / SUPERVISOR"), (124, 22, 187, 162, "ESP32-S3 MODULE"),
+        (10, 116, 122, 162, "NATIVE USB PROTECTION"), (189, 22, 289, 110, "E-PAPER SIGNAL CONDITIONING"),
+        (189, 116, 289, 162, "PROGRAMMING / STATUS TEST POINTS"),
+    ],
+    "03_Display_EPaper.kicad_sch": [
+        (10, 22, 68, 70, "DISPLAY LOAD SWITCH"), (70, 22, 151, 121, "POWER-OFF SIGNAL ISOLATION"),
+        (153, 22, 268, 158, "REFERENCE BOOSTER / PANEL RAILS"), (270, 22, 289, 158, "J6 FPC"),
+    ],
+    "04_Touch_RTC.kicad_sch": [
+        (10, 22, 118, 82, "3V0 TOUCH ALWAYS-ON / I2C"), (120, 22, 289, 88, "TOUCH RESET / FPC"),
+        (120, 90, 289, 134, "TOUCH WAKE - DIRECT + OPTIONAL LATCH"), (10, 136, 289, 164, "RV-3028-C7 RTC + BR1225 BACKUP"),
+    ],
+    "05_AUTOTERM_1Wire.kicad_sch": [
+        (10, 22, 289, 94, "AUTOTERM UART: ESP32 -> LEVEL SHIFT -> SERIES -> ESD -> J2"),
+        (10, 98, 289, 160, "1-WIRE: LOAD SWITCH / PULL-UP -> SERIES / ESD -> J3"),
+    ],
+    "06_Controls_Diagnostics.kicad_sch": [
+        (10, 22, 145, 93, "EXTERNAL BUTTON + PWM WHITE RING LED"),
+        (147, 22, 289, 93, "FRONTLIGHT CONTROL"),
+        (10, 96, 289, 166, "BOARD ENERGY-FLOW DIAGNOSTICS + OPTIONAL STATUS LEDS"),
+    ],
+}
+
+
+def function_frame(filename: str, index: int, frame: tuple[float, float, float, float, str]) -> list[str]:
+    x1, y1, x2, y2, title = frame
+    return [
+        graphic_polyline(filename, f"frame-{index}", [(x1, y1), (x2, y1), (x2, y2), (x1, y2), (x1, y1)], 0.18),
+        text_note(filename, title, x1 + 2.0, y1 + 4.0, 0.82),
+    ]
+
+
+def diagram_arrow(filename: str, key: str, points: list[tuple[float, float]], label: str, label_at: tuple[float, float], both: bool = False) -> list[str]:
+    def head(tip: tuple[float, float], previous: tuple[float, float], suffix: str) -> str:
+        tx, ty = tip
+        px, py = previous
+        if abs(tx - px) >= abs(ty - py):
+            direction = 1 if tx > px else -1
+            wing = [(tx - direction * 2.2, ty - 1.2), tip, (tx - direction * 2.2, ty + 1.2)]
+        else:
+            direction = 1 if ty > py else -1
+            wing = [(tx - 1.2, ty - direction * 2.2), tip, (tx + 1.2, ty - direction * 2.2)]
+        return graphic_polyline(filename, f"{key}-head-{suffix}", wing, 0.35)
+
+    out = [graphic_polyline(filename, key, points, 0.35), head(points[-1], points[-2], "end")]
+    if both:
+        out.append(head(points[0], points[1], "start"))
+    out.append(text_note(filename, label, label_at[0], label_at[1], 0.72))
+    return out
 
 
 def child_schematic(title: str, filename: str, parts: list[Part], notes: list[str], page_number: int, net_pages: dict[str, set[str]]) -> str:
@@ -734,13 +1214,15 @@ def child_schematic(title: str, filename: str, parts: list[Part], notes: list[st
     for part in parts:
         defs.setdefault(part.key, part)
     content = ["(kicad_sch (version 20250114) (generator eeschema)",
-               f"  (uuid {uid(filename, 'root')})", '  (paper "A3")',
-               "  (title_block", f"    (title {q(title)})", '    (date "2026-09-06")', '    (rev "A / Phase 2")',
+               f"  (uuid {uid(filename, 'root')})", '  (paper "A4")',
+               "  (title_block", f"    (title {q(title)})", '    (date "2026-09-07")', '    (rev "A / Phase 2")',
                '    (company "LandyHeater")', '    (comment 1 "Review schematic - NOT RELEASED FOR PRODUCTION")',
                f"    (comment 2 {q(' | '.join(notes))})", "  )", "  (lib_symbols"]
     for key, exemplar in sorted(defs.items()):
         content.append(lib_symbol(exemplar, embedded=True))
     content.append("  )")
+    for frame_index, frame in enumerate(FUNCTION_FRAMES[filename]):
+        content.extend(function_frame(filename, frame_index, frame))
     auxiliaries: list[str] = []
     instances: list[str] = []
     for part in parts:
@@ -761,25 +1243,55 @@ def child_schematic(title: str, filename: str, parts: list[Part], notes: list[st
 def root_schematic(page_defs: list[tuple[str, str, list[Part], list[str]]]) -> str:
     root_uuid = uid("root")
     lines = ["(kicad_sch (version 20250114) (generator eeschema)", f"  (uuid {root_uuid})", '  (paper "A4")',
-             "  (title_block", '    (title "Landy Heater Controller - Hierarchy")', '    (date "2026-09-06")',
+             "  (title_block", '    (title "Landy Heater Controller - System Architecture")', '    (date "2026-09-07")',
              '    (rev "A / Phase 2")', '    (company "LandyHeater")',
              '    (comment 1 "Review schematic - NOT RELEASED FOR PRODUCTION")',
              '    (comment 2 "ESP32-S3-WROOM-1U-N16R8 / 10-14V vehicle auxiliary battery / USB-C")', "  )",
              "  (lib_symbols)"]
-    sheet_ids: list[str] = []
+    sheet_geometry = [
+        (20.32, 35.56, 60.96, 27.94),   # power
+        (111.76, 77.47, 68.58, 35.56),  # ESP32
+        (213.36, 35.56, 66.04, 27.94),  # E-paper
+        (213.36, 88.90, 66.04, 27.94),  # Touch / RTC
+        (20.32, 111.76, 68.58, 27.94),  # external buses
+        (111.76, 137.16, 68.58, 27.94), # controls
+    ]
     for index, (title, filename, _parts, _notes) in enumerate(page_defs):
-        sx = 25.4 if index % 2 == 0 else 120.65
-        sy = 35.56 + (index // 2) * 50.8
+        sx, sy, sw, sh = sheet_geometry[index]
         su = uid("sheet", filename)
-        sheet_ids.append(su)
-        lines += [f"  (sheet (at {sx:.2f} {sy:.2f}) (size 76.20 30.48) (fields_autoplaced)",
+        lines += [f"  (sheet (at {sx:.2f} {sy:.2f}) (size {sw:.2f} {sh:.2f}) (fields_autoplaced)",
                   "    (exclude_from_sim no) (in_bom yes) (on_board yes) (dnp no)",
                   "    (stroke (width 0) (type solid) (color 0 0 0 0))", "    (fill (color 0 0 0 0.0000))",
                   f"    (uuid {su})", f"    (property \"Sheet name\" {q(title)} (id 0) (at {sx:.2f} {sy-0.84:.2f} 0) (effects (font (size 1.27 1.27)) (justify left bottom)))",
-                  f"    (property \"Sheet file\" {q(filename)} (id 1) (at {sx:.2f} {sy+31.32:.2f} 0) (effects (font (size 1.27 1.27)) (justify left top)))",
+                  f"    (property \"Sheet file\" {q(filename)} (id 1) (at {sx:.2f} {sy+sh+0.84:.2f} 0) (effects (font (size 0.75 0.75)) (justify left top)))",
                   "    (instances", '      (project "LandyHeater-Board"',
                   f'        (path "/{root_uuid}" (page {q(str(index + 2))}))',
                   "      )", "    )", "  )"]
+    lines += [
+        text_note("root", "SOURCE", 8, 22, 0.9),
+        text_note("root", "IN: 12V_INPUT, USB_VBUS  |  OUT: VIN_SYS, 3V3_CORE", 23, 58, 0.65),
+        text_note("root", "IN: power + interfaces  |  OUT: controlled GPIO / buses", 115, 106, 0.65),
+        text_note("root", "IN: SPI + display enable  |  OUT: EPD_BUSY", 217, 58, 0.65),
+        text_note("root", "IN: 3V3 + reset  |  I/O: I2C + WAKE", 217, 111, 0.65),
+        text_note("root", "I/O: AUTOTERM UART + 1-WIRE", 24, 134, 0.65),
+        text_note("root", "I/O: button / PWM / diagnostics", 115, 159, 0.65),
+    ]
+    # Primary energy architecture.
+    lines += diagram_arrow("root", "12v-in", [(8, 41), (20.32, 41)], "12V_INPUT", (8, 38))
+    lines += diagram_arrow("root", "usb-in", [(8, 55), (20.32, 55)], "USB_VBUS", (8, 52))
+    lines += diagram_arrow("root", "vin-sys", [(81.28, 47), (96.52, 47), (96.52, 145), (111.76, 145)], "VIN_SYS", (83, 44))
+    lines += diagram_arrow("root", "rail-3v3", [(81.28, 55), (101.60, 55), (101.60, 95), (111.76, 95)], "3V3_CORE", (83, 52))
+    lines += diagram_arrow("root", "display-power", [(101.60, 60), (196.85, 60), (196.85, 48), (213.36, 48)], "3V3_DISPLAY_SW", (151, 57))
+    lines += diagram_arrow("root", "touch-power", [(101.60, 68), (196.85, 68), (196.85, 101), (213.36, 101)], "3V0_TOUCH_AON", (151, 65))
+    lines += diagram_arrow("root", "sensor-power", [(101.60, 73), (96.52, 73), (96.52, 120), (88.90, 120)], "3V3_SENSOR_SW", (90, 88))
+    # Processor interfaces.  Bidirectional arrows are used only for real
+    # bidirectional or request/response interfaces.
+    lines += diagram_arrow("root", "epd-spi", [(180.34, 84), (196.85, 84), (196.85, 55), (213.36, 55)], "SPI / EN", (185, 81))
+    lines += diagram_arrow("root", "epd-busy", [(213.36, 62), (190.50, 62), (190.50, 91), (180.34, 91)], "BUSY", (187, 59))
+    lines += diagram_arrow("root", "touch-link", [(180.34, 101), (213.36, 101)], "I2C / RESET / WAKE", (184, 98), both=True)
+    lines += diagram_arrow("root", "external-link", [(111.76, 104), (99.06, 104), (99.06, 125), (88.90, 125)], "UART / 1-WIRE", (91, 101), both=True)
+    lines += diagram_arrow("root", "control-link", [(146.05, 113.03), (146.05, 137.16)], "BUTTON / PWM / DIAG", (149, 127), both=True)
+    lines += [text_note("root", "12V_INPUT -> protection -> VIN_SYS -> 3V3_CORE -> switched display/sensor rails", 20, 25, 0.95)]
     lines += ["  (sheet_instances", '    (path "/" (page "1"))', "  )", ")", ""]
     return "\n".join(lines)
 
