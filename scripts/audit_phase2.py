@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import csv
+import hashlib
 import re
 import sys
 from pathlib import Path
@@ -16,6 +17,16 @@ BOM = ROOT / "output" / "bom" / "LandyHeater-Board-BOM-Phase2.csv"
 NETLIST = ROOT / "build" / "reports" / "phase2.net"
 REPORT = ROOT / "build" / "reports" / "phase2-audit.txt"
 OUTPUT_REPORT = ROOT / "output" / "reports" / "LandyHeater-Board-Audit-Phase2.txt"
+NETLIST_COMPARISON_REPORT = ROOT / "output" / "reports" / "LandyHeater-Board-Netlist-Comparison-Phase2.txt"
+
+# Captured from build/reports/phase2-before-rework.net immediately before the
+# purely graphical rework requested on 2026-09-07.  The topology digest ignores
+# timestamps, titles, properties and net names; it hashes only the partition of
+# connected component pins.  This makes it a stable electrical regression gate.
+GRAPHICAL_REWORK_BASELINE_RAW_SHA256 = "6077254ad38973092c4b5cefda012bff106fe935b2b8a473ba2dc4fbc516b3cb"
+GRAPHICAL_REWORK_BASELINE_TOPOLOGY_SHA256 = "00ce8f7d7237aa13ae732818b4ef832ae0c6ac1b73049995a4f299356ca35dd0"
+GRAPHICAL_REWORK_BASELINE_PIN_COUNT = 651
+GRAPHICAL_REWORK_BASELINE_NET_COUNT = 175
 
 
 def balanced_blocks(text: str, marker: str) -> list[str]:
@@ -64,12 +75,24 @@ def exported_net_pins(text: str) -> dict[tuple[str, str], str]:
     return result
 
 
+def topology_digest(pin_nets: dict[tuple[str, str], str]) -> tuple[str, int, int]:
+    """Hash electrical connectivity independently of generated net names."""
+    groups: dict[str, set[tuple[str, str]]] = {}
+    for pin, net in pin_nets.items():
+        groups.setdefault(net, set()).add(pin)
+    canonical = "\n".join(
+        sorted(",".join(f"{ref}.{pin}" for ref, pin in sorted(group)) for group in groups.values())
+    ) + "\n"
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest(), len(pin_nets), len(groups)
+
+
 def main() -> int:
     definitions = pages()
     validate_definition(definitions)
     parts = [part for _title, _file, page_parts, _notes in definitions for part in page_parts]
     blockers: list[str] = []
     failures: list[str] = []
+    comparison_lines: list[str] = []
 
     if not BOM.is_file() or not NETLIST.is_file():
         failures.append("Exportierte BOM oder Netzliste fehlt; zuerst make export-phase2 ausführen.")
@@ -83,6 +106,34 @@ def main() -> int:
                 failures.append(f"BOM-Gruppe {row['Reference']} hat keinen Footprint.")
 
         actual = exported_net_pins(NETLIST.read_text(encoding="utf-8"))
+        topology_sha256, connected_pin_count, net_count = topology_digest(actual)
+        raw_sha256 = hashlib.sha256(NETLIST.read_bytes()).hexdigest()
+        topology_equal = (
+            topology_sha256 == GRAPHICAL_REWORK_BASELINE_TOPOLOGY_SHA256
+            and connected_pin_count == GRAPHICAL_REWORK_BASELINE_PIN_COUNT
+            and net_count == GRAPHICAL_REWORK_BASELINE_NET_COUNT
+        )
+        comparison_lines = [
+            "LandyHeater Revision A – Netzlistenvergleich vor/nach grafischer Überarbeitung",
+            "=============================================================================",
+            "Vergleichsbasis: Export unmittelbar vor der grundlegenden grafischen Überarbeitung vom 2026-09-07",
+            f"Vorher, rohe Netzliste SHA-256: {GRAPHICAL_REWORK_BASELINE_RAW_SHA256}",
+            f"Nachher, rohe Netzliste SHA-256: {raw_sha256}",
+            "Hinweis: Der rohe Hash darf wegen Datum, Titel und sichtbaren Bauteileigenschaften abweichen.",
+            "",
+            f"Vorher: {GRAPHICAL_REWORK_BASELINE_PIN_COUNT} angeschlossene Pins in {GRAPHICAL_REWORK_BASELINE_NET_COUNT} elektrischen Netzen",
+            f"Nachher: {connected_pin_count} angeschlossene Pins in {net_count} elektrischen Netzen",
+            f"Vorher, Topologie SHA-256: {GRAPHICAL_REWORK_BASELINE_TOPOLOGY_SHA256}",
+            f"Nachher, Topologie SHA-256: {topology_sha256}",
+            "",
+            "Ergebnis: " + (
+                "IDENTISCH – keine Pin-zu-Pin-Verbindung wurde durch die grafische Überarbeitung geändert."
+                if topology_equal else
+                "ABWEICHUNG – die elektrische Topologie stimmt nicht mit dem Vorher-Stand überein."
+            ),
+        ]
+        if not topology_equal:
+            failures.append("Elektrische Topologie weicht vom Netzlistenstand vor der grafischen Überarbeitung ab.")
         expected_by_pin = {
             (part.ref, number): expected_net
             for part in parts
@@ -142,6 +193,8 @@ def main() -> int:
     REPORT.write_text(rendered, encoding="utf-8")
     OUTPUT_REPORT.parent.mkdir(parents=True, exist_ok=True)
     OUTPUT_REPORT.write_text(rendered, encoding="utf-8")
+    if comparison_lines:
+        NETLIST_COMPARISON_REPORT.write_text("\n".join(comparison_lines) + "\n", encoding="utf-8")
     print(f"Phase-2-Audit: {REPORT}")
     if failures:
         print("\n".join(failures), file=sys.stderr)

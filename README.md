@@ -4,7 +4,7 @@ Hardwareentwicklung für das Landy-Heater-Steuergerät auf Basis des `ESP32-S3-W
 
 ## Aktueller Stand
 
-Revision A hat Phase 0 und Phase 1 abgeschlossen. Der Phase-2-Schaltplan wurde nach dem zurückgewiesenen rasterartigen Erstentwurf funktionsorientiert neu aufgebaut, elektrisch gegengeprüft und automatisiert gegen seine exportierte Netzliste auditiert. Die normative Grundlage ist Dokumentversion 1.6. Phase 2 bleibt wegen der im Review dokumentierten Mess-, Transienten-, FPC- und Footprint-Gates **nicht freigegeben**; Phase 3 wurde nicht begonnen.
+Revision A hat Phase 0 und Phase 1 abgeschlossen. Der Phase-2-Schaltplan wurde nach dem zurückgewiesenen rasterartigen Erstentwurf grundlegend als zusammenhängender Engineering-Schaltplan neu aufgebaut. Alle sieben A4-Seiten wurden aus dem KiCad-Export einzeln visuell geprüft; lokale Funktionsnetze werden mit sichtbaren Leitungen dargestellt. ERC, Struktur-Audit und der elektrische Vorher-/Nachher-Netzlistenvergleich sind fehlerfrei. Die normative Grundlage ist Dokumentversion 1.6. Phase 2 bleibt wegen der im Review dokumentierten Mess-, Transienten-, FPC- und Footprint-Gates sowie der noch ausstehenden ausdrücklichen Abnahme **nicht freigegeben**; Phase 3 wurde nicht begonnen.
 
 - [Hardware-Anforderungsspezifikation Revision A](docs/Hardware-Anforderungsspezifikation_Revision_A.md)
 - [Ergebnisbericht Phase 0](docs/Phase_0_KiCad-Arbeitsumgebung.md)
@@ -19,6 +19,7 @@ Revision A hat Phase 0 und Phase 1 abgeschlossen. Der Phase-2-Schaltplan wurde n
 - [Vorläufige BOM Phase 2](output/bom/LandyHeater-Board-BOM-Phase2.csv)
 - [ERC-Bericht Phase 2](output/reports/LandyHeater-Board-ERC-Phase2.rpt)
 - [Netzlisten-/BOM-Audit Phase 2](output/reports/LandyHeater-Board-Audit-Phase2.txt)
+- [Netzlistenvergleich vor/nach grafischer Überarbeitung](output/reports/LandyHeater-Board-Netlist-Comparison-Phase2.txt)
 
 Die Spezifikation definiert Funktionsumfang, Schnittstellen, Versorgung, Mechanik, sichere Hardwarezustände, Layoutregeln, Fertigungsunterlagen und Abnahmetests. Die darin aufgeführten Verifikationspunkte müssen vor der Fertigungsfreigabe abgeschlossen werden.
 
@@ -59,7 +60,7 @@ Jede Phase wird einzeln beauftragt, geprüft und freigegeben. Mit der nächsten 
 
 **Freigabepunkt:** Schaltplanreview abgeschlossen, ERC ohne ungeklärte Fehler und alle Hersteller-Pinouts unabhängig geprüft.
 
-**Status:** Neuaufbau und elektrischer Review abgeschlossen. ERC und exportierter Netzlisten-/BOM-Audit sind fehlerfrei. Phase 2 ist dennoch nicht freigegeben, bis die in `docs/Phase_2_Schaltplanreview.md` aufgeführten Freigabesperren geschlossen und ausdrücklich abgenommen sind.
+**Status:** Grafischer Neuaufbau, interner A4-Sichtreview und elektrischer Review abgeschlossen. ERC, exportierter Netzlisten-/BOM-Audit und Vorher-/Nachher-Topologievergleich sind fehlerfrei. Phase 2 ist dennoch nicht freigegeben, bis die in `docs/Phase_2_Schaltplanreview.md` aufgeführten Freigabesperren geschlossen und der Schaltplan ausdrücklich abgenommen ist.
 
 ### Phase 3 – Mechanik und Platzierung
 

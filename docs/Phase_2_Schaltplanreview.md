@@ -4,11 +4,11 @@ Stand: 2026-09-06
 
 Normative Grundlage: [Hardware-Anforderungsspezifikation Revision A](Hardware-Anforderungsspezifikation_Revision_A.md), Dokumentversion 1.6
 
-Status: **elektrisch und strukturell geprüft, aber wegen offener Freigabegates nicht für Phase 3 oder Fertigung freigegeben**
+Status: **elektrisch, strukturell und intern visuell geprüft, aber wegen offener Freigabegates und ausstehender Abnahme nicht für Phase 3 oder Fertigung freigegeben**
 
 ## 1. Ergebnis
 
-Der erste automatisch erzeugte, rasterartige Entwurf wurde verworfen. Der aktuelle Stand ist ein neuer, editierbarer KiCad-10-Schaltplan mit funktionsorientierter Seitenaufteilung, erkennbaren Schaltsymbolen, lokalen Leitungen für eindeutige kurze Pfade und Netzbezeichnungen nur dort, wo eine direkte Leitung die Lesbarkeit verschlechtern oder Seiten verbinden würde. Überlagerte Anschlussbeschriftungen wurden beseitigt.
+Der erste automatisch erzeugte, rasterartige und überwiegend labelbasierte Entwurf wurde verworfen. Der aktuelle Stand ist ein neuer, editierbarer KiCad-10-Schaltplan mit funktionsorientierter Seitenaufteilung. Lokale Verbindungen innerhalb eines Funktionsblocks sind als sichtbare Leitungen gezeichnet; Labels dienen nur Seitenübergängen, globalen Spannungsdomänen, Einzelanschlüssen und bewusst entfernten Verbindungen. Quellen, Schutzglieder, Regler/Schalter, Filter und Verbraucher sind vorzugsweise von links nach rechts angeordnet. Versorgungssymbole liegen oben, sichtbare GND-Symbole unten. Steckverbinder schließen die jeweiligen Signalpfade am Blockrand ab.
 
 Der Schaltplan umfasst:
 
@@ -17,13 +17,30 @@ Der Schaltplan umfasst:
 - 141 gruppierte BOM-Zeilen,
 - 0 ERC-Fehler und 0 ERC-Warnungen,
 - 0 im Export-Audit erkannte unterbrochene oder ungewollt verschmolzene Sollnetze,
+- 651 angeschlossene Pins in 175 Netzen vor und nach der grafischen Überarbeitung; identischer Topologie-Hash,
 - Footprint-Zuordnung für jede Referenz.
 
 Die automatischen Ergebnisse sind in `build/reports/erc.rpt` und `build/reports/phase2-audit.txt` reproduzierbar. Sie ersetzen weder Worst-Case-Auslegung noch die Prüfung der herstellerspezifischen Landpatterns.
 
-Der Review erfolgte in zwei getrennten Durchgängen: zuerst blockweise gegen Pinout, Referenzschaltung und Grenzwerte; anschließend systemweit über Spannungsdomänen, ausgeschaltete Zustände, Backfeeding, DNP-Kombinationen und die vollständig exportierte Pin-Netz-Matrix. Der zweite Durchgang entdeckte unter anderem unzulässige Verschmelzungen, die der ERC allein nicht gemeldet hatte; die Generatorlogik wurde daraufhin korrigiert und der Netzlisten-Audit als dauerhafte Regressionprüfung ergänzt.
+Der Review erfolgte in drei getrennten Durchgängen: zuerst blockweise gegen Pinout, Referenzschaltung und Grenzwerte; anschließend systemweit über Spannungsdomänen, ausgeschaltete Zustände, Backfeeding, DNP-Kombinationen und die vollständig exportierte Pin-Netz-Matrix; zuletzt als visueller Review jeder einzelnen aus KiCad gerenderten A4-Seite. Der elektrische Durchgang entdeckte unter anderem unzulässige Verschmelzungen, die der ERC allein nicht gemeldet hatte; die Generatorlogik wurde daraufhin korrigiert und der Netzlisten-Audit als dauerhafte Regressionprüfung ergänzt.
 
-## 2. Seitenstruktur
+## 2. Visueller A4-Review vom 2026-09-07
+
+Alle sieben Seiten des final exportierten PDFs wurden mit 150 dpi gerendert und einzeln geprüft:
+
+| Seite | Visuell verfolgter Hauptpfad | Ergebnis |
+|---|---|---|
+| 1 | 12 V/USB → VIN_SYS/3V3 → ESP32, Display, Touch, AUTOTERM/1-Wire und Controls | bestanden |
+| 2 | J1 → TVS → LM74720-Q1 → Back-to-back-FET → Filter → VIN_SYS; USB-C → CC/eFuse/Rückstromsperre → VIN_SYS; VIN_SYS → Buck → 3V3_CORE | bestanden |
+| 3 | Supervisor/RESET/BOOT, natives USB, ESP32 und E-Paper-Signalkonditionierung | bestanden |
+| 4 | Display-Lastschalter, Power-off-Isolation, Referenz-Booster und J6 | bestanden |
+| 5 | Always-on-Touchversorgung, Reset/FPC, direkter/optionaler Wake-Pfad und RTC-Backup | bestanden |
+| 6 | ESP32 ↔ Pegelwandler ↔ Serienglieder ↔ ESD ↔ J2 sowie Sensorlastschalter ↔ Pull-up/Schutz ↔ J3 | bestanden |
+| 7 | Externer Taster/Ring-LED, Frontlicht und DIAG-geschaltete Energieflussanzeige | bestanden |
+
+Die PDF hat sieben Seiten im Format A4. Funktionsrahmen und Überschriften sind auf jeder Funktionsseite vorhanden. Der Generator bricht künftig mit einem Fehler ab, falls ein lokales Mehrpunktnetz nicht mit sichtbaren Leitungen geroutet werden kann; ein stiller Rückfall auf ein Label an jedem Bauteilende ist nicht mehr möglich.
+
+## 3. Seitenstruktur
 
 | Seite | Datei | Funktion |
 |---|---|---|
@@ -35,7 +52,7 @@ Der Review erfolgte in zwei getrennten Durchgängen: zuerst blockweise gegen Pin
 | 6 | `05_AUTOTERM_1Wire.kicad_sch` | AUTOTERM-5-V-UART und geschützter 1-Wire-Bus |
 | 7 | `06_Controls_Diagnostics.kicad_sch` | 3-m-Taster, dimmbare Ring-LED, Frontlicht, Energieflussanzeige |
 
-## 3. Wesentliche Reviewkorrekturen
+## 4. Wesentliche Reviewkorrekturen
 
 | Bereich | Korrektur |
 |---|---|
@@ -52,7 +69,7 @@ Der Review erfolgte in zwei getrennten Durchgängen: zuerst blockweise gegen Pin
 | Frontlicht | AL8861 erhält 10 µF/100 V X7R lokal, 47-µH-Induktivität und automotive `B140Q-13-F`; Sollstrom 50 mA nominal. |
 | Diagnose | USB-LED misst rohes USB_VBUS, nicht das zusammengeführte VIN_SYS. Der DIAG-Gateteiler begrenzt Q5-VGS auch an der maximalen OV-Abschaltschwelle. |
 
-## 4. Hardwarezustände ohne Firmware
+## 5. Hardwarezustände ohne Firmware
 
 | Funktion | Zustand |
 |---|---|
@@ -67,7 +84,7 @@ Der Review erfolgte in zwei getrennten Durchgängen: zuerst blockweise gegen Pin
 | Energiefluss-LEDs | gemeinsamer Diagnosepfad aus, solange DIAG nicht gedrückt/überbrückt ist |
 | optionale Status-LEDs | Bauteile DNP |
 
-## 5. DNP-Varianten
+## 6. DNP-Varianten
 
 - Standard-Touch-Wake: R28 und R29 bestückt; R30, R71 und die gesamte Latch-Gruppe U13/C39/R31/R69/R70 DNP.
 - Latch-Variante erst nach Messung: U13/C39/R31/R69/R70 bestücken und R28/R29/R30/R71 nicht bestücken.
@@ -75,7 +92,7 @@ Der Review erfolgte in zwei getrennten Durchgängen: zuerst blockweise gegen Pin
 - LED6/R52 und LED7/R53 sind optionale Statusanzeigen.
 - TP1…TP38 sind DNP-Testpunkte ohne aufgelötete Buchsen.
 
-## 6. Freigabesperren
+## 7. Freigabesperren
 
 Phase 2 ist aktuell **nicht freigabefähig**. Vor Phase 3 müssen mindestens folgende Punkte geschlossen werden:
 
@@ -90,7 +107,7 @@ Phase 2 ist aktuell **nicht freigabefähig**. Vor Phase 3 müssen mindestens fol
 
 Details und quantitative Grenzen stehen in [Worst-Case-Berechnungen Phase 2](../calculations/Phase_2_Worst-Case-Berechnungen.md), die Quellenzuordnung in [Quellen und Rückverfolgbarkeit](Phase_2_Quellen-und-Rueckverfolgbarkeit.md).
 
-## 7. Reproduzierbarkeit
+## 8. Reproduzierbarkeit
 
 ```text
 python3 scripts/generate_phase2_schematic.py
@@ -98,18 +115,20 @@ make sch-check
 make export-phase2
 ```
 
-`make export-phase2` erzeugt PDF, BOM und Netzliste und prüft anschließend jede exportierte Pin-Netz-Zuordnung gegen die kanonische Schaltungsdefinition. Der Generator überschreibt die sieben Schaltplandateien; spätere manuelle KiCad-Änderungen müssen deshalb entweder zurück in den Generator übertragen oder der Generator bewusst stillgelegt werden.
+`make export-phase2` erzeugt PDF, BOM und Netzliste und prüft anschließend jede exportierte Pin-Netz-Zuordnung gegen die kanonische Schaltungsdefinition. Zusätzlich vergleicht der Audit die elektrische Topologie mit dem unmittelbar vor der grafischen Überarbeitung gesicherten Stand. Das Ergebnis ist in [`LandyHeater-Board-Netlist-Comparison-Phase2.txt`](../output/reports/LandyHeater-Board-Netlist-Comparison-Phase2.txt) dokumentiert. Der Generator überschreibt die sieben Schaltplandateien; spätere manuelle KiCad-Änderungen müssen deshalb entweder zurück in den Generator übertragen oder der Generator bewusst stillgelegt werden.
 
 Im ERC sind nur generische, für diesen Projektstand begründete Prüfklassen deaktiviert: einzeln vorkommende globale Labels (Test-/Seitenanschlüsse), Vierfach-Knoten (parallel geführte Versorgungs-/Gehäusepins), SPICE-Modelle (keine SPICE-Netzliste als Freigabenachweis) und Footprint-Filter (projektlokale kontrollierte Footprints). Konkrete ERC-Meldungen sind nicht einzeln unterdrückt; der Bericht enthält 0 Fehler und 0 Warnungen.
 
-## 8. Phase-2-Freigabekriterien
+## 9. Phase-2-Freigabekriterien
 
 - [x] lesbarer hierarchischer Funktionsschaltplan
+- [x] interner visueller Review aller sieben aus KiCad gerenderten A4-Seiten
 - [x] eindeutige Referenzen, Pinbelegungen und Footprints
 - [x] sichere Defaultzustände und DNP-Varianten dokumentiert
 - [x] ERC ohne Fehler/Warnungen
 - [x] exportierte Netzliste ohne Sollnetz-Unterbrechung oder Netzverschmelzung
+- [x] elektrische Pin-zu-Pin-Topologie vor/nach grafischer Überarbeitung identisch
 - [x] BOM mit Footprint sowie MPN für aktive/elektromechanische/induktive Bauteile
 - [x] Schaltplan-PDF und BOM reproduzierbar exportiert
-- [ ] alle Punkte aus Abschnitt 6 geschlossen
+- [ ] alle Punkte aus Abschnitt 7 geschlossen
 - [ ] unabhängige Phase-2-Freigabe durch Auftraggeber/PCB-Designer

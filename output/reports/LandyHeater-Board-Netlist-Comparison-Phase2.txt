@@ -1,0 +1,13 @@
+LandyHeater Revision A – Netzlistenvergleich vor/nach grafischer Überarbeitung
+=============================================================================
+Vergleichsbasis: Export unmittelbar vor der grundlegenden grafischen Überarbeitung vom 2026-09-07
+Vorher, rohe Netzliste SHA-256: 6077254ad38973092c4b5cefda012bff106fe935b2b8a473ba2dc4fbc516b3cb
+Nachher, rohe Netzliste SHA-256: 4e6e6a3813ed8f29429cc5ebe26a436557c7573df67168a96530a6cbf4f5bace
+Hinweis: Der rohe Hash darf wegen Datum, Titel und sichtbaren Bauteileigenschaften abweichen.
+
+Vorher: 651 angeschlossene Pins in 175 elektrischen Netzen
+Nachher: 651 angeschlossene Pins in 175 elektrischen Netzen
+Vorher, Topologie SHA-256: 00ce8f7d7237aa13ae732818b4ef832ae0c6ac1b73049995a4f299356ca35dd0
+Nachher, Topologie SHA-256: 00ce8f7d7237aa13ae732818b4ef832ae0c6ac1b73049995a4f299356ca35dd0
+
+Ergebnis: IDENTISCH – keine Pin-zu-Pin-Verbindung wurde durch die grafische Überarbeitung geändert.
