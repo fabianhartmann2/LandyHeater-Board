@@ -4587,6 +4587,56 @@
 		)
 		(uuid "fd376969-37c8-4996-931d-987035aa4380")
 	)
+	(label "SW_BUCK"
+		(at 231.14 66.04 90)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "5f7e44cb-21fd-47db-9920-155f3b4faf97")
+	)
+	(label "CC1"
+		(at 53.34 114.3 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "65f9cc16-f73c-4b38-8518-28d398bd5053")
+	)
+	(label "BATT_12V_IN"
+		(at 35.56 58.42 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "a72ed5e4-64c3-46c9-acc2-b14ba472b5c7")
+	)
+	(label "CC2"
+		(at 53.34 116.84 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "acefc7eb-5483-483d-9e7c-4b98e5ecd2d8")
+	)
+	(label "USB_VBUS"
+		(at 53.34 109.22 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "d953e047-31e1-4371-a7db-5b66eb7869fb")
+	)
 	(global_label "VBUS_PROT"
 		(shape output)
 		(at 165.1 113.03 0)
@@ -4684,7 +4734,7 @@
 		(at 127 124.46 0)
 		(unit 1)
 		(body_style 1)
-		(exclude_from_sim no)
+		(exclude_from_sim yes)
 		(in_bom yes)
 		(on_board yes)
 		(in_pos_files yes)
@@ -4733,6 +4783,50 @@
 			)
 		)
 		(property "Description" "eFuse 2,7..23 V, Strombegrenzung, einstellbare OVLO, echte Rueckstromsperre, Latch-Off"
+			(at 127 124.46 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Sim.Hinweis" "Kein ngspice-taugliches Herstellermodell (nur verschluesselt oder nicht verfuegbar)"
+			(at 127 124.46 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "TPS259470LRPWR"
+			(at 127 124.46 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Texas Instruments"
+			(at 127 124.46 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C3662793"
 			(at 127 124.46 0)
 			(hide yes)
 			(show_name no)
@@ -4836,6 +4930,17 @@
 			)
 		)
 		(property "Description" "Unpolarized capacitor"
+			(at 114.3 134.62 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Spez" "X7R 50 V 0603"
 			(at 114.3 134.62 0)
 			(hide yes)
 			(show_name no)
@@ -5156,6 +5261,17 @@
 				)
 			)
 		)
+		(property "Spez" "X7R 50 V 0603"
+			(at 182.88 62.23 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "20850558-3eff-4bd2-92e9-ec2744882731")
 		)
@@ -5176,8 +5292,8 @@
 		(at 48.26 58.42 0)
 		(unit 1)
 		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
+		(exclude_from_sim yes)
+		(in_bom no)
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
@@ -5227,6 +5343,17 @@
 			)
 		)
 		(property "Description" "test point"
+			(at 48.26 58.42 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Sim.Hinweis" "Mechanisches Bauteil, kein elektrisches Modell erforderlich"
 			(at 48.26 58.42 0)
 			(hide yes)
 			(show_name no)
@@ -5331,7 +5458,7 @@
 		(at 76.2 58.42 90)
 		(unit 1)
 		(body_style 1)
-		(exclude_from_sim no)
+		(exclude_from_sim yes)
 		(in_bom yes)
 		(on_board yes)
 		(in_pos_files yes)
@@ -5380,6 +5507,28 @@
 			)
 		)
 		(property "Description" "Ferrite bead"
+			(at 76.2 58.42 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Sim.Hinweis" "Kein Modell eingebunden; fuer die Schaltungsfunktion nicht simulationsrelevant"
+			(at 76.2 58.42 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Spez" "Ferrit 0805, 600 Ohm @ 100 MHz, >= 1 A"
 			(at 76.2 58.42 0)
 			(hide yes)
 			(show_name no)
@@ -5487,8 +5636,8 @@
 		(at 246.38 68.58 0)
 		(unit 1)
 		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
+		(exclude_from_sim yes)
+		(in_bom no)
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
@@ -5538,6 +5687,17 @@
 			)
 		)
 		(property "Description" "test point"
+			(at 246.38 68.58 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Sim.Hinweis" "Mechanisches Bauteil, kein elektrisches Modell erforderlich"
 			(at 246.38 68.58 0)
 			(hide yes)
 			(show_name no)
@@ -5624,6 +5784,17 @@
 				)
 			)
 		)
+		(property "Spez" "X7R 10 V 1206"
+			(at 254 72.39 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "23ea6d4f-2e26-4834-a4cd-59518dbd11bc")
 		)
@@ -5693,6 +5864,17 @@
 			)
 		)
 		(property "Description" "Resistor"
+			(at 58.42 143.51 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Spez" "0603, 1 %, 0,1 W"
 			(at 58.42 143.51 0)
 			(hide yes)
 			(show_name no)
@@ -5860,6 +6042,17 @@
 				)
 			)
 		)
+		(property "Spez" "X7R 25 V 0603"
+			(at 81.28 113.03 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "ac730e1d-333f-4ea2-a37e-cc43fd5b06b8")
 		)
@@ -5957,8 +6150,8 @@
 		(at 170.18 58.42 0)
 		(unit 1)
 		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
+		(exclude_from_sim yes)
+		(in_bom no)
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
@@ -6008,6 +6201,17 @@
 			)
 		)
 		(property "Description" "test point"
+			(at 170.18 58.42 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Sim.Hinweis" "Mechanisches Bauteil, kein elektrisches Modell erforderlich"
 			(at 170.18 58.42 0)
 			(hide yes)
 			(show_name no)
@@ -6112,8 +6316,8 @@
 		(at 88.9 109.22 0)
 		(unit 1)
 		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
+		(exclude_from_sim yes)
+		(in_bom no)
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
@@ -6163,6 +6367,17 @@
 			)
 		)
 		(property "Description" "test point"
+			(at 88.9 109.22 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Sim.Hinweis" "Mechanisches Bauteil, kein elektrisches Modell erforderlich"
 			(at 88.9 109.22 0)
 			(hide yes)
 			(show_name no)
@@ -6249,6 +6464,17 @@
 				)
 			)
 		)
+		(property "Spez" "0603, 1 %, 0,1 W"
+			(at 106.68 129.54 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "4c3c7656-8374-40cb-a22e-329cad51153f")
 		)
@@ -6269,8 +6495,8 @@
 		(at 182.88 147.32 0)
 		(unit 1)
 		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
+		(exclude_from_sim yes)
+		(in_bom no)
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
@@ -6330,6 +6556,17 @@
 				)
 			)
 		)
+		(property "Sim.Hinweis" "Mechanisches Bauteil, kein elektrisches Modell erforderlich"
+			(at 182.88 147.32 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "0f22b4d0-e3bf-4a3c-aca4-fc71ed91643c")
 		)
@@ -6347,8 +6584,8 @@
 		(at 157.48 113.03 0)
 		(unit 1)
 		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
+		(exclude_from_sim yes)
+		(in_bom no)
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
@@ -6398,6 +6635,17 @@
 			)
 		)
 		(property "Description" "test point"
+			(at 157.48 113.03 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Sim.Hinweis" "Mechanisches Bauteil, kein elektrisches Modell erforderlich"
 			(at 157.48 113.03 0)
 			(hide yes)
 			(show_name no)
@@ -6561,6 +6809,17 @@
 				)
 			)
 		)
+		(property "Spez" "X5R/X7R 10 V 0603"
+			(at 152.4 116.84 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "55e56305-b311-47c3-a595-af58af2f5cc4")
 		)
@@ -6630,6 +6889,17 @@
 			)
 		)
 		(property "Description" "Resistor"
+			(at 106.68 121.92 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Spez" "0603, 1 %, 0,1 W"
 			(at 106.68 121.92 0)
 			(hide yes)
 			(show_name no)
@@ -7354,7 +7624,7 @@
 		(at 210.82 73.66 0)
 		(unit 1)
 		(body_style 1)
-		(exclude_from_sim no)
+		(exclude_from_sim yes)
 		(in_bom yes)
 		(on_board yes)
 		(in_pos_files yes)
@@ -7403,6 +7673,50 @@
 			)
 		)
 		(property "Description" "Buck 3..36 V, 2 A, fest 3,3 V, 2,2 MHz, Auto-PFM/FPWM ueber MODE/SYNC, AEC-Q100"
+			(at 210.82 73.66 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Sim.Hinweis" "Kein ngspice-taugliches Herstellermodell (nur verschluesselt oder nicht verfuegbar)"
+			(at 210.82 73.66 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "LMR43620MSC3RPERQ1"
+			(at 210.82 73.66 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Texas Instruments"
+			(at 210.82 73.66 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C3190193"
 			(at 210.82 73.66 0)
 			(hide yes)
 			(show_name no)
@@ -7503,6 +7817,17 @@
 			)
 		)
 		(property "Description" "Unpolarized capacitor"
+			(at 261.62 72.39 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Spez" "X7R 10 V 1206"
 			(at 261.62 72.39 0)
 			(hide yes)
 			(show_name no)
@@ -7687,7 +8012,7 @@
 		(at 58.42 58.42 180)
 		(unit 1)
 		(body_style 1)
-		(exclude_from_sim no)
+		(exclude_from_sim yes)
 		(in_bom yes)
 		(on_board yes)
 		(in_pos_files yes)
@@ -7736,6 +8061,50 @@
 			)
 		)
 		(property "Description" "60V 1A Schottky Diode, SMA"
+			(at 58.42 58.42 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Sim.Hinweis" "Kein Modell eingebunden; fuer die Schaltungsfunktion nicht simulationsrelevant"
+			(at 58.42 58.42 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "SS16"
+			(at 58.42 58.42 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "MDD"
+			(at 58.42 58.42 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C2481"
 			(at 58.42 58.42 0)
 			(hide yes)
 			(show_name no)
@@ -7825,6 +8194,17 @@
 				)
 			)
 		)
+		(property "Spez" "X7R 16 V 0603"
+			(at 226.06 80.01 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "bb32ad33-ff16-4af1-9fe0-71a371e7719f")
 		)
@@ -7845,8 +8225,8 @@
 		(at 69.85 58.42 0)
 		(unit 1)
 		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
+		(exclude_from_sim yes)
+		(in_bom no)
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
@@ -7906,6 +8286,17 @@
 				)
 			)
 		)
+		(property "Sim.Hinweis" "Mechanisches Bauteil, kein elektrisches Modell erforderlich"
+			(at 69.85 58.42 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "c0e86d07-e697-43b6-9024-e3126d7940e0")
 		)
@@ -7927,7 +8318,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(in_pos_files yes)
-		(dnp no)
+		(dnp yes)
 		(uuid "9b64dd60-25f8-48ca-9fa9-d9e1de5fb44f")
 		(property "Reference" "C4"
 			(at 145.64 133.35 0)
@@ -7939,7 +8330,7 @@
 				)
 			)
 		)
-		(property "Value" "DNP"
+		(property "Value" "1nF"
 			(at 146.19 135.89 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -7982,6 +8373,17 @@
 				)
 			)
 		)
+		(property "Spez" "DNP, X7R 50 V 0603"
+			(at 142.24 134.62 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "9cbcb44a-5296-4bac-9595-189a53059008")
 		)
@@ -8008,7 +8410,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "9f490eb4-297a-4e08-925b-91610c94ca63")
-		(property "Reference" "R7"
+		(property "Reference" "R6"
 			(at 153.26 128.27 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -8061,6 +8463,17 @@
 				)
 			)
 		)
+		(property "Spez" "0603, 1 %, 0,1 W"
+			(at 149.86 129.54 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "d79b91c4-7d90-4014-9509-b136ab2b806b")
 		)
@@ -8070,7 +8483,7 @@
 		(instances
 			(project "LandyHeater"
 				(path "/f79b4c10-b95d-476a-8de2-bd665410a76d/c39d3920-4fd8-4364-ab23-17d6e9c351a7"
-					(reference "R7")
+					(reference "R6")
 					(unit 1)
 				)
 			)
@@ -8081,7 +8494,7 @@
 		(at 162.56 96.52 270)
 		(unit 1)
 		(body_style 1)
-		(exclude_from_sim no)
+		(exclude_from_sim yes)
 		(in_bom yes)
 		(on_board yes)
 		(in_pos_files yes)
@@ -8130,6 +8543,50 @@
 			)
 		)
 		(property "Description" "60V 1A Schottky Diode, SMA"
+			(at 162.56 96.52 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Sim.Hinweis" "Kein Modell eingebunden; fuer die Schaltungsfunktion nicht simulationsrelevant"
+			(at 162.56 96.52 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "SS16"
+			(at 162.56 96.52 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "MDD"
+			(at 162.56 96.52 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C2481"
 			(at 162.56 96.52 0)
 			(hide yes)
 			(show_name no)
@@ -8253,7 +8710,7 @@
 				)
 			)
 		)
-		(property "Value" "47uF 35V"
+		(property "Value" "47uF"
 			(at 98.14 63.5 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -8286,6 +8743,17 @@
 			)
 		)
 		(property "Description" "Polarized capacitor"
+			(at 91.44 62.23 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Spez" "Alu-Elko SMD 6,3x7,7, 47 uF, 35 V"
 			(at 91.44 62.23 0)
 			(hide yes)
 			(show_name no)
@@ -8471,7 +8939,7 @@
 		(at 78.74 137.16 0)
 		(unit 1)
 		(body_style 1)
-		(exclude_from_sim no)
+		(exclude_from_sim yes)
 		(in_bom yes)
 		(on_board yes)
 		(in_pos_files yes)
@@ -8520,6 +8988,50 @@
 			)
 		)
 		(property "Description" "2-Channel ESD Protection for Super-Speed USB 3.0 Interface, DRT-3"
+			(at 78.74 137.16 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Sim.Hinweis" "Kein ngspice-taugliches Herstellermodell (nur verschluesselt oder nicht verfuegbar)"
+			(at 78.74 137.16 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "TPD2EUSB30DRTR"
+			(at 78.74 137.16 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Texas Instruments"
+			(at 78.74 137.16 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C97502"
 			(at 78.74 137.16 0)
 			(hide yes)
 			(show_name no)
@@ -8602,6 +9114,17 @@
 			)
 		)
 		(property "Description" "Resistor"
+			(at 106.68 114.3 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Spez" "0603, 1 %, 0,1 W"
 			(at 106.68 114.3 0)
 			(hide yes)
 			(show_name no)
@@ -8709,7 +9232,7 @@
 		(at 43.18 66.04 90)
 		(unit 1)
 		(body_style 1)
-		(exclude_from_sim no)
+		(exclude_from_sim yes)
 		(in_bom yes)
 		(on_board yes)
 		(in_pos_files yes)
@@ -8758,6 +9281,50 @@
 			)
 		)
 		(property "Description" "Bidirectional transient-voltage-suppression diode"
+			(at 43.18 66.04 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Sim.Hinweis" "Kein Modell eingebunden; fuer die Schaltungsfunktion nicht simulationsrelevant"
+			(at 43.18 66.04 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "SMBJ18CA"
+			(at 43.18 66.04 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Brightking"
+			(at 43.18 66.04 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C78413"
 			(at 43.18 66.04 0)
 			(hide yes)
 			(show_name no)
@@ -9020,7 +9587,7 @@
 		(at 73.66 113.03 270)
 		(unit 1)
 		(body_style 1)
-		(exclude_from_sim no)
+		(exclude_from_sim yes)
 		(in_bom yes)
 		(on_board yes)
 		(in_pos_files yes)
@@ -9079,6 +9646,50 @@
 				)
 			)
 		)
+		(property "Sim.Hinweis" "Kein Modell eingebunden; fuer die Schaltungsfunktion nicht simulationsrelevant"
+			(at 73.66 113.03 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "ESD5Z5.0T1G"
+			(at 73.66 113.03 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "onsemi"
+			(at 73.66 113.03 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C82044"
+			(at 73.66 113.03 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "8d487e48-4257-44e3-89c9-50c13bf7d1b3")
 		)
@@ -9099,7 +9710,7 @@
 		(at 35.56 124.46 0)
 		(unit 1)
 		(body_style 1)
-		(exclude_from_sim no)
+		(exclude_from_sim yes)
 		(in_bom yes)
 		(on_board yes)
 		(in_pos_files yes)
@@ -9148,6 +9759,50 @@
 			)
 		)
 		(property "Description" "USB 2.0-only 16P Type-C Receptacle connector"
+			(at 35.56 124.46 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Sim.Hinweis" "Mechanisches Bauteil, kein elektrisches Modell erforderlich"
+			(at 35.56 124.46 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "USB4105-GF-A-060"
+			(at 35.56 124.46 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "GCT"
+			(at 35.56 124.46 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C3025063"
 			(at 35.56 124.46 0)
 			(hide yes)
 			(show_name no)
@@ -9224,7 +9879,7 @@
 		(mirror y)
 		(unit 1)
 		(body_style 1)
-		(exclude_from_sim no)
+		(exclude_from_sim yes)
 		(in_bom yes)
 		(on_board yes)
 		(in_pos_files yes)
@@ -9274,6 +9929,50 @@
 		)
 		(property "Description" "Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)"
 			(at 30.48 60.96 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Sim.Hinweis" "Mechanisches Bauteil, kein elektrisches Modell erforderlich"
+			(at 27.94 58.42 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "1053131302"
+			(at 27.94 58.42 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Molex"
+			(at 27.94 58.42 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C17345480"
+			(at 27.94 58.42 0)
 			(hide yes)
 			(show_name no)
 			(do_not_autoplace no)
@@ -9439,6 +10138,17 @@
 				)
 			)
 		)
+		(property "Spez" "0603, 1 %, 0,1 W"
+			(at 63.5 143.51 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "db0bd3b8-80b0-46f4-b031-66596fa1e347")
 		)
@@ -9508,6 +10218,39 @@
 			)
 		)
 		(property "Description" "Inductor"
+			(at 237.49 68.58 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "FAUL0420-2R2MT"
+			(at 237.49 68.58 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "CJiang"
+			(at 237.49 68.58 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C3040383"
 			(at 237.49 68.58 0)
 			(hide yes)
 			(show_name no)
@@ -9597,6 +10340,17 @@
 				)
 			)
 		)
+		(property "Spez" "X7R 50 V 1206"
+			(at 175.26 62.23 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "b28ea447-bf0a-4976-be40-6c4f6093ca39")
 		)
@@ -9666,6 +10420,17 @@
 			)
 		)
 		(property "Description" "Unpolarized capacitor"
+			(at 226.06 59.69 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Spez" "X7R 16 V 0603"
 			(at 226.06 59.69 0)
 			(hide yes)
 			(show_name no)

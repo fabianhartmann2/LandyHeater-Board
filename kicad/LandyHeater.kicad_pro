@@ -367,63 +367,63 @@
     "netclass_patterns": [
       {
         "netclass": "Power",
-        "pattern": "BATT_12V_IN"
+        "pattern": "*BATT_12V_IN"
       },
       {
         "netclass": "Power",
-        "pattern": "12V_PROT"
+        "pattern": "*12V_PROT"
       },
       {
         "netclass": "Power",
-        "pattern": "VIN_SYS"
+        "pattern": "*VIN_SYS"
       },
       {
         "netclass": "Power",
-        "pattern": "USB_VBUS"
+        "pattern": "*USB_VBUS"
       },
       {
         "netclass": "Power",
-        "pattern": "VBUS_PROT"
+        "pattern": "*VBUS_PROT"
       },
       {
         "netclass": "Power",
-        "pattern": "3V3_CORE"
+        "pattern": "*3V3_CORE"
       },
       {
         "netclass": "Power",
-        "pattern": "SW_BUCK"
+        "pattern": "*SW_BUCK"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "*LED_CC_PLUS"
+      },
+      {
+        "netclass": "Power",
+        "pattern": "*LED_PWM_MINUS"
       },
       {
         "netclass": "USB",
-        "pattern": "USB_D*"
+        "pattern": "*USB_D*"
       },
       {
         "netclass": "Extern",
-        "pattern": "AUTOTERM_*"
+        "pattern": "*AUTOTERM_5V"
       },
       {
         "netclass": "Extern",
-        "pattern": "CTRL_*"
+        "pattern": "*CTRL_*"
       },
       {
         "netclass": "Extern",
-        "pattern": "1WIRE_DQ"
+        "pattern": "*1WIRE_DQ_C"
       },
       {
         "netclass": "Extern",
-        "pattern": "3V3_SENSOR_SW"
+        "pattern": "*3V3_SENSOR_SW"
       },
       {
         "netclass": "Extern",
-        "pattern": "BUTTON_N"
-      },
-      {
-        "netclass": "Extern",
-        "pattern": "LED_CC_PLUS"
-      },
-      {
-        "netclass": "Extern",
-        "pattern": "LED_PWM_MINUS"
+        "pattern": "*BUTTON_N_C"
       }
     ]
   },

@@ -2834,6 +2834,56 @@
 		)
 		(uuid "fd42a94b-b411-4e5b-86a2-7f33321ec780")
 	)
+	(label "1WIRE_DQ_C"
+		(at 179.07 127 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "0dbd2a4d-c88c-46e4-99b7-096474bbe83c")
+	)
+	(label "CTRL_RX"
+		(at 184.15 78.74 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "8e1a2547-d25c-4abd-8e94-d5d2d3572155")
+	)
+	(label "CTRL_TX"
+		(at 184.15 73.66 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "d37b17f3-2bdf-4376-bef0-6d2f943c7146")
+	)
+	(label "3V3_SENSOR_SW"
+		(at 153.67 119.38 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "f25e3d27-ebf1-433e-b18b-22b18225116f")
+	)
+	(label "AUTOTERM_5V_F"
+		(at 152.4 62.23 90)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "f4822b4f-2b24-4387-ae61-2f92060a3fe8")
+	)
 	(global_label "AUTOTERM_TX_3V3"
 		(shape input)
 		(at 120.65 73.66 180)
@@ -3113,6 +3163,17 @@
 				)
 			)
 		)
+		(property "Spez" "X7R 16 V 0603"
+			(at 121.92 64.77 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "e9c8e416-66c2-4f90-81f6-2b0bbf40270f")
 		)
@@ -3139,7 +3200,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "0edadc38-9149-447e-b473-728a9de63f4c")
-		(property "Reference" "R21"
+		(property "Reference" "R20"
 			(at 168.77 121.92 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3192,6 +3253,17 @@
 				)
 			)
 		)
+		(property "Spez" "0603, 1 %, 0,1 W"
+			(at 172.72 123.19 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "7f49daf9-8558-4284-8c2b-11609b8e19f7")
 		)
@@ -3201,7 +3273,7 @@
 		(instances
 			(project "LandyHeater"
 				(path "/f79b4c10-b95d-476a-8de2-bd665410a76d/ec526a73-c382-44e2-bb1e-7bff243e018b"
-					(reference "R21")
+					(reference "R20")
 					(unit 1)
 				)
 			)
@@ -3212,8 +3284,8 @@
 		(at 180.34 78.74 0)
 		(unit 1)
 		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
+		(exclude_from_sim yes)
+		(in_bom no)
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
@@ -3273,6 +3345,17 @@
 				)
 			)
 		)
+		(property "Sim.Hinweis" "Mechanisches Bauteil, kein elektrisches Modell erforderlich"
+			(at 180.34 78.74 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "3b8b45ce-1b5c-42bd-87ac-8b9809fe98e7")
 		)
@@ -3290,7 +3373,7 @@
 		(at 182.88 134.62 270)
 		(unit 1)
 		(body_style 1)
-		(exclude_from_sim no)
+		(exclude_from_sim yes)
 		(in_bom yes)
 		(on_board yes)
 		(in_pos_files yes)
@@ -3349,6 +3432,50 @@
 				)
 			)
 		)
+		(property "Sim.Hinweis" "Kein Modell eingebunden; fuer die Schaltungsfunktion nicht simulationsrelevant"
+			(at 182.88 134.62 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "PESD3V3S2UT,215"
+			(at 182.88 134.62 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Nexperia"
+			(at 182.88 134.62 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C84276"
+			(at 182.88 134.62 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "015a3ec1-c4c4-4f55-ba39-75a46a59e9c4")
 		)
@@ -3378,7 +3505,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "23fd8bd6-7d67-42a3-b3f3-023eca1946bd")
-		(property "Reference" "R20"
+		(property "Reference" "R19"
 			(at 130.95 124.46 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3431,6 +3558,17 @@
 				)
 			)
 		)
+		(property "Spez" "0603, 1 %, 0,1 W"
+			(at 127 125.73 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "050e04f1-be8e-409a-ae4c-aa0767645a6f")
 		)
@@ -3440,7 +3578,7 @@
 		(instances
 			(project "LandyHeater"
 				(path "/f79b4c10-b95d-476a-8de2-bd665410a76d/ec526a73-c382-44e2-bb1e-7bff243e018b"
-					(reference "R20")
+					(reference "R19")
 					(unit 1)
 				)
 			)
@@ -3451,7 +3589,7 @@
 		(at 139.7 123.19 0)
 		(unit 1)
 		(body_style 1)
-		(exclude_from_sim no)
+		(exclude_from_sim yes)
 		(in_bom yes)
 		(on_board yes)
 		(in_pos_files yes)
@@ -3500,6 +3638,50 @@
 			)
 		)
 		(property "Description" "Lastschalter 1,62..5,5 V mit 100-mA-Strombegrenzung, Active High"
+			(at 139.7 123.19 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Sim.Hinweis" "Kein ngspice-taugliches Herstellermodell (nur verschluesselt oder nicht verfuegbar)"
+			(at 139.7 123.19 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "TPS22945DCKR"
+			(at 139.7 123.19 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Texas Instruments"
+			(at 139.7 123.19 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C47507"
 			(at 139.7 123.19 0)
 			(hide yes)
 			(show_name no)
@@ -3588,6 +3770,17 @@
 			)
 		)
 		(property "Description" "Unpolarized capacitor"
+			(at 152.4 123.19 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Spez" "X7R 16 V 0603"
 			(at 152.4 123.19 0)
 			(hide yes)
 			(show_name no)
@@ -3695,7 +3888,7 @@
 		(at 139.7 78.74 0)
 		(unit 1)
 		(body_style 1)
-		(exclude_from_sim no)
+		(exclude_from_sim yes)
 		(in_bom yes)
 		(on_board yes)
 		(in_pos_files yes)
@@ -3744,6 +3937,50 @@
 			)
 		)
 		(property "Description" "2-Kanal-Pegelwandler fest gerichtet (A1->B1Y, B2->A2Y), OE, Ioff, AEC-Q100"
+			(at 139.7 78.74 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Sim.Hinweis" "Kein ngspice-taugliches Herstellermodell (nur verschluesselt oder nicht verfuegbar)"
+			(at 139.7 78.74 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "TXU0202QDCURQ1"
+			(at 139.7 78.74 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Texas Instruments"
+			(at 139.7 78.74 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C7372013"
 			(at 139.7 78.74 0)
 			(hide yes)
 			(show_name no)
@@ -3875,7 +4112,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "35d6160d-d6bb-4fc7-960a-40f59beac2d6")
-		(property "Reference" "R18"
+		(property "Reference" "R17"
 			(at 156.21 81.28 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -3928,6 +4165,17 @@
 				)
 			)
 		)
+		(property "Spez" "0603, 1 %, 0,1 W"
+			(at 156.21 78.74 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "53023bf5-e311-44bc-b31b-764c56428ecd")
 		)
@@ -3937,7 +4185,7 @@
 		(instances
 			(project "LandyHeater"
 				(path "/f79b4c10-b95d-476a-8de2-bd665410a76d/ec526a73-c382-44e2-bb1e-7bff243e018b"
-					(reference "R18")
+					(reference "R17")
 					(unit 1)
 				)
 			)
@@ -4262,7 +4510,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "5537b2d1-3a76-4a70-a496-fd24fb79b789")
-		(property "Reference" "R17"
+		(property "Reference" "R16"
 			(at 156.21 68.83 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -4315,6 +4563,17 @@
 				)
 			)
 		)
+		(property "Spez" "0603, 1 %, 0,1 W"
+			(at 156.21 73.66 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "76ab6407-40e2-46a1-92a5-2057c19f6bbd")
 		)
@@ -4324,7 +4583,7 @@
 		(instances
 			(project "LandyHeater"
 				(path "/f79b4c10-b95d-476a-8de2-bd665410a76d/ec526a73-c382-44e2-bb1e-7bff243e018b"
-					(reference "R17")
+					(reference "R16")
 					(unit 1)
 				)
 			)
@@ -4335,8 +4594,8 @@
 		(at 187.96 119.38 0)
 		(unit 1)
 		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
+		(exclude_from_sim yes)
+		(in_bom no)
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
@@ -4396,6 +4655,17 @@
 				)
 			)
 		)
+		(property "Sim.Hinweis" "Mechanisches Bauteil, kein elektrisches Modell erforderlich"
+			(at 187.96 119.38 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "b02f3b64-1d5c-410f-afe8-cee25875113d")
 		)
@@ -4413,8 +4683,8 @@
 		(at 180.34 73.66 0)
 		(unit 1)
 		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
+		(exclude_from_sim yes)
+		(in_bom no)
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
@@ -4464,6 +4734,17 @@
 			)
 		)
 		(property "Description" "test point"
+			(at 180.34 73.66 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Sim.Hinweis" "Mechanisches Bauteil, kein elektrisches Modell erforderlich"
 			(at 180.34 73.66 0)
 			(hide yes)
 			(show_name no)
@@ -4540,6 +4821,17 @@
 			)
 		)
 		(property "Description" "Unpolarized capacitor"
+			(at 157.48 59.69 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Spez" "X7R 16 V 0603"
 			(at 157.48 59.69 0)
 			(hide yes)
 			(show_name no)
@@ -4647,7 +4939,7 @@
 		(at 182.88 59.69 270)
 		(unit 1)
 		(body_style 1)
-		(exclude_from_sim no)
+		(exclude_from_sim yes)
 		(in_bom yes)
 		(on_board yes)
 		(in_pos_files yes)
@@ -4696,6 +4988,50 @@
 			)
 		)
 		(property "Description" "ESD Protection Diode, SOD-523"
+			(at 182.88 59.69 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Sim.Hinweis" "Kein Modell eingebunden; fuer die Schaltungsfunktion nicht simulationsrelevant"
+			(at 182.88 59.69 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "ESD5Z5.0T1G"
+			(at 182.88 59.69 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "onsemi"
+			(at 182.88 59.69 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C82044"
 			(at 182.88 59.69 0)
 			(hide yes)
 			(show_name no)
@@ -4803,8 +5139,8 @@
 		(at 123.19 83.82 0)
 		(unit 1)
 		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
+		(exclude_from_sim yes)
+		(in_bom no)
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
@@ -4864,6 +5200,17 @@
 				)
 			)
 		)
+		(property "Sim.Hinweis" "Mechanisches Bauteil, kein elektrisches Modell erforderlich"
+			(at 123.19 83.82 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "64a3dcef-d7de-4eb7-961c-e482243b9bdf")
 		)
@@ -4881,8 +5228,8 @@
 		(at 125.73 78.74 0)
 		(unit 1)
 		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
+		(exclude_from_sim yes)
+		(in_bom no)
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
@@ -4932,6 +5279,17 @@
 			)
 		)
 		(property "Description" "test point"
+			(at 125.73 78.74 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Sim.Hinweis" "Mechanisches Bauteil, kein elektrisches Modell erforderlich"
 			(at 125.73 78.74 0)
 			(hide yes)
 			(show_name no)
@@ -5036,8 +5394,8 @@
 		(at 177.8 127 0)
 		(unit 1)
 		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
+		(exclude_from_sim yes)
+		(in_bom no)
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
@@ -5097,6 +5455,17 @@
 				)
 			)
 		)
+		(property "Sim.Hinweis" "Mechanisches Bauteil, kein elektrisches Modell erforderlich"
+			(at 177.8 127 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "79a1f667-c186-48f7-85af-1c310dcaa31a")
 		)
@@ -5114,7 +5483,7 @@
 		(at 200.66 71.12 0)
 		(unit 1)
 		(body_style 1)
-		(exclude_from_sim no)
+		(exclude_from_sim yes)
 		(in_bom yes)
 		(on_board yes)
 		(in_pos_files yes)
@@ -5173,6 +5542,50 @@
 				)
 			)
 		)
+		(property "Sim.Hinweis" "Mechanisches Bauteil, kein elektrisches Modell erforderlich"
+			(at 200.66 71.12 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "1053131304"
+			(at 200.66 71.12 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Molex"
+			(at 200.66 71.12 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C17554326"
+			(at 200.66 71.12 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "acb9ca8a-ef40-4c59-9b2b-8f890569013a")
 		)
@@ -5199,8 +5612,8 @@
 		(at 125.73 73.66 0)
 		(unit 1)
 		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
+		(exclude_from_sim yes)
+		(in_bom no)
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
@@ -5250,6 +5663,17 @@
 			)
 		)
 		(property "Description" "test point"
+			(at 125.73 73.66 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Sim.Hinweis" "Mechanisches Bauteil, kein elektrisches Modell erforderlich"
 			(at 125.73 73.66 0)
 			(hide yes)
 			(show_name no)
@@ -5413,6 +5837,17 @@
 				)
 			)
 		)
+		(property "Spez" "X7R 16 V 0603"
+			(at 162.56 59.69 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "07c78abe-ff53-4497-8ba6-99233f137ce4")
 		)
@@ -5439,7 +5874,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "9d830c02-0536-47b1-978f-b0e9be5cdbff")
-		(property "Reference" "R16"
+		(property "Reference" "R15"
 			(at 172.72 51.05 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5492,6 +5927,17 @@
 				)
 			)
 		)
+		(property "Spez" "0603, 1 %, 0,1 W"
+			(at 172.72 55.88 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "a19ebe7d-1a88-421e-9c8d-fe5889d5f24a")
 		)
@@ -5501,7 +5947,7 @@
 		(instances
 			(project "LandyHeater"
 				(path "/f79b4c10-b95d-476a-8de2-bd665410a76d/ec526a73-c382-44e2-bb1e-7bff243e018b"
-					(reference "R16")
+					(reference "R15")
 					(unit 1)
 				)
 			)
@@ -5512,7 +5958,7 @@
 		(at 170.18 90.17 270)
 		(unit 1)
 		(body_style 1)
-		(exclude_from_sim no)
+		(exclude_from_sim yes)
 		(in_bom yes)
 		(on_board yes)
 		(in_pos_files yes)
@@ -5561,6 +6007,50 @@
 			)
 		)
 		(property "Description" "Doppel-ESD-Schutzdiode 5,2 V, gemeinsame Anode (Pin 3)"
+			(at 170.18 90.17 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Sim.Hinweis" "Kein Modell eingebunden; fuer die Schaltungsfunktion nicht simulationsrelevant"
+			(at 170.18 90.17 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "PESD5V2S2UT,215"
+			(at 170.18 90.17 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Nexperia"
+			(at 170.18 90.17 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C18441"
 			(at 170.18 90.17 0)
 			(hide yes)
 			(show_name no)
@@ -5730,6 +6220,17 @@
 				)
 			)
 		)
+		(property "Spez" "X7R 16 V 0603"
+			(at 121.92 113.03 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "302fef48-1d53-4e8a-a3bc-f0d89a36b565")
 		)
@@ -5833,7 +6334,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "c4adebbd-354b-452b-959d-d33478c7f834")
-		(property "Reference" "R19"
+		(property "Reference" "R18"
 			(at 130.95 86.36 0)
 			(show_name no)
 			(do_not_autoplace no)
@@ -5886,6 +6387,17 @@
 				)
 			)
 		)
+		(property "Spez" "0603, 1 %, 0,1 W"
+			(at 127 87.63 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "a949d82d-928f-407c-b808-fe0f467dc0a7")
 		)
@@ -5895,7 +6407,7 @@
 		(instances
 			(project "LandyHeater"
 				(path "/f79b4c10-b95d-476a-8de2-bd665410a76d/ec526a73-c382-44e2-bb1e-7bff243e018b"
-					(reference "R19")
+					(reference "R18")
 					(unit 1)
 				)
 			)
@@ -5984,8 +6496,8 @@
 		(at 187.96 55.88 0)
 		(unit 1)
 		(body_style 1)
-		(exclude_from_sim no)
-		(in_bom yes)
+		(exclude_from_sim yes)
+		(in_bom no)
 		(on_board yes)
 		(in_pos_files yes)
 		(dnp no)
@@ -6035,6 +6547,17 @@
 			)
 		)
 		(property "Description" "test point"
+			(at 187.96 55.88 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Sim.Hinweis" "Mechanisches Bauteil, kein elektrisches Modell erforderlich"
 			(at 187.96 55.88 0)
 			(hide yes)
 			(show_name no)
@@ -6222,7 +6745,7 @@
 		(in_pos_files yes)
 		(dnp no)
 		(uuid "ebb92b44-2a00-43ee-956c-199aecfb28c1")
-		(property "Reference" "R22"
+		(property "Reference" "R21"
 			(at 162.56 134.87 90)
 			(show_name no)
 			(do_not_autoplace no)
@@ -6275,6 +6798,17 @@
 				)
 			)
 		)
+		(property "Spez" "0603, 1 %, 0,1 W"
+			(at 162.56 139.7 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
 		(pin "1"
 			(uuid "d44c3aac-8c65-4305-bdcb-2044bd5b069a")
 		)
@@ -6284,7 +6818,7 @@
 		(instances
 			(project "LandyHeater"
 				(path "/f79b4c10-b95d-476a-8de2-bd665410a76d/ec526a73-c382-44e2-bb1e-7bff243e018b"
-					(reference "R22")
+					(reference "R21")
 					(unit 1)
 				)
 			)
@@ -6295,7 +6829,7 @@
 		(at 200.66 121.92 0)
 		(unit 1)
 		(body_style 1)
-		(exclude_from_sim no)
+		(exclude_from_sim yes)
 		(in_bom yes)
 		(on_board yes)
 		(in_pos_files yes)
@@ -6344,6 +6878,50 @@
 			)
 		)
 		(property "Description" "Generic connector, single row, 01x03, script generated (kicad-library-utils/schlib/autogen/connector/)"
+			(at 200.66 121.92 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Sim.Hinweis" "Mechanisches Bauteil, kein elektrisches Modell erforderlich"
+			(at 200.66 121.92 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "1053131303"
+			(at 200.66 121.92 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "Molex"
+			(at 200.66 121.92 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C17198650"
 			(at 200.66 121.92 0)
 			(hide yes)
 			(show_name no)
