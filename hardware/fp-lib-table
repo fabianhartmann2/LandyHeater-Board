@@ -1,10 +1,10 @@
 (fp_lib_table
 	(version 7)
 	(lib
-		(name "LandyHeater")
+		(name "LandyHeater_RevA")
 		(type "KiCad")
-		(uri "${KIPRJMOD}/libraries/footprints/LandyHeater.pretty")
+		(uri "${KIPRJMOD}/libraries/LandyHeater_RevA.pretty")
 		(options "")
-		(descr "Project-local footprints for the Landy Heater Controller")
+		(descr "Rev A rebuild: footprints transcribed from manufacturer land patterns (generated)")
 	)
 )
