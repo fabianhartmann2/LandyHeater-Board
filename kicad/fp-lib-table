@@ -1,0 +1,4 @@
+(fp_lib_table
+  (version 7)
+  (lib (name "LandyHeater")(type "KiCad")(uri "${KIPRJMOD}/libraries/LandyHeater.pretty")(options "")(descr "Projektlokale, geprüfte Footprints"))
+)

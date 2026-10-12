@@ -1,0 +1,4 @@
+(sym_lib_table
+  (version 7)
+  (lib (name "LandyHeater")(type "KiCad")(uri "${KIPRJMOD}/libraries/LandyHeater.kicad_sym")(options "")(descr "Projektlokale, geprüfte Symbole"))
+)

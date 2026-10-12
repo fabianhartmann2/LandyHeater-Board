@@ -1,0 +1,21 @@
+(kicad_sch (version 20260101) (generator "eeschema") (generator_version "10.0")
+
+  (uuid f79b4c10-b95d-476a-8de2-bd665410a76d)
+
+  (paper "A4")
+
+  (title_block
+    (title "LandyHeater Controller")
+    (date "2026-10-12")
+    (rev "B")
+    (company "Fabian Hartmann")
+    (comment 1 "Grundlage: docs/Anforderungsdokument_Neuentwicklung.md v2.0")
+  )
+
+  (lib_symbols
+  )
+
+  (sheet_instances
+    (path "/" (page "1"))
+  )
+)
