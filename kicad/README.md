@@ -6,8 +6,8 @@ Neuaufbau nach [Anforderungsdokument v2.0](../docs/Anforderungsdokument_Neuentwi
 
 | Phase | Status |
 |---|---|
-| 0 – Projekt, Lagen, Regeln, Bibliotheken | abgeschlossen, Freigabe ausstehend |
-| 1 – Bauteilauswahl, Symbole, Footprints | offen |
+| 0 – Projekt, Lagen, Regeln, Bibliotheken | freigegeben (2026-10-12) |
+| 1 – Bauteilauswahl, Symbole, Footprints | abgeschlossen, Freigabe ausstehend – siehe [Bauteilliste](Bauteilliste.md) |
 
 ## Struktur
 

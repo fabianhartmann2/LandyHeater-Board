@@ -342,7 +342,7 @@ Lagerbestand am 2026-10-12 laut jlcpcb.com/parts (5 Prototypen benötigen je Tei
 | ESD 1-Wire/Taster | `PESD3V3S2UT,215` | C84276 | 55 431 | Übernommen; gemeinsame Anode an Pin 3. |
 | RTC | `RV-8263-C8-32.768KHZ-20PPM-TA-QC` (190 nA, Alarm, Open-Drain-INT, I2C) | C24955831 | 460 | **Geändert.** `RV-3028-C7` ist bei JLCPCB nicht lieferbar (≈ 76 Tage Vorbestellung). RV-8263 hat keine eingebaute Backup-Umschaltung → Versorgung über Dioden-ODER (2 × `BAS116`) aus 3V3_CORE und Knopfzelle. ±20 ppm genügt, da die Zeit per WLAN/NTP synchronisiert wird. Bevorzugt, falls beschaffbar: `RV-3028-C7` (C3019759). |
 | Sperrdioden (RTC-Backup, Diagnose) | `BAS116,215` (Leckstrom 3 pA) | C48502 | 42 689 | Übernommen. |
-| Knopfzelle/Halter | `BR1225` in Keystone `500` | C238121 | 0 | Halter nur vorbestellbar (≈ 8,60 $). In Phase 1 SMD-Halter für 12,5 × 2,5 mm mit Lagerbestand wählen. Zelle wird nicht bestückt. |
+| Knopfzelle/Halter | `BR1225` in SMD-Klemme `MY-1225-01-J` (Minuspol = Kupferpad unter der Zelle) | C20606803 | 1 281 | Ersetzt Keystone `500` (nicht lieferbar). Zelle wird nicht bestückt. |
 | Ring-LED-Treiber | `BCR421UW6Q-7` (10 mA, EN = PWM < 25 kHz) | C154739 | **65** | Übernommen; Bestand ausreichend, früh reservieren. Thermik bei 14 V (≈ 125 mW) und Headroom bei USB prüfen. |
 | Diagnose-Schalter | `2N7002K` | C22379475 | 1 607 174 | Übernommen; Gate-Teiler so, dass VGS bei 14 V + Transienten < 20 V bleibt. |
 | LEDs | `LTST-C190KRKT` (rot, 0603) | C94869 | 337 173 | Übernommen. |

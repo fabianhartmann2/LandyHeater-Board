@@ -1,0 +1,243 @@
+(footprint "MicroCrystal_C8_SON-8_2.0x1.2mm"
+	(version 20260206)
+	(generator "pcbnew")
+	(generator_version "10.0")
+	(layer "F.Cu")
+	(descr "Micro Crystal C8 SON-8 2.0x1.2 mm (RV-8263-C8). Quelle EasyEDA C24955831, Pads = Herstellerempfehlung 0,27x0,7 mm, Raster 0,54 mm.")
+	(property "Reference" "REF**"
+		(at 0 -4.5 0)
+		(layer "F.SilkS")
+		(uuid "31df531d-2c3d-4e7d-910f-83fc0b1ee1ab")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Value" "MicroCrystal_C8_SON-8_2.0x1.2mm"
+		(at 0 4.5 0)
+		(layer "F.Fab")
+		(uuid "025da300-8197-4f76-8cf9-5239f2b0b425")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(property "Datasheet" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "24e44a43-4a06-4a6b-9697-80f7b103ca0f")
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+	)
+	(property "Description" ""
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "b5736361-a0b2-4277-9936-947640d0390d")
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+	)
+	(property "LCSC Part" "C24955831"
+		(at 0 0 0)
+		(layer "F.Fab")
+		(hide yes)
+		(uuid "a02fd3a4-f196-4ebc-9912-b1244b604457")
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+		)
+	)
+	(attr smd)
+	(duplicate_pad_numbers_are_jumpers no)
+	(fp_line
+		(start -1.14 -0.64)
+		(end -1.13 -0.64)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "e33026a5-e83e-4181-9b67-8097a04d4a8f")
+	)
+	(fp_line
+		(start -1.14 0.63)
+		(end -1.14 -0.64)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "b609f862-4720-480e-8eb4-24865d0585ff")
+	)
+	(fp_line
+		(start -1.13 0.63)
+		(end -1.14 0.63)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "155bf681-2186-4ec8-b632-4bb354fa8c3b")
+	)
+	(fp_line
+		(start 1.13 -0.64)
+		(end 1.14 -0.64)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "0b0882c9-e75d-42e0-b2cf-e18d25739fd8")
+	)
+	(fp_line
+		(start 1.14 -0.64)
+		(end 1.14 0.63)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "e3cefa23-0125-4240-a6f7-a53218a05a04")
+	)
+	(fp_line
+		(start 1.14 0.63)
+		(end 1.13 0.63)
+		(stroke
+			(width 0.15)
+			(type solid)
+		)
+		(layer "F.SilkS")
+		(uuid "d55a8ea3-d347-4fb7-a0bb-122713d59f47")
+	)
+	(fp_circle
+		(center -1.27 1.02)
+		(end -1.14 1.02)
+		(stroke
+			(width 0.25)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.SilkS")
+		(uuid "9272989b-cdec-4c39-9f31-553371189a3a")
+	)
+	(fp_circle
+		(center -1 0.6)
+		(end -0.97 0.6)
+		(stroke
+			(width 0.06)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.SilkS")
+		(uuid "7ba46883-1024-4dca-9374-088245a2d1a3")
+	)
+	(fp_circle
+		(center -1.14 0.76)
+		(end -1.04 0.76)
+		(stroke
+			(width 0.2)
+			(type solid)
+		)
+		(fill no)
+		(layer "Cmts.User")
+		(uuid "6c98aa5e-4793-415c-8c37-fa4326124295")
+	)
+
+
+
+
+	(fp_text user "${REFERENCE}"
+		(at 0 0 0)
+		(layer "F.Fab")
+		(uuid "dc4167b5-2592-466b-b428-01079d0b1577")
+		(effects
+			(font
+				(size 1 1)
+				(thickness 0.15)
+			)
+		)
+	)
+	(pad "1" smd rect
+		(at -0.81 0.5)
+		(size 0.27 0.7)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "0c6da114-b21c-4ff3-8c98-845dd3a48df2")
+	)
+	(pad "2" smd rect
+		(at -0.27 0.5)
+		(size 0.27 0.7)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "474cd3e9-4441-4015-b4e7-04442a9e710b")
+	)
+	(pad "3" smd rect
+		(at 0.27 0.5)
+		(size 0.27 0.7)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "8037c515-4dec-4cd7-b3cb-63a3bd865723")
+	)
+	(pad "4" smd rect
+		(at 0.81 0.5)
+		(size 0.27 0.7)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "1d3b3e23-1c0f-462e-a3d9-c3dd65015feb")
+	)
+	(pad "5" smd rect
+		(at 0.81 -0.5)
+		(size 0.27 0.7)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "aa4fbac5-da9b-4fed-a199-658f484d64dc")
+	)
+	(pad "6" smd rect
+		(at 0.27 -0.5)
+		(size 0.27 0.7)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "e8a87295-0055-44f4-9105-0f9f7238db65")
+	)
+	(pad "7" smd rect
+		(at -0.27 -0.5)
+		(size 0.27 0.7)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "1bde1d19-eb3f-47b1-a395-4aae3db1830f")
+	)
+	(pad "8" smd rect
+		(at -0.81 -0.5)
+		(size 0.27 0.7)
+		(layers "F.Cu" "F.Mask" "F.Paste")
+		(uuid "7b987432-2eb6-4eaf-b1ab-01f88c9c058e")
+	)
+	(fp_rect
+		(start -1.25 -1.1)
+		(end 1.25 1.1)
+		(stroke
+			(width 0.05)
+			(type solid)
+		)
+		(fill no)
+		(layer "F.CrtYd")
+		(uuid "b2010145-54bf-4e4e-9e4b-62cf797418cb")
+	)
+	(embedded_fonts no)
+	(model "${LANDYHEATER_3DMODELS}/MicroCrystal_C8_SON-8_2.0x1.2mm.step"
+		(offset
+			(xyz 0 0 0)
+		)
+		(scale
+			(xyz 1 1 1)
+		)
+		(rotate
+			(xyz 0 0 0)
+		)
+	)
+)
