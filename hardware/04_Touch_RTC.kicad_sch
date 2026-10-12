@@ -4420,7 +4420,7 @@
 				)
 			)
 		)
-		(property "Value" "10k (DNP)"
+		(property "Value" "10k"
 			(at 39.37 82.55 270)
 			(effects
 				(font
@@ -5243,7 +5243,7 @@
 				)
 			)
 		)
-		(property "Value" "74LVC1G74 (DNP)"
+		(property "Value" "74LVC1G74"
 			(at 45.72 120.65 0)
 			(effects
 				(font
@@ -5635,7 +5635,7 @@
 				)
 			)
 		)
-		(property "Value" "100k (DNP)"
+		(property "Value" "100k"
 			(at 93.98 113.03 270)
 			(effects
 				(font
@@ -5793,7 +5793,7 @@
 				)
 			)
 		)
-		(property "Value" "100nF 50V X7R (DNP)"
+		(property "Value" "100nF 50V X7R"
 			(at 142.24 113.03 270)
 			(effects
 				(font
@@ -5977,7 +5977,7 @@
 				)
 			)
 		)
-		(property "Value" "100Ω (DNP)"
+		(property "Value" "100Ω"
 			(at 181.61 113.03 270)
 			(effects
 				(font
@@ -6135,7 +6135,7 @@
 				)
 			)
 		)
-		(property "Value" "0Ω (DNP)"
+		(property "Value" "0Ω"
 			(at 227.33 113.03 270)
 			(effects
 				(font

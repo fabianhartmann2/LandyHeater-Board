@@ -7419,7 +7419,7 @@
 				)
 			)
 		)
-		(property "Footprint" "TestPoint:TestPoint_Pad_D1.5mm"
+		(property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
 			(at 369.57 63.5 0)
 			(effects
 				(font
@@ -7542,7 +7542,7 @@
 				)
 			)
 		)
-		(property "Footprint" "TestPoint:TestPoint_Pad_D1.5mm"
+		(property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
 			(at 22.86 74.93 0)
 			(effects
 				(font
@@ -7665,7 +7665,7 @@
 				)
 			)
 		)
-		(property "Footprint" "TestPoint:TestPoint_Pad_D1.5mm"
+		(property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
 			(at 50.8 74.93 0)
 			(effects
 				(font
@@ -7788,7 +7788,7 @@
 				)
 			)
 		)
-		(property "Footprint" "TestPoint:TestPoint_Pad_D1.5mm"
+		(property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
 			(at 74.93 74.93 0)
 			(effects
 				(font
@@ -14957,7 +14957,7 @@
 				)
 			)
 		)
-		(property "Value" "DNP (DNP)"
+		(property "Value" "CFF opt."
 			(at 368.3 232.41 270)
 			(effects
 				(font
@@ -15010,7 +15010,7 @@
 				(hide yes)
 			)
 		)
-		(property "Notes" "optional CFF"
+		(property "Notes" "optional feed-forward capacitor"
 			(at 368.3 229.87 0)
 			(effects
 				(font
@@ -15649,7 +15649,7 @@
 				)
 			)
 		)
-		(property "Footprint" "TestPoint:TestPoint_Pad_D1.5mm"
+		(property "Footprint" "TestPoint:TestPoint_Pad_D1.0mm"
 			(at 115.57 246.38 0)
 			(effects
 				(font

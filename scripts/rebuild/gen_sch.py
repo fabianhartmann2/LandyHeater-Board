@@ -302,7 +302,7 @@ def gen_child(sheet_key, filename, title, page, sheet_uuid):
             val_at = (p.x, p.y + 2.6) if single else (p.x, p.y - b0y + 1.9)
             if len(p.si.pins) == 1:
                 ref_at, val_at = (p.x, p.y - 3.2), (p.x + 2.0, p.y - 5.4)
-            value = part.value + (" (DNP)" if part.dnp else "")
+            value = part.value
             items.append(symbol_instance(p.si.lib_id, part.ref, value, p.x, p.y, p.rot, sheet_path,
                                          (sheet_key, part.ref), fields, list(p.si.pins.keys()), dnp=part.dnp,
                                          in_bom=part.symbol != "dev:TestPoint" or False,

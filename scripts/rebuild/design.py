@@ -184,10 +184,10 @@ add("FB1", "220Ω@100MHz", "dev:FerriteBead", "Inductor_SMD:L_0805_2012Metric",
 add("C6", "47µF 35V", "dev:C_Polarized", "Capacitor_SMD:CP_Elec_6.3x7.7", {"1": "VIN_SYS", "2": "GND"},
     mpn="EEE-FK1V470P", mfr="Panasonic", lcsc="C178565",
     note="DEV-03: hold-up for micro-interruptions (LV124 E-10) and ESR damping of the input filter")
-TP("TP1", "BATT_12V", "BATT_12V_IN", TP15)
-TP("TP2", "12V_PROT", "VIN_12V_PROT", TP15)
-TP("TP3", "VIN_SYS", "VIN_SYS", TP15)
-TP("TP4", "GND", "GND", TP15)
+TP("TP1", "BATT_12V", "BATT_12V_IN")
+TP("TP2", "12V_PROT", "VIN_12V_PROT")
+TP("TP3", "VIN_SYS", "VIN_SYS")
+TP("TP4", "GND", "GND")
 
 block("USB-C sink: CC detection (TUSB321AI), ESD, eFuse with reverse blocking (TPS259470L)")
 add("J5", "USB-C", "conn:USBC", "Connector_USB:USB_C_Receptacle_HRO_TYPE-C-31-M-12",
@@ -247,11 +247,11 @@ CP("C13", "100nF", "BUCK_BOOT", "BUCK_SW")
 CP("C14", "1uF", "BUCK_VCC", "GND")
 RP("R16", "100k", "3V3", "BUCK_FB", note="RFBT")
 RP("R17", "43.2k", "BUCK_FB", "GND", note="RFBB → 3.31 V")
-C("C15", "DNP", "3V3", "BUCK_FB", "", "", dnp=True, note="optional CFF")
+C("C15", "CFF opt.", "3V3", "BUCK_FB", "", "", dnp=True, note="optional feed-forward capacitor")
 CP("C16", "22uF10", "3V3", "GND")
 CP("C17", "22uF10", "3V3", "GND")
 RP("R18", "100k", "3V3", "BUCK_PG")
-TP("TP8", "3V3", "3V3", TP15)
+TP("TP8", "3V3", "3V3")
 TP("TP9", "BUCK_PG", "BUCK_PG")
 
 # ==========================================================================

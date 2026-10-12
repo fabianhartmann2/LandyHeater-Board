@@ -5518,7 +5518,7 @@
 				)
 			)
 		)
-		(property "Value" "10pF C0G (DNP)"
+		(property "Value" "10pF C0G"
 			(at 134.62 118.11 270)
 			(effects
 				(font
@@ -5702,7 +5702,7 @@
 				)
 			)
 		)
-		(property "Value" "10pF C0G (DNP)"
+		(property "Value" "10pF C0G"
 			(at 170.18 118.11 270)
 			(effects
 				(font
@@ -6992,7 +6992,7 @@
 				)
 			)
 		)
-		(property "Value" "10pF C0G (DNP)"
+		(property "Value" "10pF C0G"
 			(at 264.16 129.54 270)
 			(effects
 				(font
