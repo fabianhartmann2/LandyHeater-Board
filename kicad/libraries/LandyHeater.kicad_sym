@@ -567,7 +567,7 @@
 		(in_bom yes)
 		(on_board yes)
 		(property "Reference" "U"
-			(at -6.35 10.16 0)
+			(at -6.35 13.969999999999999 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -575,7 +575,7 @@
 			)
 		)
 		(property "Value" "TXU0202QDCURQ1"
-			(at -6.35 -12.7 0)
+			(at -6.35 -16.509999999999998 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -656,8 +656,8 @@
 		)
 		(symbol "TXU0202QDCURQ1_0_1"
 			(rectangle
-				(start -6.35 8.89)
-				(end 6.35 -8.89)
+				(start -6.35 12.7)
+				(end 6.35 -12.7)
 				(stroke
 					(width 0.254)
 					(type default)
@@ -669,7 +669,7 @@
 		)
 		(symbol "TXU0202QDCURQ1_1_1"
 			(pin power_in line
-				(at -8.89 6.35 0)
+				(at -8.89 10.16 0)
 				(length 2.54)
 				(name "VCCA"
 					(effects
@@ -687,7 +687,7 @@
 				)
 			)
 			(pin input line
-				(at -8.89 3.81 0)
+				(at -8.89 5.08 0)
 				(length 2.54)
 				(name "A1"
 					(effects
@@ -705,7 +705,7 @@
 				)
 			)
 			(pin tri_state line
-				(at -8.89 1.27 0)
+				(at -8.89 0.0 0)
 				(length 2.54)
 				(name "A2Y"
 					(effects
@@ -723,7 +723,7 @@
 				)
 			)
 			(pin input line
-				(at -8.89 -1.27 0)
+				(at -8.89 -5.08 0)
 				(length 2.54)
 				(name "OE"
 					(effects
@@ -741,7 +741,7 @@
 				)
 			)
 			(pin power_in line
-				(at 8.89 6.35 180)
+				(at 8.89 10.16 180)
 				(length 2.54)
 				(name "VCCB"
 					(effects
@@ -759,7 +759,7 @@
 				)
 			)
 			(pin tri_state line
-				(at 8.89 3.81 180)
+				(at 8.89 5.08 180)
 				(length 2.54)
 				(name "B1Y"
 					(effects
@@ -777,7 +777,7 @@
 				)
 			)
 			(pin input line
-				(at 8.89 1.27 180)
+				(at 8.89 0.0 180)
 				(length 2.54)
 				(name "B2"
 					(effects
@@ -795,7 +795,7 @@
 				)
 			)
 			(pin power_in line
-				(at 0.0 -11.43 90)
+				(at 0.0 -15.239999999999998 90)
 				(length 2.54)
 				(name "GND"
 					(effects
