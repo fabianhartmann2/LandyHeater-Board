@@ -1811,11 +1811,18 @@
 		(embedded_fonts no)
 	)
 	(symbol "BAS116"
+		(pin_numbers
+			(hide yes)
+		)
+		(pin_names
+			(offset 1.016)
+			(hide yes)
+		)
 		(exclude_from_sim no)
 		(in_bom yes)
 		(on_board yes)
 		(property "Reference" "D"
-			(at -2.54 6.35 0)
+			(at 0 2.54 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1823,7 +1830,7 @@
 			)
 		)
 		(property "Value" "BAS116"
-			(at -2.54 -8.89 0)
+			(at 0 -2.54 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -1848,7 +1855,7 @@
 				(hide yes)
 			)
 		)
-		(property "Description" "Low-Leakage-Schaltdiode 85 V, 215 mA, SOT-23 (Pin 2 n.c.)"
+		(property "Description" "Low-Leakage-Schaltdiode 85 V, 215 mA, SOT-23 (Pin 1 A, Pin 3 K, Pin 2 n.c.)"
 			(at 0 0 0)
 			(effects
 				(font
@@ -1903,21 +1910,46 @@
 			)
 		)
 		(symbol "BAS116_0_1"
-			(rectangle
-				(start -2.54 5.08)
-				(end 2.54 -5.08)
+			(polyline
+				(pts
+					(xy -1.27 1.27) (xy 1.27 0) (xy -1.27 -1.27) (xy -1.27 1.27)
+				)
 				(stroke
 					(width 0.254)
 					(type default)
 				)
 				(fill
-					(type background)
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy 1.27 1.27) (xy 1.27 -1.27)
+				)
+				(stroke
+					(width 0.254)
+					(type default)
+				)
+				(fill
+					(type none)
+				)
+			)
+			(polyline
+				(pts
+					(xy -1.27 0) (xy 1.27 0)
+				)
+				(stroke
+					(width 0)
+					(type default)
+				)
+				(fill
+					(type none)
 				)
 			)
 		)
 		(symbol "BAS116_1_1"
 			(pin passive line
-				(at -5.08 2.54 0)
+				(at -3.81 0 0)
 				(length 2.54)
 				(name "A"
 					(effects
@@ -1935,7 +1967,7 @@
 				)
 			)
 			(pin passive line
-				(at 5.08 2.54 180)
+				(at 3.81 0 180)
 				(length 2.54)
 				(name "K"
 					(effects
@@ -1953,8 +1985,9 @@
 				)
 			)
 			(pin no_connect line
-				(at 0.0 -7.62 90)
-				(length 2.54)
+				(at 0 0 0)
+				(length 0)
+				(hide yes)
 				(name "NC"
 					(effects
 						(font
