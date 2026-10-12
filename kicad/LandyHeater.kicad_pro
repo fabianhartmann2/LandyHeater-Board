@@ -259,6 +259,19 @@
   "cvpcb": {
     "equivalence_files": []
   },
+  "environment": {
+    "vars": {
+      "LANDYHEATER_3DMODELS": "${KIPRJMOD}/libraries/3dmodels"
+    }
+  },
+  "erc": {
+    "rule_severities": {
+      "footprint_filter": "warning",
+      "four_way_junction": "warning",
+      "simulation_model_issue": "warning",
+      "single_global_label": "warning"
+    }
+  },
   "libraries": {
     "pinned_footprint_libs": [],
     "pinned_symbol_libs": []
@@ -297,6 +310,25 @@
         "line_style": 0,
         "microvia_diameter": 0.3,
         "microvia_drill": 0.1,
+        "name": "Extern",
+        "pcb_color": "rgba(0, 0, 0, 0.000)",
+        "priority": 0,
+        "schematic_color": "rgba(0, 0, 0, 0.000)",
+        "track_width": 0.3,
+        "tuning_profile": "",
+        "via_diameter": 0.6,
+        "via_drill": 0.3,
+        "wire_width": 6
+      },
+      {
+        "bus_width": 12,
+        "clearance": 0.2,
+        "diff_pair_gap": 0.25,
+        "diff_pair_via_gap": 0.25,
+        "diff_pair_width": 0.2,
+        "line_style": 0,
+        "microvia_diameter": 0.3,
+        "microvia_drill": 0.1,
         "name": "Power",
         "pcb_color": "rgba(0, 0, 0, 0.000)",
         "priority": 0,
@@ -321,25 +353,6 @@
         "priority": 0,
         "schematic_color": "rgba(0, 0, 0, 0.000)",
         "track_width": 0.25,
-        "tuning_profile": "",
-        "via_diameter": 0.6,
-        "via_drill": 0.3,
-        "wire_width": 6
-      },
-      {
-        "bus_width": 12,
-        "clearance": 0.2,
-        "diff_pair_gap": 0.25,
-        "diff_pair_via_gap": 0.25,
-        "diff_pair_width": 0.2,
-        "line_style": 0,
-        "microvia_diameter": 0.3,
-        "microvia_drill": 0.1,
-        "name": "Extern",
-        "pcb_color": "rgba(0, 0, 0, 0.000)",
-        "priority": 0,
-        "schematic_color": "rgba(0, 0, 0, 0.000)",
-        "track_width": 0.3,
         "tuning_profile": "",
         "via_diameter": 0.6,
         "via_drill": 0.3,
@@ -429,7 +442,13 @@
     "bus_aliases": {},
     "legacy_lib_dir": "",
     "legacy_lib_list": [],
-    "top_level_sheets": []
+    "top_level_sheets": [
+      {
+        "filename": "LandyHeater.kicad_sch",
+        "name": "LandyHeater",
+        "uuid": "00000000-0000-0000-0000-000000000000"
+      }
+    ]
   },
   "sheets": [],
   "text_variables": {},
@@ -438,18 +457,5 @@
       "version": 0
     },
     "tuning_profiles_impedance_geometric": []
-  },
-  "environment": {
-    "vars": {
-      "LANDYHEATER_3DMODELS": "${KIPRJMOD}/libraries/3dmodels"
-    }
-  },
-  "erc": {
-    "rule_severities": {
-      "single_global_label": "warning",
-      "four_way_junction": "warning",
-      "footprint_filter": "warning",
-      "simulation_model_issue": "warning"
-    }
   }
 }
