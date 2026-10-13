@@ -55,7 +55,7 @@ Umfang: 131 Bauteile (inkl. 28 Testpunkte, 3 DNP), 103 Netze.
 | P2-01 | LCSC-Nummern der passiven Bauteile (Basic bevorzugt) mit dem JLCPCB-Plugin zuweisen | 5 |
 | P2-02 | PTC F1 und Ferrit FB1 konkretes Teil bei JLCPCB wählen | 5 |
 | P2-03 | USB-Diff.-Paar 90 Ω mit JLCPCB-Impedanzrechner bestätigen | 4 |
-| P2-04 | Firmware: GPIO1 und GPIO2 als EXT1 ANY_LOW, RTC-Alarm-Ausgang, CLKOUT aus; DQ hochohmig/LOW solange Sensorversorgung aus | Firmware |
+| P2-04 | Firmware: GPIO7 (RTC_INT_N) und GPIO9 (BUTTON_N) als EXT1 ANY_LOW (Belegung seit Phase 3, s. A12), RTC-Alarm-Ausgang, CLKOUT aus; DQ hochohmig/LOW solange Sensorversorgung aus | Firmware |
 | P2-05 | Bestand knapp (LMR43620MSC3 14 Stück, BCR421 65, Nano-Fit J2 9), J1/J3/J4 nur Vorbestellung | 5 |
 
 ## 6. Freigabekriterien Phase 2

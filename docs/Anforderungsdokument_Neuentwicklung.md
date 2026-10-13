@@ -1,13 +1,14 @@
 # LandyHeater-Board – Anforderungsdokument für die Neuentwicklung
 
-Dokumentversion: 2.0
-Stand: 2026-10-12
+Dokumentversion: 2.1
+Stand: 2026-10-13
 Status: Grundlage für einen vollständigen Neuaufbau (Schaltplan, Layout, Fertigung) von Grund auf
 
 Änderungen:
 
 - 1.1 – E-Paper-Display einschließlich integriertem Touch und Frontlicht entfallen.
 - 2.0 – Aufteilung in **Teil A (verbindlich)** und **Teil B (informativ)**. Leiterplatte maximal 80 × 50 mm, einseitige Bestückung bevorzugt, Status-LEDs bestückt, RTC als Wake-Quelle, GPIO-Belegung neu festgelegt, USB-Stromerkennung entfallen, Fertigung bei JLCPCB statt PCBWay.
+- 2.1 – GPIO-Belegung nach Modulseite zum jeweiligen Funktionsblock neu verteilt (kurze Wege, A12); Layout-Checkliste aus Hersteller-Leitfäden ergänzt (B7).
 
 ## Aufbau und Verbindlichkeit
 
@@ -200,27 +201,27 @@ Festgelegte Belegung (Änderung im Layout zulässig, wenn die Regeln eingehalten
 | GPIO | Modulpad | Signal | Richtung | Externe Beschaltung | Default / Deep-Sleep | Wake |
 |---:|---:|---|---|---|---|---|
 | 0 | 27 | `BOOT_N` | E | 10 kΩ → 3V3, Taster → GND | HIGH | – |
-| 1 | 39 | `BUTTON_N` | E | Pull-up → 3V3, Serien-R/RC, ESD | HIGH | EXT1 low |
-| 2 | 38 | `RTC_INT_N` | E | Pull-up → 3V3_CORE (Open-Drain der RTC) | HIGH | EXT1 low |
-| 4 | 4 | `1WIRE_DQ` | OD | 4,7 kΩ → 3V3_SENSOR_SW, 0 Ω, ESD | Z | – |
-| 5 | 5 | `SENSOR_EN` | A | 100 kΩ PD | LOW = aus | – |
-| 6 | 6 | `AUTOTERM_OE` | A | 100 kΩ PD | LOW = gesperrt | – |
-| 7 | 7 | `BUTTON_LED_PWM` | A | 100 kΩ PD am Treiber | LOW = aus | – |
-| 8 | 12 | `I2C_SDA` | OD | 4,7 kΩ → 3V3_CORE | HIGH | – |
-| 9 | 17 | `I2C_SCL` | OD | 4,7 kΩ → 3V3_CORE | HIGH | – |
-| 10 | 18 | `DIAG_RUN` | A | 100 kΩ PD | LOW = aus | – |
-| 11 | 19 | `STATUS_LED_1` | A | Vorwiderstand, 100 kΩ PD | LOW = aus | – |
-| 12 | 20 | `STATUS_LED_2` | A | Vorwiderstand, 100 kΩ PD | LOW = aus | – |
+| 4 | 4 | `STATUS_LED_1` | A | Vorwiderstand, 100 kΩ PD | LOW = aus | – |
+| 5 | 5 | `STATUS_LED_2` | A | Vorwiderstand, 100 kΩ PD | LOW = aus | – |
+| 6 | 6 | `DIAG_RUN` | A | 100 kΩ PD | LOW = aus | – |
+| 7 | 7 | `RTC_INT_N` | E | Pull-up → 3V3_CORE (Open-Drain der RTC) | HIGH | EXT1 low |
+| 15 | 8 | `I2C_SDA` | OD | 4,7 kΩ → 3V3_CORE | HIGH | – |
+| 16 | 9 | `I2C_SCL` | OD | 4,7 kΩ → 3V3_CORE | HIGH | – |
 | 17 | 10 | `AUTOTERM_TX_3V3` | A | Serien-R | gesperrt über OE | – |
 | 18 | 11 | `AUTOTERM_RX_3V3` | E | Serien-R | – | – |
+| 8 | 12 | `AUTOTERM_OE` | A | 100 kΩ PD | LOW = gesperrt | – |
 | 19 | 13 | `USB_D_N` | USB | 22–33 Ω | – | – |
 | 20 | 14 | `USB_D_P` | USB | 22–33 Ω | – | – |
+| 9 | 17 | `BUTTON_N` | E | Pull-up → 3V3, Serien-R/RC, ESD | HIGH | EXT1 low |
+| 10 | 18 | `BUTTON_LED_PWM` | A | 100 kΩ PD am Treiber | LOW = aus | – |
+| 13 | 21 | `1WIRE_DQ` | OD | 4,7 kΩ → 3V3_SENSOR_SW, 0 Ω, ESD | Z | – |
+| 14 | 22 | `SENSOR_EN` | A | 100 kΩ PD | LOW = aus | – |
 | 43 | 37 | `U0TXD_TEST` | A | 499 Ω, Testpad | – | – |
 | 44 | 36 | `U0RXD_TEST` | E | Testpad | – | – |
 | 3, 45, 46 | 15, 26, 16 | Strapping, unbenutzt | – | kein Pull | – | – |
-| 13–16, 21, 38–42, 47, 48 | | Reserve | – | – | – | – |
+| 1, 2, 11, 12, 21, 38–42, 47, 48 | | Reserve | – | – | – | – |
 
-Begründung: Alle Funktionspins liegen in GPIO1–12 bzw. 17/18, alle Ausgänge sind active HIGH mit Pulldown (Einschaltimpuls = aus). GPIO17/18 sind die ESP-IDF-Standardpins von UART1, GPIO8/9 die üblichen I2C-Standardpins des ESP32-S3; GPIO18 wird nur als Eingang (RX) genutzt. Die JTAG-Pins GPIO39–42 bleiben frei. Modulpads 1, 40, 41/EPAD = GND; Pad 2 = 3V3; Pad 3 = `CHIP_PU/EN`.
+Begründung: Jeder Funktionsblock liegt an der Modulseite, die ihm im Layout zugewandt ist (Platzierung Phase 3): linke Modulkante oben Status/Diagnose und RTC/I2C, darunter AUTOTERM, unten USB; untere Modulkante Taster/LED und 1-Wire über ihren Steckern; rechte Modulkante BOOT und UART0-Testpads. Fest sind nur EN, GPIO0, GPIO19/20 (USB) und GPIO43/44 (UART0). Alle Wake-Eingänge (GPIO7, GPIO9) sind RTC-GPIOs; alle Ausgänge liegen in GPIO4–17, sind active HIGH mit Pulldown (Einschaltimpuls = aus); GPIO18 wird nur als Eingang (RX) genutzt. GPIO15/16 sind frei, weil kein 32-kHz-Quarz am Modul hängt. Die JTAG-Pins GPIO39–42 bleiben frei. Modulpads 1, 40, 41/EPAD = GND; Pad 2 = 3V3; Pad 3 = `CHIP_PU/EN`.
 
 ## A13. Sichere Hardware-Defaultzustände
 
@@ -387,7 +388,27 @@ Lagerbestand am 2026-10-12 laut jlcpcb.com/parts (5 Prototypen benötigen je Tei
 - ERC hat unzulässige Netzverschmelzungen nicht erkannt → N-05.
 - Häufige Fehler, die von Anfang an richtig umzusetzen sind: ESD-Arrays mit gemeinsamer Anode an Pin 3; keine Doppelterminierung an USB-CC; Diagnose-USB-LED am VBUS vor der Zusammenführung; Strapping-Pins ohne Pull-ups.
 
-## B7. Referenzen
+## B7. Layout-Checkliste (aus Hersteller-Leitfäden)
+
+Quellen: Espressif *ESP32-S3 Hardware Design Guidelines – PCB Layout Design*, TI LMR43620-Q1 Datenblatt Abschnitt 8.5, TI-Layoutleitfäden für ESD-Schutz, Renesas *Full-Speed USB 2.0 Board Design*, JLCPCB-Hilfe zu Passermarken und Nutzenrändern, In Compliance Magazine *PCB Layout Considerations*.
+
+| # | Regel | Phase |
+|---|---|---|
+| G-01 | 3V3-Hauptversorgung ≥ 0,65 mm (25 mil); Lagenwechsel der Versorgung mit mindestens 2 Vias. | 3/4 |
+| G-02 | Am Modul 10–22 µF am Versorgungseingang, 100 nF direkt an Pad 2 (≤ 2 mm), GND-Via am Kondensator. Allgemein: jeder 100-nF-Abblockkondensator ≤ 2 mm vom Versorgungspin. | 3 |
+| G-03 | U0TXD-Serienwiderstand am Modulpad; UART-Leitungen kurz, auf der Oberseite, mit GND-Umrandung. | 3/4 |
+| G-04 | USB-Serienwiderstände am Modul, ESD am Stecker; D+/D− parallel, längengleich, 90 Ω ± 10 %, möglichst ohne Via; falls doch, je ein GND-Rückführungsvia; GND-Kupfer beidseitig. | 3/4 |
+| G-05 | USB, UART und schnelle Signale vom U.FL-Anschluss fernhalten; unter dem U.FL alle Lagen frei. | 3/4 |
+| G-06 | In1.Cu durchgehend GND ohne Leiterbahnen; dichte GND-Vias um die Modul-Massepads und das EPAD. | 4 |
+| G-07 | ESD-/TVS-Schutz direkt am Stecker; geschützte Leitung vom Stecker zum Schutzbauteil gerade und ohne Via; ungeschützte Leitungen von geschützten fernhalten. | 3/4 |
+| G-08 | Buck: CIN direkt an VIN/GND (≤ 1 mm), VCC- und BOOT-Kondensator kurz und breit, SW-Fläche minimal, VOUT-Messleitung nicht neben SW; laute Ströme auf eine Seite der Massefläche, empfindliche Leitungen auf die andere. | 3/4 |
+| G-09 | GND-Vias direkt an den Ein- und Ausgangskondensatoren; Kupferfläche zur Wärmeableitung. | 4 |
+| G-10 | 3 Passermarken: 1 mm Kupfer, 2 mm Lötstoppfreistellung, ≥ 3,35 mm vom Rand, nicht symmetrisch. | 3 |
+| G-11 | Bauteile am Rand → Nutzenränder (5 mm) für die JLCPCB-Bestückung vorsehen. | 5 |
+| G-12 | Massefläche nie teilen, Blöcke räumlich trennen; schnelle Signale nur über ungeteilter Masse; GND-Vias an jedem Lagenwechsel. | 4 |
+| G-13 | Signale kurz und direkt, 45°-Knicke; Funktionsblöcke nach Signalfluss; gepolte Bauteile einheitlich ausgerichtet. | 3/4 |
+
+## B8. Referenzen
 
 - Espressif: [ESP32-S3-WROOM-1/1U Datasheet](https://documentation.espressif.com/esp32-s3-wroom-1_wroom-1u_datasheet_en.pdf), [Schematic Checklist](https://docs.espressif.com/projects/esp-hardware-design-guidelines/en/latest/esp32s3/schematic-checklist.html), [PCB Layout Design](https://docs.espressif.com/projects/esp-hardware-design-guidelines/en/latest/esp32s3/pcb-layout-design.html), [Sleep Modes](https://docs.espressif.com/projects/esp-idf/en/stable/esp32s3/api-reference/system/sleep_modes.html)
 - TI: [LMR43610-Q1/LMR43620-Q1](https://www.ti.com/product/LMR43620-Q1), [TPS25947](https://www.ti.com/product/TPS25947), [TPS3808-Q1](https://www.ti.com/product/TPS3808-Q1), [TXU0202-Q1](https://www.ti.com/product/TXU0202-Q1)

@@ -9,7 +9,7 @@ Neuaufbau nach [Anforderungsdokument v2.0](../docs/Anforderungsdokument_Neuentwi
 | 0 – Projekt, Lagen, Regeln, Bibliotheken | freigegeben (2026-10-12) |
 | 1 – Bauteilauswahl, Symbole, Footprints | freigegeben (2026-10-12) – [Bauteilliste](Bauteilliste.md) |
 | 2 – Schaltplan | freigegeben (2026-10-13) – [Review](Phase2_Schaltplanreview.md), [Entwurf](Schaltungsentwurf.md) |
-| 3 – Kontur, Platzierung, Transientennachweis | zur Freigabe – [Bericht](Phase3_Platzierung.md) |
+| 3 – Kontur, Platzierung, Transientennachweis | zur Freigabe (überarbeitet nach Layout-Checkliste B7) – [Bericht](Phase3_Platzierung.md) |
 
 ## Struktur
 
@@ -26,7 +26,7 @@ Neuaufbau nach [Anforderungsdokument v2.0](../docs/Anforderungsdokument_Neuentwi
 - 4 Lagen, JLCPCB-Stackup **JLC04161H-7628**, 1,6 mm, ENIG:
   F.Cu 35 µm · Prepreg 7628 0,2104 mm (εr 4,4) · In1.Cu 15,2 µm · Kern 1,065 mm · In2.Cu 15,2 µm · Prepreg 0,2104 mm · B.Cu 35 µm.
 - Lagennutzung (A14): F.Cu Bauteile/Signale, In1.Cu GND durchgehend, In2.Cu Versorgung/langsame Signale, B.Cu GND/langsame Signale.
-- Kontur: 80 × 50 mm, Ecken R 2 mm, Ursprung (100, 100). Vier M3-Befestigungslöcher H1–H4 (3,2 mm, nur Leiterplatte) in den Ecken.
+- Kontur: 80 × 50 mm, Ecken R 2 mm, Ursprung (100, 100). Vier M3-Befestigungslöcher H1–H4 (3,2 mm, nur Leiterplatte) in den Ecken, drei Passermarken FID1–FID3.
 
 ## Designregeln (JLCPCB 4 Lagen, mit Reserve)
 
@@ -46,7 +46,7 @@ Neuaufbau nach [Anforderungsdokument v2.0](../docs/Anforderungsdokument_Neuentwi
 | Klasse | Bahn | Abstand | Via | Zuordnung (Muster) |
 |---|---|---|---|---|
 | Default | 0,2 mm | 0,2 mm | 0,6/0,3 | alle übrigen Netze |
-| Power | 0,5 mm | 0,2 mm | 0,8/0,4 | `BATT_12V_IN`, `12V_PROT`, `VIN_SYS`, `USB_VBUS`, `VBUS_PROT`, `3V3_CORE`, `SW_BUCK` |
+| Power | 0,65 mm (G-01) | 0,2 mm | 0,8/0,4 | `BATT_12V_IN`, `12V_PROT`, `VIN_SYS`, `USB_VBUS`, `VBUS_PROT`, `3V3_CORE`, `SW_BUCK` |
 | USB | Diff.-Paar 0,25 mm / Spalt 0,13 mm | 0,2 mm (im Paar 0,13 mm) | 0,6/0,3 | `USB_D*` |
 | Extern | 0,3 mm | 0,2 mm | 0,6/0,3 | `AUTOTERM_*`, `CTRL_*`, `1WIRE_DQ`, `3V3_SENSOR_SW`, `BUTTON_N`, `LED_CC_PLUS`, `LED_PWM_MINUS` |
 
