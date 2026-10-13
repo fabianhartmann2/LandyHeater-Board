@@ -9,6 +9,7 @@ Neuaufbau nach [Anforderungsdokument v2.0](../docs/Anforderungsdokument_Neuentwi
 | 0 – Projekt, Lagen, Regeln, Bibliotheken | freigegeben (2026-10-12) |
 | 1 – Bauteilauswahl, Symbole, Footprints | freigegeben (2026-10-12) – [Bauteilliste](Bauteilliste.md) |
 | 2 – Schaltplan | freigegeben (2026-10-13) – [Review](Phase2_Schaltplanreview.md), [Entwurf](Schaltungsentwurf.md) |
+| 3 – Kontur, Platzierung, Transientennachweis | zur Freigabe – [Bericht](Phase3_Platzierung.md) |
 
 ## Struktur
 
@@ -25,28 +26,31 @@ Neuaufbau nach [Anforderungsdokument v2.0](../docs/Anforderungsdokument_Neuentwi
 - 4 Lagen, JLCPCB-Stackup **JLC04161H-7628**, 1,6 mm, ENIG:
   F.Cu 35 µm · Prepreg 7628 0,2104 mm (εr 4,4) · In1.Cu 15,2 µm · Kern 1,065 mm · In2.Cu 15,2 µm · Prepreg 0,2104 mm · B.Cu 35 µm.
 - Lagennutzung (A14): F.Cu Bauteile/Signale, In1.Cu GND durchgehend, In2.Cu Versorgung/langsame Signale, B.Cu GND/langsame Signale.
-- Kontur: noch nicht gezeichnet (Phase 3, maximal 80 × 50 mm). Der DRC meldet deshalb bis dahin `invalid_outline`.
+- Kontur: 80 × 50 mm, Ecken R 2 mm, Ursprung (100, 100). Vier M3-Befestigungslöcher H1–H4 (3,2 mm, nur Leiterplatte) in den Ecken.
 
 ## Designregeln (JLCPCB 4 Lagen, mit Reserve)
 
 | Regel | Wert | JLCPCB-Minimum |
 |---|---|---|
 | Leiterbahn Standard / Minimum | 0,2 / 0,127 mm | 0,09 mm |
-| Abstand Kupfer | 0,15 mm | 0,09 mm |
+| Abstand Kupfer | 0,2 mm (Regel), in Feinraster-ICs 0,12 mm | 0,09 mm |
 | Via Standard | 0,6 / 0,3 mm | 0,45 / 0,3 mm (ohne Aufpreis) |
 | Via Minimum | 0,45 / 0,3 mm | – |
 | Kupfer zum Platinenrand | 0,3 mm | 0,2 mm |
-| Bohrung zu Kupfer | 0,25 mm | – |
+| Bohrung zu Kupfer | 0,25 mm (Regel), USB-C-Führungsstifte 0,15 mm | – |
+| Bohrung Minimum | 0,2 mm (Wärmevias ESP32-Modul) | 0,15 mm |
 | Courtyard | Pflicht (Fehler) | – |
 
 ## Netzklassen
 
 | Klasse | Bahn | Abstand | Via | Zuordnung (Muster) |
 |---|---|---|---|---|
-| Default | 0,2 mm | 0,15 mm | 0,6/0,3 | alle übrigen Netze |
+| Default | 0,2 mm | 0,2 mm | 0,6/0,3 | alle übrigen Netze |
 | Power | 0,5 mm | 0,2 mm | 0,8/0,4 | `BATT_12V_IN`, `12V_PROT`, `VIN_SYS`, `USB_VBUS`, `VBUS_PROT`, `3V3_CORE`, `SW_BUCK` |
-| USB | Diff.-Paar 0,25 mm / Spalt 0,13 mm | 0,15 mm | 0,6/0,3 | `USB_D*` |
+| USB | Diff.-Paar 0,25 mm / Spalt 0,13 mm | 0,2 mm (im Paar 0,13 mm) | 0,6/0,3 | `USB_D*` |
 | Extern | 0,3 mm | 0,2 mm | 0,6/0,3 | `AUTOTERM_*`, `CTRL_*`, `1WIRE_DQ`, `3V3_SENSOR_SW`, `BUTTON_N`, `LED_CC_PLUS`, `LED_PWM_MINUS` |
+
+Die Abstände kommen aus `LandyHeater.kicad_dru`: KiCad verwendet den größeren Wert aus Netzklasse und Regel, deshalb stehen die Netzklassen auf 0,15 mm und die Regel setzt 0,2 mm mit den begründeten Ausnahmen.
 
 Das USB-Paar ist für ≈ 90 Ω differentiell über In1.Cu (Abstand 0,2104 mm) abgeschätzt. Vor dem Routing mit dem JLCPCB-Impedanzrechner für JLC04161H-7628 bestätigen und die Werte gegebenenfalls anpassen. Netznamen in den Mustern sind die geplanten Namen aus dem Anforderungsdokument; neue Netze werden bei Bedarf ergänzt.
 

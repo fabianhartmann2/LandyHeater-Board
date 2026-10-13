@@ -1,0 +1,26 @@
+(version 1)
+
+# Kupferabstand allgemein 0,2 mm. Die Netzklassen stehen auf 0,15 mm, weil KiCad den
+# groesseren Wert aus Netzklasse und Regel nimmt und sonst keine Ausnahme moeglich waere.
+(rule "Kupferabstand"
+	(constraint clearance (min 0.2)))
+
+# Pad-Abstaende innerhalb der Feinraster-ICs sind durch den Hersteller-Footprint vorgegeben
+# (VSSOP 0,5 mm, VQFN-HR, SON-8). JLCPCB-Minimum 4 Lagen: 0,09 mm.
+(rule "Pad-Pad im Feinraster-IC"
+	(condition "A.Type == 'Pad' && B.Type == 'Pad' && ((A.Parent == 'U2' && B.Parent == 'U2') || (A.Parent == 'U3' && B.Parent == 'U3') || (A.Parent == 'U6' && B.Parent == 'U6') || (A.Parent == 'U7' && B.Parent == 'U7'))")
+	(constraint clearance (min 0.12)))
+
+# USB-Differenzpaar: Spalt 0,13 mm innerhalb des Paares (Impedanz ~90 Ohm).
+(rule "USB-Paar"
+	(condition "A.NetClass == 'USB' && B.NetClass == 'USB'")
+	(constraint clearance (min 0.13)))
+
+# Bohrung-Kupfer allgemein 0,25 mm (Board-Setup-Minimum 0,15 mm).
+(rule "Bohrung-Kupfer"
+	(constraint hole_clearance (min 0.25)))
+
+# USB-C GCT USB4105: Abstand der NPTH-Fuehrungsstifte zu den GND-Pads laut Herstellerzeichnung.
+(rule "USB-C Fuehrungsstifte"
+	(condition "A.Parent == 'J5' && B.Parent == 'J5'")
+	(constraint hole_clearance (min 0.15)))
