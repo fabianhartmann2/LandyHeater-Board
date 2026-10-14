@@ -70,6 +70,15 @@ for x, y in [(125.93, 128.03), (126.5, 128.03), (127.49, 127.48), (128.04, 126.9
              (128.545, 126.44), (128.6, 124.1), (129.03, 125.2), (125.67, 131.47)]:
     D(CT, x, y)
 
+# EN: Freerouting-Abschnitt unter dem Modulkörper (L1 bei x 154,3 und Via 155,17/119,09) entfernen – Ersatz in
+# route_manual.py (L4 an der Modul-Oberkante); die L4-Bahnen treffen sich ohne Via bei (155,17/119,09)
+for x, y in [(153.8, 106.13), (154.3, 112.0), (154.7, 118.65), (155.17, 119.09)]:
+    D(EN, x, y)
+T(EN, B, [(155.17, 119.09), (152.84, 121.42)])                                       # L4-Anschluss zur TP8-Trasse
+# DIAG_K: überlappender Freerouting-Stich an SW3 durch geraden Anschluss ersetzen
+D(DK, 102.3, 113.8); D(DK, 102.9, 114.0)
+T(DK, F, [(103.08, 113.8), (103.08, 114.18)])
+
 # >>> maze_route.py (generiert, nicht von Hand ändern)
 # kein Weg: /AUTOTERM und 1-Wire/AUTOTERM_5V_F (370 Schritte)
 # kein Weg: /AUTOTERM und 1-Wire/AUTOTERM_5V_F (2500001 Schritte)

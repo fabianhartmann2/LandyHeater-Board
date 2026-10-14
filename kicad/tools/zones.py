@@ -22,9 +22,16 @@ ZONES = [  # Name, Lage, Netz, Polygon, Priorität
     ('GND L4', pcbnew.B_Cu, 'GND', FULL, 0),
 ]
 
+# GND-Pads, die schon in einer vollflächigen Handrouting-Fläche („R: GND Buck") bzw. direkt am Stecker sitzen: die
+# Außenlagen-Füllung kann dort keine Wärmefallen-Stege bilden (DRC „starved thermal") → volle Anbindung
+SOLID_PADS = [('C6', '2'), ('C7', '2'), ('U3', '9'), ('J5', 'A12'), ('J5', 'B1')]
+
 
 def main(path):
     b = pcbnew.LoadBoard(path); fm = pcbnew.FromMM
+    for ref, num in SOLID_PADS:
+        for p in b.FindFootprintByReference(ref).Pads():
+            if p.GetNumber() == num: p.SetLocalZoneConnection(pcbnew.ZONE_CONNECTION_FULL)
     names = {z[0] for z in ZONES}
     for z in list(b.Zones()):
         if not z.GetIsRuleArea() and z.GetZoneName() in names:

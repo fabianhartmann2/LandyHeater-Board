@@ -181,6 +181,11 @@ for pin, n in FANOUT.items():
     T(n, F, [(152.9, y), (151.45, y)], 0.2); V(n, 151.45, y)
 T('1WIRE_DQ', F, [(162.64, 121.7), (162.64, 122.8)], 0.2); V('1WIRE_DQ', 162.64, 122.8)
 LED1, LED2 = 'STATUS_LED_1', 'STATUS_LED_2'
+# EN zu SW1/TP8: Via auf der EN-Leitung zu R7 (oberhalb C15), L4 entlang der Modul-Oberkante und unter dem Modul
+# zur EN-Trasse von SW1 (keine Vias unter dem Modulkörper)
+V('/ESP32 und RTC/EN', 148.3, 106.0)
+T('/ESP32 und RTC/EN', B, [(148.3, 106.0), (148.3, 105.0), (157.0, 105.0), (157.5, 105.5), (157.5, 113.1), (158.4, 114.0),
+                           (158.6, 114.0)], 0.2)
 T('/ESP32 und RTC/EN', F, [(152.9, 106.13), (151.6, 106.13)], 0.25)                        # Pin 3 → C15.1
 T('/ESP32 und RTC/EN', F, [(151.1, 106.8), (150.05, 107.85), (150.05, 108.2)], 0.25)          # C15.1 → U5.1
 T(LED1, B, [(151.45, 107.4), (146.6, 107.4), (146.3, 107.2)], 0.2); V(LED1, 146.3, 107.2)              # L4, Landung rechts von D20
