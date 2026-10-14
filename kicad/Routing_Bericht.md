@@ -79,11 +79,85 @@ Ergebnis: alle Flächenpads angebunden (59 Vias, Rest über Handrouting).
   harte Zeitgrenze je Lauf (ein Durchgang lief einmal 34 min); Nutzungsstatistik von Freerouting abgeschaltet.
 - Übernahme nur neuer Bahnen auf offenen Signalnetzen (keine Zusätze auf Flächennetzen und fertig geroutenen Netzen).
 
-Stand: Freerouting-Ergebnis noch nicht im Projekt. Nach Block H erreicht Freerouting 13 offene Verbindungen je Lauf
-(Probe: 23 offene KiCad-Verbindungen, überwiegend kurze lokale Verbindungen, die Freerouting durch eigene Bahnen verbaut).
+Übernommen wurde der beste Lauf (23 offene Verbindungen) als Ausgangsstand für die Nacharbeit.
 
-## Nächste Schritte
+## 6.6 Nacharbeit – restliche Verbindungen
 
-1. Freerouting für die restlichen Signale, verbleibende Verbindungen von Hand.
-3. Nacharbeit (45°, Umwege, Vias, GND-Rückführungsvias an Lagenwechseln), keine Vias unter der BT1-Klammer.
-4. Außenlagen füllen (`tools/zones.py --fill-all`), GND-Stitching, DRC, Abschlussbericht mit Bildern.
+`tools/route_finish.py` läuft nach Freerouting und enthält:
+
+| Bereich | Maßnahme |
+|---|---|
+| RESET/BOOT, UART-Testpunkte | RXD auf L1 in der Gasse zwischen Modulpads und SW1 zu TP11; TXD über L4 zu TP10; BOOT_N U4.27 → TP9; je Taster die beiden Pin-2-Pads verbunden |
+| EN | Freerouting hatte EN auf L1 unter dem Modul mit Via unter dem Modulkörper geführt → entfernt; EN jetzt über ein Via bei C15 auf L4 an der Modul-Oberkante entlang zu SW1 und zur TP8-Trasse |
+| Diagnose-LEDs, DIAG-Taster | D19-A gerade; D20-A durch die Gasse D20/R32 (LED1 kommt dafür von links an R32/R34); DIAG_K-Gruppen über L4 oberhalb der 12V/VBUS-Trassen verbunden |
+| U6 (RTC) | GND-Vias von Pin 2/4 schräg nach außen, damit RTC_INT (Pin 3) gerade nach unten zur L4-Trasse kommt |
+| U7 (TXU0202) | Freerouting-Abschnitt von CTRL_TX vor den linken U7-Pins entfernt (sperrte OE und AUTOTERM_5V_F ein) und neu verlegt |
+| Rest | `tools/maze_route.py`: deterministischer A*-Router (L1/L4, 45°, 0,1-mm-Raster, für das 0,5-mm-Pinraster von U7 ein Fenster mit 0,05 mm), gleiche Abstandsregeln wie das Projekt, kein Via-in-Pad. Er schreibt keine Platine, sondern T()/V()-Zeilen, die als markierter Abschnitt in `route_finish.py` stehen (prüfbar, reproduzierbar). |
+
+## 6.7 Außenlagen, GND-Heftung, Prüfung
+
+- Außenlagen L1/L4 als GND gefüllt (`tools/zones.py --fill-all`). Fünf GND-Pads, die bereits in vollflächigen
+  Handrouting-Flächen liegen (C6.2, C7.2, U3.9, J5 A12/B1), sind voll angebunden – die Außenlagen-Füllung kann dort
+  keine Wärmefallen-Stege bilden. Alle übrigen Pads mit Wärmefallen (Grabsteineffekt bei kleinen Bauteilen).
+- `tools/stitch_gnd.py`: **148 GND-Heftvias** (Raster 3 mm, Ring 1,2 mm innerhalb der Kante), nur wo beide Außenlagen-
+  Füllungen den ganzen Via-Umfang mit 0,25 mm Rand enthalten; nicht unter dem Modul.
+- `tools/check_routing.py` (Prüfungen, die der DRC nicht kennt):
+
+| Prüfung | Ergebnis |
+|---|---|
+| Y-03: L4-Bahnen kreuzen die L3-Teilung | keine, außer den freigestellten Diagnose-Zuleitungen 12V_PROT/VBUS_PROT (statisch, ~1 mA) |
+| Vias unter der Knopfzelle | nur GND |
+| Vias unter dem Modulkörper | keine (außer den Wärmevias des Footprints) |
+| spitze Winkel < 90° | 6 – kurze, überlappende Stichenden (RTC_INT, BUTTON_N, 1WIRE_DQ, AUTOTERM_5V_F), kosmetisch |
+
+**DRC (KiCad 10, alle Schweregrade, mit Schaltplanabgleich): 0 Verletzungen, 0 offene Verbindungen.**
+Einziger Eintrag: Footprint-Filter F1 (PTC) – offener Punkt Phase 5. Bericht: [doc/DRC_Routing.rpt](doc/DRC_Routing.rpt).
+
+Kennzahlen: Bahnlänge L1 693 mm, L4 436 mm; 316 Vias (148 GND-Heftung, 62 Handrouting, 57 Flächenanbindung,
+26 Freerouting, 23 Nacharbeit).
+
+### Bilder
+
+| | |
+|---|---|
+| L1 + L4 | ![L1 und L4](doc/Routing_3_L1_L4.png) |
+| L1 (Bestückungsseite, mit Bestückungsdruck) | ![L1](doc/Routing_4_L1.png) |
+| L4 | ![L4](doc/Routing_5_L4.png) |
+| L2 – GND-Ebene | ![L2](doc/Routing_6_L2.png) |
+| L3 – geteilte Ebene VIN_SYS / 3V3 | ![L3](doc/Routing_7_L3.png) |
+| 3D oben | ![3D oben](doc/Routing_8_3D_oben.png) |
+| 3D unten | ![3D unten](doc/Routing_9_3D_unten.png) |
+
+## Reproduktion
+
+```
+python3 tools/place_v2.py        LandyHeater.kicad_pcb
+python3 tools/route_manual.py    LandyHeater.kicad_pcb
+python3 tools/route_planevias.py LandyHeater.kicad_pcb
+python3 tools/freeroute.py       LandyHeater.kicad_pcb   # zufallsgesteuert – Ergebnis ist im Board festgeschrieben
+python3 tools/route_finish.py    LandyHeater.kicad_pcb
+python3 tools/silkscreen.py      LandyHeater.kicad_pcb
+python3 tools/zones.py           LandyHeater.kicad_pcb --fill-all
+python3 tools/stitch_gnd.py      LandyHeater.kicad_pcb
+python3 tools/check_routing.py   LandyHeater.kicad_pcb
+```
+
+Freerouting ist nicht deterministisch; sein Ergebnis liegt als Gruppe „Freerouting (tools/freeroute.py)" im Board.
+Alle übrigen Schritte erzeugen ihre Gruppen bei jedem Lauf identisch neu.
+
+## Abweichungen und offene Punkte
+
+| Nr. | Punkt | Status |
+|---|---|---|
+| R-01 | USB-Paar 0,25/0,15 mm statt 0,25/0,13 mm (Netzklassen-Abstand nicht gelockert), ≈ 92 Ω | mit JLCPCB-Impedanzrechner bestätigen (P3-03) |
+| R-02 | Power-Netze der Taster-LED (LED_CC_PLUS/LED_PWM_MINUS) und die Diagnose-Zuleitungen mit 0,4 mm statt Netzklassen-Vorgabe 0,65 mm geroutet (Strom ≤ 50 mA bzw. ~1 mA) | Netzklassenbreite ist Vorgabe, keine DRC-Regel; zur Kenntnis |
+| R-03 | Routingbedingte Platzierungsänderungen: USB-Block (U1, D3, R1, R2, C17, C18, R6, C4) und R33 ↔ R34 | oben begründet |
+| R-04 | D− wechselt am Stecker einmal auf L4 (B7-Brücke, 1,5 mm); Bezugsebene dort L3 (3V3) statt GND | für USB Full Speed unkritisch |
+| R-05 | 6 spitze Winkel an kurzen Stichenden | kosmetisch, optional in KiCad nacharbeiten |
+| R-06 | ESP32-Modul ohne 3D-Modell im 3D-Bild | nur Darstellung |
+| R-07 | Footprint-Filter F1 (PTC) | Phase 5 (Bauteilwahl PTC/Ferrit) |
+
+## Nächster Schritt
+
+Phase 5 – Fertigungsdaten JLCPCB (Gerber/Bohrdaten, BOM mit LCSC-Nummern, Bestückungsdaten), DC-Bias-Prüfung,
+Impedanzbestätigung, 3D-Kontrolle.

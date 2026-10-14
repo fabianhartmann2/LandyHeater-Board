@@ -1,0 +1,18 @@
+** Drc report for LandyHeater.kicad_pcb **
+** Created on 2026-10-14T22:46:44 **
+** Report includes: Errors, Warnings, Exclusions **
+
+** Found 0 DRC violations **
+
+** Found 0 unconnected pads **
+
+** Found 1 Footprint errors **
+[footprint_filters_mismatch]: Fuse:Fuse_0805_2012Metric doesn't match symbol's footprint filters (*polyfuse* *PTC*)
+    Local override; warning
+    @(140.0000 mm, 134.6000 mm): Footprint F1
+
+** Ignored checks **
+    - Track endpoint not centered on via
+    - Tuning profile track geometries
+
+** End of Report **
