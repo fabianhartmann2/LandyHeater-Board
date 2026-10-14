@@ -38,7 +38,7 @@ P.update({
     # Status-LEDs links am Modul in einer Spalte mit ihren Widerständen, sichtbar (G-06)
     'D20': (144.5, 107.4, 180), 'D21': (144.5, 111.0, 180),
     # Passermarken (G-10): unsymmetrisches Dreieck, >= 3,35 mm vom Rand, 2 mm Freiraum
-    'FID1': (104.5, 140.5, 0), 'FID2': (175.5, 140.5, 0), 'FID3': (127.0, 115.75, 0),
+    'FID1': (104.5, 140.5, 0), 'FID2': (175.5, 140.5, 0), 'FID3': (124.0, 116.75, 0),
 })
 
 # ---------------------------------------------------------------------------------------------

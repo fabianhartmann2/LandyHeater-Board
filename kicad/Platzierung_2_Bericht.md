@@ -55,7 +55,7 @@ Dieser Bericht ist der **Platzierungsmeilenstein**. Geroutet wird erst nach sein
 | B8 1-Wire | D9 90° mit Pins zu J3.2/J3.1, GND oben; U8 mit C23 (VIN) und C24 (VOUT) direkt am Bauteil | TPS22945 11.1; Y-06 |
 | B9 Taster/Ring-LED | D10 an J4.1; F1 im LED-Plus-Pfad zu J4.3; U9 mit freier Fläche um die OUT-Pins | BCR421: Wärme über die OUT-Pins (Kupferfläche im Routing) |
 | Testpunkte | blockweise in Reihen: Buck (VIN_SYS, GND, 3V3), AUTOTERM (2 Reihen), MCU (INT, SDA, SCL, EN, BUTTON), UART/BOOT/GND zwischen den Tastern | A16; zugänglich, nicht verstreut |
-| Passermarken | (104,5/140,5), (175,5/140,5), (127,0/115,75): unsymmetrisches Dreieck | G-10 |
+| Passermarken | (104,5/140,5), (175,5/140,5), (124,0/116,75): unsymmetrisches Dreieck, abseits der Routing-Kanäle (Probelauf, Abschnitt 10) | G-10 |
 
 **Abweichungen vom Floorplan (begründet):**
 1. Die 12V/USB-Dioden D15/D16, der DIAG-Taster und R31 liegen links unter H1 außerhalb von Z3. So bleibt das LED-Bild frei für Beschriftung.
@@ -126,6 +126,7 @@ Abstände Padmitte zu Padmitte.
 | K-01 | Erster Entwurf: BAS116 direkt über der LED-Reihe, kein Platz für G-01-Beschriftung | Diagnosebereich neu geordnet: LED-Bild frei, Unterbau in zwei Reihen darunter |
 | K-02 | Bauteile direkt vor den Modulpads 4–12 (Routing-Engpass, Signale nur durch 0,2-mm-Spalte) | Fan-out-Streifen freigehalten, RESET-Taster an den rechten Rand, U5/C16/R12/R13 nach links |
 | K-03 | Courtyard-Kollisionen D4/TP5, D9/R20, BT1/SW1, D18/Q1, D15/D16 mit H1 | Positionen korrigiert, Prüfung ohne Befund |
+| K-05 | Passermarke FID3 lag in einem Routing-Kanal (AUTOTERM, 3V3): Freiraum 0,6 mm und Maskenöffnung verletzt (Probelauf 1) | FID3 nach (124,0/116,75) an eine Stelle ohne Leiterbahnverkehr |
 | K-04 | 38 Footprints mit Rundungsabweichungen von 1 nm zur Bibliothek (DRC lib_footprint_mismatch) | aus der Bibliothek neu geladen; Pads, Netze, Felder und Schaltplanbezug nachweislich unverändert. U4 und J5 tragen jetzt die Bibliotheks-Montageart „SMD“ |
 
 ## 7. DRC (Projektregeln, mit Schaltplan-Parität)
@@ -144,9 +145,9 @@ Vollständiger Bericht: `output/drc.rpt` (wird nicht versioniert, mit dem Befehl
 
 | # | Punkt |
 |---|---|
-| E-02 | **Bestückungsdruck:** Vorschlag: Referenzbezeichner nur auf der Bestückungszeichnung (F.Fab, für JLCPCB nicht nötig). Der Silkscreen trägt die Y-08-Inhalte: Steckerbezeichnungen und Pin 1, Polaritäten, Batteriepolung, RESET/BOOT/DIAG, Status-LEDs, Energiefluss-Bild, Revision, Testpunktnamen. Alternative: alle Referenzen auf dem Silkscreen, dann mit 0,8 mm Schrift und Lageoptimierung, auf 80 × 50 mm bei 139 Teilen nur eingeschränkt lesbar. |
+| E-02 | **Bestückungsdruck – entschieden 2026-10-14:** Referenzbezeichner nur auf der Bestückungszeichnung (F.Fab). Der Silkscreen trägt die Y-08-Inhalte: Steckerbezeichnungen und Pin 1, Polaritäten, Batteriepolung, RESET/BOOT/DIAG, Status-LEDs, Energiefluss-Bild, Revision, Testpunktnamen. Umsetzung nach dem Routing-Probelauf. |
 | R-01 | Ratsnest-Kreuzungen langsamer Diagnose-/Steuerleitungen erfordern Lagenwechsel auf L3/L4. Akzeptiert, Machbarkeit im Routing zu bestätigen. |
-| R-02 | Optional: Routbarkeits-Probelauf mit Freerouting auf einer Kopie (nicht installiert; Download freerouting.jar von GitHub nötig). |
+| R-02 | Routbarkeits-Probelauf mit Freerouting 2.1.0 auf einer Kopie: beauftragt 2026-10-14, Ergebnis siehe Abschnitt 10. |
 | R-03 | U4/J5 als „SMD“ in der Bestückungsdatei; THT-Schirmlaschen von J5 bei der JLCPCB-Bestellung prüfen (Phase 5). |
 | R-04 | C1 (Elko) und BT1 sind die schwersten Teile. C1 liegt ≈ 17 mm von H3; Befestigung gegen Vibration (M-03) bei Bedarf mit Kleber. |
 
@@ -157,8 +158,35 @@ Vollständiger Bericht: `output/drc.rpt` (wird nicht versioniert, mit dem Befehl
 - [x] Elektrische Bewertung (Schritt 4)
 - [x] Validierung: Platzierungsprüfung, DRC, Parität (Schritt 5)
 - [x] Rendering und Positionstabelle
-- [ ] Entscheidung E-02 (Bestückungsdruck)
+- [x] Entscheidung E-02 (Bestückungsdruck): Referenzen auf F.Fab, Silkscreen nach Y-08
+- [x] Routbarkeits-Probelauf (Abschnitt 10)
 - [ ] Freigabe durch Auftraggeber → danach Routing (Schritt 6)
+
+## 10. Routbarkeits-Probelauf (Freerouting 2.1.0, nur Bewertung)
+
+Der Probelauf läuft auf einer Kopie und dient nur der Bewertung der Platzierung, nicht als Layout. Freerouting 2.1.0 von `github.com/freerouting/freerouting` ist die letzte Version für Java 21.
+
+**Aufbau:**
+- L2 als GND-Ebene (Lagentyp „power“), damit keine Signale auf L2 laufen.
+- Abstand 0,2 mm (USB 0,15 mm), strenger als die Netzklassen.
+- Versorgungsnetze 0,4 mm statt 0,65 mm, als Ersatz für Einschnürungen an Feinraster-Pins.
+- Auftragszeitlimit 5 min.
+- Bewertung mit den echten Projektregeln (`.kicad_dru`).
+
+| Kennzahl | Lauf 1 | Lauf 2 (FID3 verschoben, Versorgung 0,4 mm) |
+|---|---|---|
+| Verletzungen der Projektregeln | 6 (alle an FID3) | **0** |
+| Vias | 21 | 31 |
+| offene Verbindungen gesamt | 102 | 82 |
+| davon Versorgungs-/Flächennetze | 99 | 79 (GND 60, 3V3 11, VBUS 5, VIN_SYS, 12V_PROT, VBUS_PROT je 1) |
+| davon Signale | 1 | 3 (U2-ILM 1,4 mm, U2-ITIMER 1,9 mm, LED_PWM_MINUS 6 mm) |
+
+**Bewertung:**
+- **Signale:** Alle Signale bis auf drei kurze Verbindungen wurden geroutet, fast vollständig auf L1. Die drei offenen Signalverbindungen sind gerade, freie Strecken an den VQFN-HR-Sonderpads der eFuse bzw. am THT-Pad von J4. Freerouting kann dort mit fester Breite nicht einschnüren; von Hand sind sie trivial.
+- **Flächennetze:** Freerouting bindet SMD-Pads nicht selbst an die Ebenen an. Nachweis der Machbarkeit mit `tools/check_plane_vias.py`: **alle 107 Pads** von GND, 3V3_CORE und VIN_SYS haben Platz für ein eigenes Via (0,6/0,3 mm, kein Via-in-Pad, 0,2 mm zu fremden Netzen) innerhalb von 1,2 mm.
+- **Fazit:** Die Platzierung ist routbar. Engpässe gab es nur an FID3 (behoben).
+
+![Probelauf 2 (Bewertung, nicht das Layout)](doc/Platzierung_3_Routing_Probelauf.png)
 
 ## Anhang: Positionen (exakt, aus der Leiterplatte)
 
@@ -298,7 +326,7 @@ Vollständiger Bericht: `output/drc.rpt` (wird nicht versioniert, mit dem Befehl
 |  | R35 | 100k | 144.50 | 116.40 | 0° |
 | Mechanik | FID1 | Fiducial | 104.50 | 140.50 | 0° |
 |  | FID2 | Fiducial | 175.50 | 140.50 | 0° |
-|  | FID3 | Fiducial | 127.00 | 115.75 | 0° |
+|  | FID3 | Fiducial | 124.00 | 116.75 | 0° |
 |  | H1 | M3 | 104.00 | 104.00 | 0° |
 |  | H2 | M3 | 176.00 | 104.00 | 0° |
 |  | H3 | M3 | 104.00 | 146.00 | 0° |
