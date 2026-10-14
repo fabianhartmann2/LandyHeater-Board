@@ -48,9 +48,40 @@ die Regel „USB-Paar 0,13" in `LandyHeater.kicad_dru` greift daher nicht. Statt
 Paar mit 0,25/0,15 mm geführt (≈ 92 Ω, abzugleichen mit dem JLCPCB-Rechner, P3-03). Für USB Full Speed (12 Mbit/s)
 ist das unkritisch (USB 2.0: 90 Ω ± 15 %).
 
+### 6.3 Fortsetzung – Engstellen von Hand (Blöcke E–G)
+
+| Block | Inhalt | Grund |
+|---|---|---|
+| E | U7 (VSSOP, 0,5 mm): GND/3V3-Innenpins unter den Gehäusekörper (1,55 mm Reihenabstand) zu je einem Via; U8.2 (SOT-23-5) zwischen Pin 3/4 nach unten zum Via | kein Platz für Vias neben den Innenpins |
+| F | Linke Modul-Pinreihe: EN direkt C15.1 → U5.1 (Gasse zwischen C15 und U5); STATUS_LED_1/2 über L4 zu Landungs-Vias, dann auf L1 an die LED-Spalte; DIAG_RUN auf L1 unter U5 hindurch zum Via; SDA/SCL-Pull-ups R12/R13 in der Gasse vor der Via-Spalte; Fan-out-Vias (x 151,45) für RTC_INT, AUTOTERM TX/RX/OE, 1WIRE_DQ (Pin 21) | Freerouting findet im Streifen zwischen Modul und U5/C16/R12/R13 keinen Weg (Probeläufe 13–100 offen) |
+| G | Ausgänge der Diagnose-Zuleitungen 12V_PROT/VBUS_PROT mit Via außerhalb ihrer Netzflächen | Rest auf L4 (statisch, ~1 mA; Ausnahme zu Y-03) |
+
+Routingbedingte Platzierungsänderung: **R33 ↔ R34 getauscht.** Vorher wechselten sich die beiden Status-LED-Netze
+in der Widerstandsspalte ab (R32 LED1, R33 LED2, R34 LED1, R35 LED2) – jede Lagenzuordnung erzwang Kreuzungen mit den
+DIAG/RTC/I2C-Leitungen. Jetzt liegen je Netz die Pads untereinander; D21 erreicht R33.2 unter dem R34-Körper.
+
+## 6.4 Flächenanbindung
+
+`tools/route_planevias.py`: jedes SMD-Pad von GND/3V3_CORE/VIN_SYS ohne Verbindung zu seiner Ebene bekommt ein
+Via mit kurzer Bahn (0,6/0,3 mm, kein Via-in-Pad, 0,2 mm zu fremdem Kupfer aller Lagen, L3-Teilung beachtet:
+3V3-/VIN-Vias nur über ihrer Teilfläche; keine Vias unter dem Modulkörper; unter der Knopfzelle nur GND).
+Ergebnis: alle Flächenpads angebunden (59 Vias, Rest über Handrouting).
+
+## 6.5 Freerouting (langsame Signale)
+
+`tools/freeroute.py` (Hand- und Flächenrouting gesperrt; Arbeitskopie in `build/freeroute`):
+
+- Netzflächen „R: …" zusätzlich als Sperrflächen exportiert – Freerouting 2.1.0 behandelt DSN-Flächen auf Signallagen
+  als durchlässig (Probe: 12V_PROT und DIAG_K quer durch die Reglerflächen, SW-Fläche zerteilt).
+- L3 als Versorgungslage exportiert (kein Routing auf der geteilten Ebene).
+- Viakosten 8 statt 50 (mit 50 meidet Freerouting L4 fast ganz); mehrere Läufe nacheinander, bester wird übernommen;
+  harte Zeitgrenze je Lauf (ein Durchgang lief einmal 34 min); Nutzungsstatistik von Freerouting abgeschaltet.
+- Übernahme nur neuer Bahnen auf offenen Signalnetzen (keine Zusätze auf Flächennetzen und fertig geroutenen Netzen).
+
+Stand: Freerouting-Ergebnis noch nicht im Projekt; bester Probelauf vor den letzten Handrouten 19 offene Verbindungen.
+
 ## Nächste Schritte
 
-1. Modul-Fan-out (Pins 4–12) und restliche Flächen-Vias (GND/3V3/VIN_SYS).
-2. Freerouting für die langsamen Signale, Handrouten fixiert.
+1. Freerouting für die restlichen Signale, verbleibende Verbindungen von Hand.
 3. Nacharbeit (45°, Umwege, Vias, GND-Rückführungsvias an Lagenwechseln), keine Vias unter der BT1-Klammer.
 4. Außenlagen füllen (`tools/zones.py --fill-all`), GND-Stitching, DRC, Abschlussbericht mit Bildern.

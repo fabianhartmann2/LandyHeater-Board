@@ -127,7 +127,8 @@ P.update({
     # RTC-Streifen unter BT1
     'D5': (131.0, 116.4, 0), 'D6': (135.2, 116.4, 0),
     # Status und I2C-/INT-Pull-ups links am Modul
-    'R32': (144.5, 109.2, 0), 'R33': (144.5, 112.8, 0), 'R34': (144.5, 114.6, 0), 'R35': (144.5, 116.4, 0),
+    # R33/R34 getauscht (Routing 6.5): je Status-LED-Netz liegen die beiden Pads untereinander statt verschachtelt
+    'R32': (144.5, 109.2, 0), 'R34': (144.5, 112.8, 0), 'R33': (144.5, 114.6, 0), 'R35': (144.5, 116.4, 0),
     'R14': (144.5, 118.2, 0),
     'R12': (149.1, 114.4, 0), 'R13': (149.1, 116.2, 0),
     # AUTOTERM
