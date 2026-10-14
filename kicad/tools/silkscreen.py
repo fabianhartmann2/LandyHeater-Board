@@ -8,6 +8,7 @@
 Aufruf (KiCad-Python, Board im Projektordner): python3 tools/silkscreen.py LandyHeater.kicad_pcb
 """
 import math
+import os
 import sys
 import pcbnew
 
@@ -51,12 +52,14 @@ TP_NAMES = {
 def main(path):
     b = pcbnew.LoadBoard(path); mm, fm = pcbnew.ToMM, pcbnew.FromMM
     V = lambda x, y: pcbnew.VECTOR2I(fm(x), fm(y))
-    # alte Werkzeug-Gruppe entfernen
-    for g in list(b.Groups()):
-        if g.GetName() == GROUP:
-            for it in list(g.GetItems()):
-                b.Remove(it)
-            b.Remove(g)
+    # alte Werkzeug-Gruppe entfernen, speichern und neu starten: nach BOARD.Remove() verliert die SWIG-Bindung
+    # die Typen der übrigen Objekte (Footprints werden unbrauchbar)
+    old_g = [g for g in b.Groups() if g.GetName() == GROUP]
+    if old_g:
+        for it in [it for g in old_g for it in g.GetItems()] + old_g:
+            b.Remove(it)
+        b.Save(path); sys.stdout.flush()
+        os.execv(sys.executable, [sys.executable, os.path.abspath(__file__), path])
     grp = pcbnew.PCB_GROUP(b); grp.SetName(GROUP); b.Add(grp)
 
     fps = {f.GetReference(): f for f in b.GetFootprints()}
@@ -135,6 +138,7 @@ def main(path):
     b.Save(path)
     print(f'Silkscreen: {len(LABELS)} feste Texte, {len(LINES)} Linien, {len(TP_NAMES)} Testpunkte')
     for r in report: print('  ', r)
+    sys.stdout.flush(); os._exit(0)   # Python-Aufräumen kann nach Save abstürzen
 
 
 if __name__ == '__main__':

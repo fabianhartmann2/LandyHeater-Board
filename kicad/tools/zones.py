@@ -54,7 +54,7 @@ def fill(path, fill_all):
     pcbnew.ZONE_FILLER(b).Fill(b.Zones())
     if not fill_all:   # Außenlagen erst nach dem Routing füllen (sonst blockieren sie Leiterbahnen)
         for z in b.Zones():
-            if not z.GetIsRuleArea() and z.GetLayer() in (pcbnew.F_Cu, pcbnew.B_Cu):
+            if z.GetZoneName() in ('GND L1', 'GND L4'):   # nur die Außenlagen-Füllungen, nicht die Leistungsflächen
                 z.UnFill()
     b.Save(path)
 

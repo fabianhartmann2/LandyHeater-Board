@@ -51,8 +51,8 @@ P.update({
     'L1': (115.6, 117.6, 270),       # Pad 1 (SW) unten neben U3.5, Pad 2 (VOUT) oben
     # U2 TPS25947 unter J5; EN/OVLO links (Teiler), ILM/ITIMER/DVDT/GND rechts
     'U2': (165.5, 136.5, 0),
-    # U1 TPD2EUSB30 direkt an J5 D+/D- (TI 10.1), Durchfluss: D+ 128,35 / D- 127,65 = J5 A6/A7
-    'U1': (170.1, 128.0, 90),
+    # U1 TPD2EUSB30: 4,1 mm vor den J5-Pads (Routing 6.3: Raum für die A/B-Verbindungen und CC-Ausgänge am Stecker)
+    'U1': (167.0, 128.0, 90),
     # U7 TXU0202, 180°: B-Seite (5 V, Kabel) unten zu J2, A-Seite (3,3 V) oben zum Modul
     'U7': (128.6, 128.3, 180),
     # U8 TPS22945 über J3
@@ -91,13 +91,13 @@ P.update({
     'R8': (178.9, 121.0, 90),        # BOOT-Pull-up
     'C19': (141.6, 115.6, 90),       # RTC VDD
     # USB-Eingang
-    'D3': (169.6, 130.6, 0),         # VBUS-ESD an J5 VBUS (130,4)
-    'R2': (168.0, 125.3, 0),         # CC2 (126,25) oberhalb des Paares
-    'R1': (166.6, 129.9, 0),         # CC1 (129,25) unterhalb des Paares
-    'C17': (164.0, 126.0, 270), 'C18': (164.0, 130.0, 90),    # DNP, Pads direkt am Paar (stubfrei)
+    'D3': (169.6, 130.6, 180),       # VBUS-ESD an J5 VBUS (130,4); VBUS-Pad zum Stecker (Routing 6.3)
+    'R2': (168.0, 125.3, 180),       # CC2 (126,25) oberhalb des Paares, CC-Pad zum Stecker (Routing 6.3)
+    'R1': (166.6, 129.9, 180),       # CC1 (129,25) unterhalb des Paares, CC-Pad zum Stecker (Routing 6.3)
+    'C17': (164.0, 125.5, 90), 'C18': (164.0, 130.45, 270),   # DNP, Signalpad berührt die Paarleitung (stubfrei)
     'C2': (165.4, 133.3, 0),         # eFuse IN
     'R3': (161.9, 134.4, 0), 'R4': (161.9, 136.2, 0), 'R5': (161.9, 138.0, 0),   # Teiler an EN/OVLO
-    'R6': (168.6, 136.3, 0), 'C3': (168.6, 138.0, 0), 'C4': (168.6, 134.6, 0),   # ILM, DVDT, ITIMER
+    'R6': (168.6, 135.9, 0), 'C3': (168.6, 138.0, 0), 'C4': (168.6, 134.3, 0),   # ILM, DVDT, ITIMER; GND-Pin 8 frei nach rechts (Routing 6.3)
     'C5': (165.6, 140.0, 0),         # eFuse OUT
     'D4': (165.0, 143.6, 0),         # ODER-Diode VBUS_PROT -> VIN_SYS
     # AUTOTERM

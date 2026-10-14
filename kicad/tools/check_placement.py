@@ -34,8 +34,8 @@ DIST = [
     (('R9', '1'), ('U4', '13'), 2.5, 'Espressif: USB-R am Modul'),
     (('R10', '1'), ('U4', '14'), 2.5, 'Espressif: USB-R am Modul'),
     (('R11', '1'), ('U4', '37'), 3.5, 'Espressif: UART-R am Modul'),
-    (('U1', '1'), ('J5', 'A6'), 2.5, 'TPD2EUSB30 10.1 am Stecker'),
-    (('U1', '2'), ('J5', 'A7'), 2.5, 'TPD2EUSB30 10.1 am Stecker'),
+    (('U1', '1'), ('J5', 'A6'), 5.0, 'TPD2EUSB30 10.1 am Stecker (Abstand für A/B-Verbindung, Routing 6.3)'),
+    (('U1', '2'), ('J5', 'A7'), 5.0, 'TPD2EUSB30 10.1 am Stecker (Abstand für A/B-Verbindung, Routing 6.3)'),
     (('D3', '1'), ('J5', 'A4'), 6.0, 'Y-06 VBUS-ESD am Stecker'),
     (('D1', '2'), ('J1', '1'), 5.0, 'Y-06 TVS am Stecker'),
     (('D7', '1'), ('J2', '1'), 5.0, 'Y-06 ESD am Stecker'),
@@ -53,7 +53,7 @@ KEEPOUT = [
     ('Fan-out Modulpads 4-12', 150.9, 107.2, 152.2, 118.0, set()),     # ab Oberkante Via Pad 4
     ('USB-Paar unter dem Modul', 149.0, 122.45, 161.6, 124.8, set()),
     ('USB-Paar senkrecht', 159.8, 122.45, 161.6, 129.2, set()),
-    ('USB-Paar zu U1', 161.6, 126.9, 169.35, 129.1, {'C17', 'C18'}),   # DNP-Abgleich direkt am Paar (stubfrei)
+    ('USB-Paar zu U1', 161.6, 126.6, 166.2, 129.1, {'C17', 'C18'}),   # DNP-Abgleich direkt am Paar (stubfrei)
 ]
 POLAR_SAME = [['D11', 'D12', 'D13', 'D19', 'D14'], ['D20', 'D21']]
 
