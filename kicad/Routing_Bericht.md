@@ -54,6 +54,7 @@ ist das unkritisch (USB 2.0: 90 Ω ± 15 %).
 |---|---|---|
 | E | U7 (VSSOP, 0,5 mm): GND/3V3-Innenpins unter den Gehäusekörper (1,55 mm Reihenabstand) zu je einem Via; U8.2 (SOT-23-5) zwischen Pin 3/4 nach unten zum Via | kein Platz für Vias neben den Innenpins |
 | F | Linke Modul-Pinreihe: EN direkt C15.1 → U5.1 (Gasse zwischen C15 und U5); STATUS_LED_1/2 über L4 zu Landungs-Vias, dann auf L1 an die LED-Spalte; DIAG_RUN auf L1 unter U5 hindurch zum Via; SDA/SCL-Pull-ups R12/R13 in der Gasse vor der Via-Spalte; Fan-out-Vias (x 151,45) für RTC_INT, AUTOTERM TX/RX/OE, 1WIRE_DQ (Pin 21) | Freerouting findet im Streifen zwischen Modul und U5/C16/R12/R13 keinen Weg (Probeläufe 13–100 offen) |
+| H | Lange L4-Trassen: DIAG_RUN (y 111,0) zu TP28/R31 mit Abzweig zu Q1; 12V_PROT und VBUS_PROT parallel (x 113,0/113,6) zu R26/R27, VBUS_PROT auf y 131,5 innerhalb der VIN-Hälfte von L3 | Freerouting schafft lange Verbindungen mit Lagenwechsel nicht |
 | G | Ausgänge der Diagnose-Zuleitungen 12V_PROT/VBUS_PROT mit Via außerhalb ihrer Netzflächen | Rest auf L4 (statisch, ~1 mA; Ausnahme zu Y-03) |
 
 Routingbedingte Platzierungsänderung: **R33 ↔ R34 getauscht.** Vorher wechselten sich die beiden Status-LED-Netze
@@ -78,7 +79,8 @@ Ergebnis: alle Flächenpads angebunden (59 Vias, Rest über Handrouting).
   harte Zeitgrenze je Lauf (ein Durchgang lief einmal 34 min); Nutzungsstatistik von Freerouting abgeschaltet.
 - Übernahme nur neuer Bahnen auf offenen Signalnetzen (keine Zusätze auf Flächennetzen und fertig geroutenen Netzen).
 
-Stand: Freerouting-Ergebnis noch nicht im Projekt; bester Probelauf vor den letzten Handrouten 19 offene Verbindungen.
+Stand: Freerouting-Ergebnis noch nicht im Projekt. Nach Block H erreicht Freerouting 13 offene Verbindungen je Lauf
+(Probe: 23 offene KiCad-Verbindungen, überwiegend kurze lokale Verbindungen, die Freerouting durch eigene Bahnen verbaut).
 
 ## Nächste Schritte
 
