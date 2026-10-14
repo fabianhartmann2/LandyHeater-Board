@@ -188,7 +188,7 @@ def main(path):
         for k in range(16):
             ang = 2 * math.pi * k / 16
             ps.Append(pcbnew.FromMM(x + 2.0 * math.cos(ang)), pcbnew.FromMM(y + 2.0 * math.sin(ang)))
-        z.SetOutline(ps)
+        z.SetOutline(ps); ps.thisown = 0   # Zone übernimmt das Polygon (sonst gibt Python es frei -> Absturz)
         b.Add(z)
     b.Save(path)
     print(f'{len(P)} von {len(fps)} Footprints platziert, 3 Sperrflächen um die Passermarken')
