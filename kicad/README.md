@@ -9,7 +9,7 @@ Neuaufbau nach [Anforderungsdokument v2.0](../docs/Anforderungsdokument_Neuentwi
 | 0 – Projekt, Lagen, Regeln, Bibliotheken | freigegeben (2026-10-12) |
 | 1 – Bauteilauswahl, Symbole, Footprints | freigegeben (2026-10-12) – [Bauteilliste](Bauteilliste.md) |
 | 2 – Schaltplan | freigegeben (2026-10-13) – [Review](Phase2_Schaltplanreview.md), [Entwurf](Schaltungsentwurf.md) |
-| 3 – Platzierung (Meilenstein nach [Layout-Anleitung](../docs/PCB_Layout_Engineering_Instructions.md)) | Schritt 1–2 freigegeben: [Analyse und Floorplan](Platzierung_1_Analyse_Floorplan.md) · Schritt 3–5 zur Freigabe: [Platzierungsbericht](Platzierung_2_Bericht.md) · [Transientennachweis V-01](Phase3_Platzierung.md#6-transientennachweis-v-01-p-03) |
+| 3 – Platzierung (Meilenstein nach [Layout-Anleitung](../docs/PCB_Layout_Engineering_Instructions.md)) | Schritt 1–2 freigegeben: [Analyse und Floorplan](Platzierung_1_Analyse_Floorplan.md) · Schritt 3–5 freigegeben (2026-10-14): [Platzierungsbericht](Platzierung_2_Bericht.md) · Schritt 6 Routing in Arbeit · [Transientennachweis V-01](Phase3_Platzierung.md#6-transientennachweis-v-01-p-03) |
 
 ## Struktur
 

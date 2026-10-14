@@ -161,7 +161,7 @@ Vollständiger Bericht: `output/drc.rpt` (wird nicht versioniert, mit dem Befehl
 - [x] Rendering und Positionstabelle
 - [x] Entscheidung E-02 (Bestückungsdruck): Referenzen auf F.Fab, Silkscreen nach Y-08
 - [x] Routbarkeits-Probelauf (Abschnitt 10)
-- [ ] Freigabe durch Auftraggeber → danach Routing (Schritt 6)
+- [x] Freigabe durch Auftraggeber (2026-10-14) → Routing (Schritt 6)
 
 ## 10. Routbarkeits-Probelauf (Freerouting 2.1.0, nur Bewertung)
 
