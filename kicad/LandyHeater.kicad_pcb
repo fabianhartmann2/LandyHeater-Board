@@ -30348,5 +30348,107 @@
 		(layer "Edge.Cuts")
 		(uuid "b7e5e2cf-ca4b-48ec-a6ed-587b03d12958")
 	)
+	(zone
+		(layers "F.Cu" "B.Cu" "In1.Cu" "In2.Cu")
+		(uuid "bad9ec35-6a71-430d-9549-d7f6e3ea1be4")
+		(name "Sperrfläche FID2")
+		(hatch edge 0.5)
+		(connect_pads
+			(clearance 0)
+		)
+		(min_thickness 0.25)
+		(keepout
+			(tracks not_allowed)
+			(vias not_allowed)
+			(pads allowed)
+			(copperpour not_allowed)
+			(footprints allowed)
+		)
+		(placement
+			(enabled no)
+			(sheetname "")
+		)
+		(fill
+			(thermal_gap 0.5)
+			(thermal_bridge_width 0.5)
+			(island_removal_mode 0)
+		)
+		(polygon
+			(pts
+				(xy 177.5 140.5) (xy 177.347759 141.265366) (xy 176.914213 141.914213) (xy 176.265366 142.347759)
+				(xy 175.5 142.5) (xy 174.734633 142.347759) (xy 174.085786 141.914213) (xy 173.65224 141.265366)
+				(xy 173.5 140.5) (xy 173.65224 139.734633) (xy 174.085786 139.085786) (xy 174.734633 138.65224)
+				(xy 175.5 138.5) (xy 176.265366 138.65224) (xy 176.914213 139.085786) (xy 177.347759 139.734633)
+			)
+		)
+	)
+	(zone
+		(layers "F.Cu" "B.Cu" "In1.Cu" "In2.Cu")
+		(uuid "f950dc6c-c1c1-4e3e-8d55-ed8cf32d3c02")
+		(name "Sperrfläche FID3")
+		(hatch edge 0.5)
+		(connect_pads
+			(clearance 0)
+		)
+		(min_thickness 0.25)
+		(keepout
+			(tracks not_allowed)
+			(vias not_allowed)
+			(pads allowed)
+			(copperpour not_allowed)
+			(footprints allowed)
+		)
+		(placement
+			(enabled no)
+			(sheetname "")
+		)
+		(fill
+			(thermal_gap 0.5)
+			(thermal_bridge_width 0.5)
+			(island_removal_mode 0)
+		)
+		(polygon
+			(pts
+				(xy 126 116.75) (xy 125.847759 117.515366) (xy 125.414213 118.164213) (xy 124.765366 118.597759)
+				(xy 124 118.75) (xy 123.234633 118.597759) (xy 122.585786 118.164213) (xy 122.15224 117.515366)
+				(xy 122 116.75) (xy 122.15224 115.984633) (xy 122.585786 115.335786) (xy 123.234633 114.90224) (xy 124 114.75)
+				(xy 124.765366 114.90224) (xy 125.414213 115.335786) (xy 125.847759 115.984633)
+			)
+		)
+	)
+	(zone
+		(layers "F.Cu" "B.Cu" "In1.Cu" "In2.Cu")
+		(uuid "ffd31048-133d-496a-a68f-ab9aba931749")
+		(name "Sperrfläche FID1")
+		(hatch edge 0.5)
+		(connect_pads
+			(clearance 0)
+		)
+		(min_thickness 0.25)
+		(keepout
+			(tracks not_allowed)
+			(vias not_allowed)
+			(pads allowed)
+			(copperpour not_allowed)
+			(footprints allowed)
+		)
+		(placement
+			(enabled no)
+			(sheetname "")
+		)
+		(fill
+			(thermal_gap 0.5)
+			(thermal_bridge_width 0.5)
+			(island_removal_mode 0)
+		)
+		(polygon
+			(pts
+				(xy 106.5 140.5) (xy 106.347759 141.265366) (xy 105.914213 141.914213) (xy 105.265366 142.347759)
+				(xy 104.5 142.5) (xy 103.734633 142.347759) (xy 103.085786 141.914213) (xy 102.65224 141.265366)
+				(xy 102.5 140.5) (xy 102.65224 139.734633) (xy 103.085786 139.085786) (xy 103.734633 138.65224)
+				(xy 104.5 138.5) (xy 105.265366 138.65224) (xy 105.914213 139.085786) (xy 106.347759 139.734633)
+			)
+		)
+	)
 	(embedded_fonts no)
 )

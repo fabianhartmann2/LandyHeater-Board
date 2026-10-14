@@ -168,8 +168,25 @@ def main(path):
         f = fps[r]
         f.SetOrientationDegrees(rot)
         f.SetPosition(pcbnew.VECTOR2I(pcbnew.FromMM(x), pcbnew.FromMM(y)))
+    # Sperrflächen um die Passermarken (keine Leiterbahnen, Vias, Kupferflächen; Radius 2 mm), damit jeder
+    # Router – auch Freerouting, das den lokalen Freiraum des Fiducial-Pads nicht kennt – Abstand hält.
+    for z in list(b.Zones()):
+        if z.GetIsRuleArea() and z.GetZoneName().startswith('Sperrfläche FID'):
+            b.Remove(z)
+    for r in ('FID1', 'FID2', 'FID3'):
+        x, y, _ = P[r]
+        z = pcbnew.ZONE(b); z.SetIsRuleArea(True); z.SetZoneName(f'Sperrfläche {r}')
+        z.SetDoNotAllowTracks(True); z.SetDoNotAllowVias(True); z.SetDoNotAllowZoneFills(True)
+        z.SetDoNotAllowPads(False); z.SetDoNotAllowFootprints(False)
+        ls = pcbnew.LSET(); ls.AddLayer(pcbnew.F_Cu); ls.AddLayer(pcbnew.B_Cu); ls.AddLayer(pcbnew.In1_Cu); ls.AddLayer(pcbnew.In2_Cu)
+        z.SetLayerSet(ls)
+        o = z.Outline(); o.NewOutline()
+        for k in range(16):
+            ang = 2 * 3.141592653589793 * k / 16
+            o.Append(pcbnew.FromMM(x + 2.0 * __import__('math').cos(ang)), pcbnew.FromMM(y + 2.0 * __import__('math').sin(ang)))
+        b.Add(z)
     b.Save(path)
-    print(f'{len(P)} von {len(fps)} Footprints platziert')
+    print(f'{len(P)} von {len(fps)} Footprints platziert, 3 Sperrflächen um die Passermarken')
 
 
 if __name__ == '__main__':

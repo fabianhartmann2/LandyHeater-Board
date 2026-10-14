@@ -126,6 +126,7 @@ Abstände Padmitte zu Padmitte.
 | K-01 | Erster Entwurf: BAS116 direkt über der LED-Reihe, kein Platz für G-01-Beschriftung | Diagnosebereich neu geordnet: LED-Bild frei, Unterbau in zwei Reihen darunter |
 | K-02 | Bauteile direkt vor den Modulpads 4–12 (Routing-Engpass, Signale nur durch 0,2-mm-Spalte) | Fan-out-Streifen freigehalten, RESET-Taster an den rechten Rand, U5/C16/R12/R13 nach links |
 | K-03 | Courtyard-Kollisionen D4/TP5, D9/R20, BT1/SW1, D18/Q1, D15/D16 mit H1 | Positionen korrigiert, Prüfung ohne Befund |
+| K-06 | Freerouting ignoriert den lokalen Freiraum der Passermarken | Sperrflächen (Radius 2 mm, alle Kupferlagen) um FID1–FID3, Teil von `tools/place_v2.py` |
 | K-05 | Passermarke FID3 lag in einem Routing-Kanal (AUTOTERM, 3V3): Freiraum 0,6 mm und Maskenöffnung verletzt (Probelauf 1) | FID3 nach (124,0/116,75) an eine Stelle ohne Leiterbahnverkehr |
 | K-04 | 38 Footprints mit Rundungsabweichungen von 1 nm zur Bibliothek (DRC lib_footprint_mismatch) | aus der Bibliothek neu geladen; Pads, Netze, Felder und Schaltplanbezug nachweislich unverändert. U4 und J5 tragen jetzt die Bibliotheks-Montageart „SMD“ |
 
@@ -147,7 +148,7 @@ Vollständiger Bericht: `output/drc.rpt` (wird nicht versioniert, mit dem Befehl
 |---|---|
 | E-02 | **Bestückungsdruck – entschieden 2026-10-14:** Referenzbezeichner nur auf der Bestückungszeichnung (F.Fab). Der Silkscreen trägt die Y-08-Inhalte: Steckerbezeichnungen und Pin 1, Polaritäten, Batteriepolung, RESET/BOOT/DIAG, Status-LEDs, Energiefluss-Bild, Revision, Testpunktnamen. Umsetzung nach dem Routing-Probelauf. |
 | R-01 | Ratsnest-Kreuzungen langsamer Diagnose-/Steuerleitungen erfordern Lagenwechsel auf L3/L4. Akzeptiert, Machbarkeit im Routing zu bestätigen. |
-| R-02 | Routbarkeits-Probelauf mit Freerouting 2.1.0 auf einer Kopie: beauftragt 2026-10-14, Ergebnis siehe Abschnitt 10. |
+| R-02 | Routbarkeit nachgewiesen (Abschnitt 10, Lauf 9): 0 Verletzungen, alle Signale geroutet, 4 kurze Verbindungen von Hand. |
 | R-03 | U4/J5 als „SMD“ in der Bestückungsdatei; THT-Schirmlaschen von J5 bei der JLCPCB-Bestellung prüfen (Phase 5). |
 | R-04 | C1 (Elko) und BT1 sind die schwersten Teile. C1 liegt ≈ 17 mm von H3; Befestigung gegen Vibration (M-03) bei Bedarf mit Kleber. |
 
@@ -164,29 +165,41 @@ Vollständiger Bericht: `output/drc.rpt` (wird nicht versioniert, mit dem Befehl
 
 ## 10. Routbarkeits-Probelauf (Freerouting 2.1.0, nur Bewertung)
 
-Der Probelauf läuft auf einer Kopie und dient nur der Bewertung der Platzierung, nicht als Layout. Freerouting 2.1.0 von `github.com/freerouting/freerouting` ist die letzte Version für Java 21.
+Der Probelauf läuft immer auf einer Kopie, die Projektplatine bleibt ohne Leiterbahnen. Bewertet wird jeweils nach dem Import mit dem KiCad-DRC und den echten Projektregeln (`.kicad_dru`).
 
-**Aufbau:**
-- L2 als GND-Ebene (Lagentyp „power“), damit keine Signale auf L2 laufen.
-- Abstand 0,2 mm (USB 0,15 mm), strenger als die Netzklassen.
-- Versorgungsnetze 0,4 mm statt 0,65 mm, als Ersatz für Einschnürungen an Feinraster-Pins.
-- Auftragszeitlimit 5 min.
-- Bewertung mit den echten Projektregeln (`.kicad_dru`).
+**Werkzeuge:**
+- Freerouting 2.1.0 von `github.com/freerouting/freerouting`, die letzte Version für Java 21.
+- `tools/trial_plane_fanout.py` setzt die Ebenen-Vias. Grund: Die Fan-out-Funktion von Freerouting 2.1.0 bricht mit einer NullPointerException ab.
 
-| Kennzahl | Lauf 1 | Lauf 2 (FID3 verschoben, Versorgung 0,4 mm) |
-|---|---|---|
-| Verletzungen der Projektregeln | 6 (alle an FID3) | **0** |
-| Vias | 21 | 31 |
-| offene Verbindungen gesamt | 102 | 82 |
-| davon Versorgungs-/Flächennetze | 99 | 79 (GND 60, 3V3 11, VBUS 5, VIN_SYS, 12V_PROT, VBUS_PROT je 1) |
-| davon Signale | 1 | 3 (U2-ILM 1,4 mm, U2-ITIMER 1,9 mm, LED_PWM_MINUS 6 mm) |
+**Einstellungen:**
+- Abstand 0,2 mm (USB 0,15 mm).
+- Optimierer aus, weil Freerouting 2.1.0 mit Optimierer im Kommandozeilenbetrieb einen älteren Zwischenstand in die SES-Datei schreibt (nachgewiesen: 32 von 104 Netzen).
 
-**Bewertung:**
-- **Signale:** Alle Signale bis auf drei kurze Verbindungen wurden geroutet, fast vollständig auf L1. Die drei offenen Signalverbindungen sind gerade, freie Strecken an den VQFN-HR-Sonderpads der eFuse bzw. am THT-Pad von J4. Freerouting kann dort mit fester Breite nicht einschnüren; von Hand sind sie trivial.
-- **Flächennetze:** Freerouting bindet SMD-Pads nicht selbst an die Ebenen an. Nachweis der Machbarkeit mit `tools/check_plane_vias.py`: **alle 107 Pads** von GND, 3V3_CORE und VIN_SYS haben Platz für ein eigenes Via (0,6/0,3 mm, kein Via-in-Pad, 0,2 mm zu fremden Netzen) innerhalb von 1,2 mm.
-- **Fazit:** Die Platzierung ist routbar. Engpässe gab es nur an FID3 (behoben).
+| Lauf | Aufbau | Verletzungen | offen (KiCad) | davon Signale |
+|---|---|---:|---:|---|
+| 1 | L2 GND-Ebene, Versorgung 0,65 mm | 6 (FID3) | 102 | 1 |
+| 2 | FID3 verschoben, Versorgung 0,4 mm | 0 | 82 | 3 |
+| 3–4 | Freerouting-Fan-out | – | – | Abbruch (Fehler in Freerouting) |
+| 5–6 | eigene Ebenen-Vias, L3 = 3V3-Ebene | 4 (FID3) | 23 | 0 |
+| 7 | Sperrflächen um die Passermarken, Versorgung 0,25 mm | 0 | 13 | 0 |
+| 8 | L3 als reine Signal-/Versorgungslage, 3V3 als Leiterbahnen | 0 | 37 | 3 |
+| **9** | **L3 geteilt: VIN_SYS unten/links, 3V3 oben** | **0** | **4** | **0** |
 
-![Probelauf 2 (Bewertung, nicht das Layout)](doc/Platzierung_3_Routing_Probelauf.png)
+**Lauf 9:** 135 Vias, 670 Segmente (618 auf L1, 52 auf L4). Offen bleiben:
+- **U7.2 (GND), U7.3 (3V3), U2.8 (GND):** Innenpins im Feinraster. Die gerade Verbindung kreuzt Nachbarpins; von Hand mit drei Segmenten zum benachbarten Abblock- bzw. Hilfsbauteil, bei U2 wie in TPS25947 8.4.1 gefordert.
+- **USB_VBUS an J5 A4:** kurze Verbindung am Stecker, von Hand.
+
+**Ergebnisse:**
+- Alle Signalnetze sind geroutet.
+- Alle 107 Pads der Flächennetze haben Platz für ein eigenes Via ohne Via-in-Pad (`tools/check_plane_vias.py`).
+
+**Folgerungen für das Routing (Schritt 6):**
+1. **L3 geteilt:** VIN_SYS-Fläche unten/links (12-V-Seite, FB1 → Schaltregler → F1 → D4), 3V3-Fläche oben (Last). Lauf 8 zeigt: 3V3 nur als Leiterbahnen (25 Pads) ist ungünstig.
+2. **Diagnosezuführungen** `12V_PROT` und `VBUS_PROT` (mA, langsam) als dünne Leiterbahnen auf L4.
+3. **Sperrflächen:** um die Passermarken (umgesetzt) und für Vias unter dem Knopfzellenhalter (Kontaktbügel = VBAT über dem GND-Pad).
+4. **Von Hand:** die vier offenen Verbindungen; Versorgungsflächen an den Feinraster-Pins (SW-Knoten, eFuse IN/OUT).
+
+![Probelauf 9 (Bewertung, nicht das Layout)](doc/Platzierung_3_Routing_Probelauf.png)
 
 ## Anhang: Positionen (exakt, aus der Leiterplatte)
 
