@@ -1,5 +1,7 @@
 # Phase 3 – Kontur, Platzierung, Transientennachweis
 
+> **Hinweis (2026-10-14):** Die Platzierung in diesem Bericht (Abschnitte 2–4) ist überholt. Sie war auf Verbindungslänge optimiert; Vergleichsbasis ist der Git-Tag `placement-baseline-1`. Maßgeblich sind jetzt [Analyse und Floorplan](Platzierung_1_Analyse_Floorplan.md) und der [Platzierungsbericht](Platzierung_2_Bericht.md). Gültig bleiben Kontur, Designregeln (Abschnitt 5) und der Transientennachweis V-01 (Abschnitt 6).
+
 Stand: 2026-10-13 (Überarbeitung nach Layout-Leitfäden) · Leiterplatte: `LandyHeater.kicad_pcb` · Regeln: `LandyHeater.kicad_dru`
 
 ## 1. Ergebnis

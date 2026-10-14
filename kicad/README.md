@@ -9,7 +9,7 @@ Neuaufbau nach [Anforderungsdokument v2.0](../docs/Anforderungsdokument_Neuentwi
 | 0 – Projekt, Lagen, Regeln, Bibliotheken | freigegeben (2026-10-12) |
 | 1 – Bauteilauswahl, Symbole, Footprints | freigegeben (2026-10-12) – [Bauteilliste](Bauteilliste.md) |
 | 2 – Schaltplan | freigegeben (2026-10-13) – [Review](Phase2_Schaltplanreview.md), [Entwurf](Schaltungsentwurf.md) |
-| 3 – Kontur, Platzierung, Transientennachweis | zur Freigabe (überarbeitet nach Layout-Checkliste B7) – [Bericht](Phase3_Platzierung.md) |
+| 3 – Platzierung (Meilenstein nach [Layout-Anleitung](../docs/PCB_Layout_Engineering_Instructions.md)) | Schritt 1–2 freigegeben: [Analyse und Floorplan](Platzierung_1_Analyse_Floorplan.md) · Schritt 3–5 zur Freigabe: [Platzierungsbericht](Platzierung_2_Bericht.md) · [Transientennachweis V-01](Phase3_Platzierung.md#6-transientennachweis-v-01-p-03) |
 
 ## Struktur
 
@@ -19,6 +19,9 @@ Neuaufbau nach [Anforderungsdokument v2.0](../docs/Anforderungsdokument_Neuentwi
 | `libraries/LandyHeater.kicad_sym` | projektlokale, geprüfte Symbole (Bibliothek `LandyHeater`) |
 | `libraries/LandyHeater.pretty/` | projektlokale, geprüfte Footprints (Bibliothek `LandyHeater`) |
 | `libraries/3dmodels/` | 3D-Modelle, im Projekt als `${LANDYHEATER_3DMODELS}` |
+| `tools/` | reproduzierbare KiCad-Python-Werkzeuge: Floorplan, Platzierung, Platzierungsprüfung, Ratsnest-Kennzahlen, Footprint-Aktualisierung |
+| `sim/` | SPICE-Nachweise (ngspice aus KiCad) |
+| `doc/` | Renderings für die Berichte |
 | `output/` | erzeugte Berichte und Fertigungsdaten (nicht versioniert) |
 
 ## Leiterplatte

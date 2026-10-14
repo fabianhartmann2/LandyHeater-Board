@@ -167,8 +167,10 @@ Testpunkte werden je Block an einer zugänglichen Blockkante in einer Reihe ange
 
 Werkzeug: reproduzierbares KiCad-Python-Skript mit expliziten, begründeten Koordinaten je Block, keine Zufallsoptimierung. Danach Validierung (DRC, Courtyards, Abstände aus 2.3, Datenblattpunkte aus 1.4) und Platzierungsbericht mit Rendering.
 
-### 2.5 Offene Punkte zur Freigabe
+### 2.5 Freigabe (2026-10-14)
 
-1. **Floorplan und Zonen** wie oben.
-2. **Steckerreihenfolge J1, J2, J4, J3** beibehalten. Alternative auf Wunsch, wirkt auf das Gehäuse.
-3. **USB-Kreuzung:** Kreuzungen langsamer Signale unter dem USB-Korridor auf L3 sind akzeptiert. Betroffen sind 1-Wire- und Taster-GPIOs von der Modulunterkante. Eine GPIO-Neubelegung würde das vermeiden, ist aber bei der Modulausrichtung nicht ohne Nachteile möglich.
+| Punkt | Entscheidung |
+|---|---|
+| Floorplan und Zonen | freigegeben |
+| Steckerreihenfolge J1, J2, J4, J3 | freigegeben (Alternativen geprüft: keine Verbesserung) |
+| Kreuzung langsamer Signale (1-Wire, Taster) unter dem USB-Korridor auf L3 | freigegeben |
