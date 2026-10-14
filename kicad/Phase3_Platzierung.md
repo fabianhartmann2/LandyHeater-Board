@@ -7,11 +7,11 @@ Stand: 2026-10-13 (Überarbeitung nach Layout-Leitfäden) · Leiterplatte: `Land
 | Prüfung | Ergebnis |
 |---|---|
 | Kontur | 80 × 50 mm, Ecken R 2 mm (M-05) |
-| Bestückung | alle 131 Bauteile auf der Oberseite |
+| Bestückung | alle 132 Bauteile auf der Oberseite (inkl. C26 aus E-01) |
 | Befestigung | 4 × M3 (3,2 mm, NPTH) in den Ecken, 3,3 mm Freiraum |
 | Passermarken | 3 × 1 mm / Maske 2 mm bei (104,5 / 109,5), (104,5 / 140), (172 / 135,5), ≥ 3,35 mm vom Rand, unsymmetrisch |
 | Courtyard-Kollisionen | keine |
-| DRC | 0 Fehler außer 249 nicht gerouteten Verbindungen (Phase 4) |
+| DRC | 0 Fehler außer 251 nicht gerouteten Verbindungen (Phase 4) |
 | ERC / Netzlistenprüfung N-05 | 0 Fehler (1 begründete Warnung F1) / 0 Abweichungen nach GPIO-Neubelegung |
 | Schaltplan-Parität | 0 Fehler |
 | Layout-Checkliste B7 | Abschnitt 4 |
@@ -131,11 +131,11 @@ Die Netzklassen stehen auf 0,15 mm, die Regeln in `LandyHeater.kicad_dru` setzen
 
 | Puls | V(J1) max/min | VIN_SYS max | U<sub>R</sub> D2 | P D1 | E D1 |
 |---|---|---|---|---|---|
-| 2a +112 V, 2 Ω, 50 µs | 37,4 / 7,7 V | 24,9 V | 10 V | 768 W | 7 mJ |
-| 2a wie oben, 100 µs | 37,4 / 7,7 V | 28,6 V | 14 V | 772 W | 22 mJ |
+| 2a +112 V, 2 Ω, 50 µs | 38,0 / 8,0 V | 24,9 V | 10 V | 812 W | 7 mJ |
+| 2a wie oben, 100 µs | 38,0 / 8,0 V | 28,6 V | 14 V | 817 W | 22 mJ |
 | 1 −150 V, 10 Ω, 2 ms (Batterie getrennt) | −31,3 V | 13,5 V | 45 V | 370 W | 189 mJ |
-| 3a −220 V, 50 Ω, 0,1 µs | −25,1 V | 13,5 V | 60 V¹ | 75 W | < 0,1 mJ |
-| 3b +150 V, 50 Ω, 0,1 µs | 24,7 V | 13,5 V | 2,5 V | 61 W | < 0,1 mJ |
+| 3a −220 V, 50 Ω, 0,1 µs | −25,3 V | 13,5 V | 38,8 V¹ | 201 W | < 0,1 mJ |
+| 3b +150 V, 50 Ω, 0,1 µs | 14,9 V | 13,5 V | 12,5 V | 201 W | < 0,1 mJ |
 
 | Bauteil | Grenze | Höchstwert | Reserve |
 |---|---|---|---|
@@ -143,13 +143,13 @@ Die Netzklassen stehen auf 0,15 mm, die Regeln in `LandyHeater.kicad_dru` setzen
 | C1 Elko | 35 V | 28,6 V | 18 % |
 | C6 | 50 V | 28,6 V | 43 % |
 | U9 BCR421 (an VIN_SYS über F1) | 40 V | 28,6 V | 28 % |
-| D1 Spitzenleistung | ≈ 2,7 kW bei 50 µs (600 W bei 1 ms, ∝ t<sup>−½</sup>) | 772 W | ausreichend |
+| D1 Spitzenleistung | ≈ 2,7 kW bei 50 µs (600 W bei 1 ms, ∝ t<sup>−½</sup>) | 817 W | ausreichend |
 | D1 Energie | ≈ 0,86 J (10/1000 µs, 600 W) | 0,19 J | ausreichend |
 | D2 SS16 Sperrspannung | 60 V | 45 V (Puls 1) | 25 % |
 | D4 SS16 (VIN_SYS gegen USB) | 60 V | 28,6 V | 52 % |
 | eFuse U2 (P1-01) | IN ≥ OUT − 21 V | durch D4 getrennt | erfüllt |
 
-¹ Bei Puls 3a erreicht D2 im Modell für etwa 15 ns die Durchbruchspannung, mit 39 nJ Lawinenenergie. Die Ursache ist die Resonanz der Ferrit-Induktivität mit der Sperrschichtkapazität von D2. Mit realistischen Ferritverlusten oder 22 pF Leiterbahnkapazität an `12V_PROT` bleibt sie bei ≤ 51 V. Das ist unkritisch; s. Empfehlung E-01.
+¹ Ohne C26 erreichte D2 bei Puls 3a im Modell für etwa 15 ns die Durchbruchspannung von 60 V (39 nJ Lawinenenergie). Ursache war die Resonanz der Ferrit-Induktivität mit der Sperrschichtkapazität von D2. C26 (100 nF an `12V_PROT`, E-01) begrenzt das auf 38,8 V, 35 % unter der Grenze, ohne Durchbruch.
 
 **Grenzen der Schutzschaltung:**
 - **Lastabwurf ohne zentrale Begrenzung** (ISO 16750-2 Test A) wird nicht beherrscht. Die TVS würde überlastet und niederohmig ausfallen; die externe 1-A-Sicherung (P-01) trennt dann.
@@ -160,7 +160,7 @@ Die Netzklassen stehen auf 0,15 mm, die Regeln in `LandyHeater.kicad_dru` setzen
 
 | # | Punkt | Phase |
 |---|---|---|
-| E-01 | Optional 100 nF / 50 V (0603) von `12V_PROT` nach GND vor FB1. Begrenzt die Spitze aus Puls 3a an D2 auf 25 V und verbessert das Eingangsfilter. Kleine Schaltplanänderung. | Entscheid Auftraggeber |
+| E-01 | **Umgesetzt (2026-10-14):** C26 100 nF / 50 V X7R 0603 von `12V_PROT` nach GND vor FB1, auf der Leiterplatte zwischen D2 und FB1. ERC, Netzlistenprüfung und DRC ohne Abweichung; Transientennachweis aktualisiert. | erledigt |
 | P3-01 | Footprints aus Bibliothek aktualisieren (26 Rundungswarnungen gedrehter Footprints) | 4 |
 | P3-02 | Beschriftung bereinigen: RST/BOOT/DIAG, Energiefluss-Grafik an der Diagnose-LED-Reihe, Steckerbelegung | 4 |
 | P3-03 | USB-Impedanz mit dem JLCPCB-Rechner bestätigen (P2-03) | 4 |

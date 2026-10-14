@@ -23,6 +23,7 @@ Seitenübergreifend: Versorgungen als Power-Symbole (`GND`, `3V3_CORE`, `VIN_SYS
 | J1 | Nano-Fit 2-pol. | 1 `BATT_12V_IN`, 2 `GND` |
 | D1 | SMBJ18CA | `BATT_12V_IN` – `GND` |
 | D2 | SS16 | A `BATT_12V_IN`, K `12V_PROT` (Verpolschutz, ODER-Zweig 12 V) |
+| C26 | 100 nF / 50 V X7R 0603 | `12V_PROT` – `GND` vor FB1 (Pi-Filter, begrenzt schnelle Pulse an D2; E-01, Phase 3) |
 | FB1 | Ferrit 600 Ω | `12V_PROT` – `VIN_SYS` |
 | C1 | 47 µF / 35 V Elko | `VIN_SYS` – `GND` (dämpft Ferrit/MLCC-Resonanz) |
 | J5 | USB4105 | VBUS `USB_VBUS`, CC1/CC2, D+/D− `USB_DP_C`/`USB_DN_C`, SBU offen, GND/Schirm `GND` |
@@ -128,3 +129,4 @@ Testpunkte: TP24 `DIAG_K`, TP25 `GND`, TP26 `BUTTON_N`, TP27 `BUTTON_LED_PWM`, T
 | S-04 | – | An USB bleiben nach LED (≈ 3 V) ≈ 1,3 V für den BCR421 (Minimum 1,4 V) | Ring-LED an USB etwas dunkler, an 12 V volle 10 mA. Messung in Abnahmetest 12. |
 | S-05 | EN- und OVLO-Teiler getrennt | Ein dreistufiger Teiler R3/R4/R5 | Gleiche Schwellen, ein Widerstand weniger, geringerer Querstrom. |
 | S-06 | HEAT-Anzeige aus `AUTOTERM_5V_F` | aus `AUTOTERM_5V` am Stecker | Funktional gleich (Anwesenheit der Heizungsspannung), übersichtlichere Verdrahtung. |
+| S-07 | – | C26 100 nF an `12V_PROT` (Phase 3, E-01) | SPICE V-01: Puls 3a (−220 V, 0,1 µs) treibt D2 sonst kurz an die 60-V-Grenze; mit C26 38,8 V. Zusätzlich Pi-Filter C26–FB1–C1 gegen Buck-Störungen auf der 12-V-Leitung. |

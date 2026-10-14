@@ -1,6 +1,6 @@
 """V-01: Transientennachweis des 12-V-Eingangs mit ngspice (libngspice aus KiCad).
 
-Pfad: J1 -> D1 SMBJ18CA (bidirektional) -> D2 SS16 -> FB1 -> VIN_SYS (C1, C6, C7, Buck-Last).
+Pfad: J1 -> D1 SMBJ18CA (bidirektional) -> D2 SS16 -> C26 -> FB1 -> VIN_SYS (C1, C6, C7, Buck-Last).
 Aufruf mit dem KiCad-Python:
   /Applications/KiCad/KiCad.app/Contents/Frameworks/Python.framework/Versions/3.9/bin/python3 -I kicad/sim/v01_transienten.py
 """
@@ -17,6 +17,8 @@ D1a in t1 ZTVS
 D1b 0 t1 ZTVS
 VD2 in d2a 0
 D2 d2a p12 SS16
+* C26 100 nF/50 V an 12V_PROT vor dem Ferrit (E-01)
+C26 p12 0 100n IC=13.5
 * FB1: DC 0,15 Ohm, ~1 uH, bei HF resistiv (600 Ohm parallel, ungünstig hohe Güte)
 RFB p12 f1 0.15
 LFB f1 vin 1u
