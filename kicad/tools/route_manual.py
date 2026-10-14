@@ -61,7 +61,7 @@ for x in (105.4, 106.95, 108.5):
 for x in (112.0, 114.5):
     V('VIN_SYS', x, 126.25)                                     # FB1-Seite zur L3-VIN-Fläche
 # GND: Fläche über C6.2/C7.2/U3.1/U3.9/C8.2 – kleinste Eingangsschleife, Vias neben den Kondensatoren
-Z('GND Buck', 'GND', F, [(104.4, 113.4), (113.3, 113.4), (113.3, 115.6), (110.25, 115.6), (110.25, 118.62), (109.55, 118.62),
+Z('GND Buck', 'GND', F, [(104.4, 114.6), (107.9, 114.6), (107.9, 113.4), (113.3, 113.4), (113.3, 115.6), (110.25, 115.6), (110.25, 118.62), (109.55, 118.62),
                          (109.55, 117.9), (104.4, 117.9)])
 for x, y in ((104.9, 114.9), (106.5, 114.9), (108.0, 114.9), (109.5, 114.4), (112.4, 113.85)):
     V('GND', x, y)
@@ -156,6 +156,9 @@ V('VIN_SYS', 162.3, 145.25); V('VIN_SYS', 163.6, 145.25)
 # Gehäusekörper (1,55 mm Reihenabstand) zu je einem Via – kürzester Rückweg (TXU0202 11.1)
 T('GND', F, [(129.6, 128.55), (128.6, 128.9)], 0.2); V('GND', 128.6, 128.9)
 T('3V3_CORE', F, [(129.6, 128.05), (128.6, 127.9)], 0.2); V('3V3_CORE', 128.6, 127.9)
+# U6 (RTC): GND-Pins 2/4 mit Vias schräg nach außen, damit RTC_INT (Pin 3) gerade nach unten entkommt
+T('GND', F, [(138.92, 116.5), (138.65, 117.0), (138.65, 117.25)], 0.2); V('GND', 138.65, 117.25)
+T('GND', F, [(140.0, 116.5), (140.3, 117.0), (140.3, 117.25)], 0.2); V('GND', 140.3, 117.25)
 # U8 TPS22945 (SOT-23-5): GND (2) zwischen Pin 1 und 3; unter dem Körper zwischen Pin 3 und 4 nach unten zum Via
 T('GND', F, [(155.6, 128.6), (156.3, 128.6), (156.3, 130.0)], 0.2); V('GND', 156.3, 130.0)
 
@@ -164,14 +167,14 @@ T('GND', F, [(155.6, 128.6), (156.3, 128.6), (156.3, 130.0)], 0.2); V('GND', 156
 # F) Linke Modul-Pinreihe (Pins 4–12) durch den Engpass vor dem Modul (U5, C16, R12/R13 davor, Status-LED-
 #    Spalte R32–R35 neben dem BT1-Lappen). Freerouting findet hier keinen Weg (Probeläufe 13–100 offen).
 #    - EN (Pin 3): direkt über C15.1 zu U5.1 (Gasse zwischen C15 und U5, TPS3808: C am Ausgang nah).
-#    - STATUS_LED_1 (Pin 4) über L4 zu einem Via rechts von D20, auf L1 zu R32.1 und links an R32/R34 entlang.
+#    - STATUS_LED_1 (Pin 4) über L4 zu einem Via rechts von D20, auf L1 über D20 und links an R32/R34 entlang.
 #    - DIAG_RUN (Pin 6) auf L1 unter U5 hindurch (Gasse U5/C16) zum Via, Rest per Freerouting auf L4.
 #    - STATUS_LED_2 (Pin 5) über L4 zu einem Via rechts der LED-Spalte, auf L1 zwischen R33 und R35 hinein.
 #    - SDA/SCL: Pull-ups R12/R13 auf L1 in der Gasse zwischen R12/R13 und der Via-Spalte.
 #    - übrige Pins (7, 10–12) und Pin 21: nur Fan-out-Via (x 151,45: 0,75 mm zu den Modulpads), Rest Freerouting.
 #    Alle L4-Abschnitte liegen unter der 3V3-Hälfte von L3 (keine Spaltkreuzung, Y-03).
 # =============================================================================================
-FANOUT = {4: 'STATUS_LED_1', 5: 'STATUS_LED_2', 7: '/ESP32 und RTC/RTC_INT_N', 8: '/ESP32 und RTC/I2C_SDA', 9: '/ESP32 und RTC/I2C_SCL',
+FANOUT = {4: 'STATUS_LED_1', 5: 'STATUS_LED_2', 7: '/ESP32 und RTC/RTC_INT_N', 8: '/ESP32 und RTC/I2C_SDA',
           10: 'AUTOTERM_TX_3V3', 11: 'AUTOTERM_RX_3V3', 12: 'AUTOTERM_OE'}
 for pin, n in FANOUT.items():
     y = round(106.13 + (pin - 3) * 1.27, 2)        # Padmitte (Raster 1,27 mm, Pin 3 bei y 106,13)
@@ -181,7 +184,7 @@ LED1, LED2 = 'STATUS_LED_1', 'STATUS_LED_2'
 T('/ESP32 und RTC/EN', F, [(152.9, 106.13), (151.6, 106.13)], 0.25)                        # Pin 3 → C15.1
 T('/ESP32 und RTC/EN', F, [(151.1, 106.8), (150.05, 107.85), (150.05, 108.2)], 0.25)          # C15.1 → U5.1
 T(LED1, B, [(151.45, 107.4), (146.6, 107.4), (146.3, 107.2)], 0.2); V(LED1, 146.3, 107.2)              # L4, Landung rechts von D20
-T(LED1, F, [(146.3, 107.2), (146.3, 108.3), (143.68, 108.3), (143.68, 108.9)], 0.2)                   # zwischen D20 und R32 zu R32.1
+T(LED1, F, [(146.3, 107.2), (145.9, 106.3), (143.2, 106.3), (142.89, 106.6), (142.89, 110.0)], 0.2)    # über D20, links herab (Gasse D20/R32 bleibt für D20-A)
 T(LED1, F, [(143.5, 109.4), (142.89, 110.0), (142.89, 112.3), (143.5, 112.8)], 0.2)                    # R32.1 → R34.1
 T(LED2, B, [(151.45, 108.67), (146.3, 108.67), (146.3, 110.2)], 0.2); V(LED2, 146.3, 110.2)          # Landung oberhalb der DIAG-Trasse
 T(LED2, F, [(146.3, 110.2), (146.4, 110.6), (146.4, 115.5), (143.68, 115.5)], 0.2); T(LED2, F, [(143.68, 114.9), (143.68, 116.1)], 0.2)
@@ -192,7 +195,7 @@ T('GND', F, [(149.1, 108.9), (149.1, 109.6), (147.0, 109.6)], 0.25); V('GND', 14
 T('GND', F, [(145.3, 111.3), (145.3, 112.5)], 0.25)          # R34.2 → D21.1 (dessen Via), rechts liegt die LED2-Landung
 T('GND', F, [(149.85, 112.9), (149.4, 113.5), (147.5, 113.5), (147.0, 114.1)], 0.25); V('GND', 147.0, 114.1)
 T('/ESP32 und RTC/I2C_SDA', F, [(151.45, 112.48), (150.75, 113.18), (150.75, 113.9), (150.2, 114.3)], 0.2)          # → R12.2
-T('/ESP32 und RTC/I2C_SCL', F, [(151.45, 113.75), (151.45, 114.0), (150.75, 114.7), (150.75, 115.9), (150.2, 116.2)], 0.2)  # → R13.2
+T('/ESP32 und RTC/I2C_SCL', F, [(152.9, 113.75), (151.45, 113.75), (151.45, 114.0), (150.75, 114.7), (150.75, 115.9), (150.2, 116.2)], 0.2)  # → R13.2
 
 # =============================================================================================
 # G) Ausgänge der Diagnose-Zuleitungen (12V_PROT, VBUS_PROT → R26/R27, statisch ~1 mA): Stich mit Via
