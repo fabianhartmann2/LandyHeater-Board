@@ -41,17 +41,26 @@ def main(path):
         for x, y in poly: ps.Append(fm(x), fm(y))
         z.SetOutline(ps); ps.thisown = 0   # Zone übernimmt das Polygon (sonst gibt Python es frei -> Absturz)
         b.Add(z)
-    # Außenlagen-Füllung erst nach dem Routing (sonst blockiert sie die Leiterbahnen und bindet Pads zufällig an)
-    fill_all = '--fill-all' in sys.argv
-    inner = [z for z in b.Zones() if not z.GetIsRuleArea() and z.GetLayer() in (pcbnew.In1_Cu, pcbnew.In2_Cu)]
-    pcbnew.ZONE_FILLER(b).Fill(b.Zones() if fill_all else inner)
-    if not fill_all:
+    b.Save(path)
+    # Füllen in einem eigenen Prozess: nach b.Remove() ist die SWIG-Typzuordnung im laufenden Prozess gestört
+    import subprocess
+    subprocess.run([sys.executable, __file__, path, '--fill-stage'] + (['--fill-all'] if '--fill-all' in sys.argv else []), check=True)
+    print('Flächen:', ', '.join(f'{z[0]} ({z[2]})' for z in ZONES), flush=True)
+    import os; os._exit(0)   # Python-Aufräumen würde Objekte freigeben, die dem Board gehören (Absturz beim Beenden)
+
+
+def fill(path, fill_all):
+    b = pcbnew.LoadBoard(path)
+    pcbnew.ZONE_FILLER(b).Fill(b.Zones())
+    if not fill_all:   # Außenlagen erst nach dem Routing füllen (sonst blockieren sie Leiterbahnen)
         for z in b.Zones():
             if not z.GetIsRuleArea() and z.GetLayer() in (pcbnew.F_Cu, pcbnew.B_Cu):
                 z.UnFill()
     b.Save(path)
-    print('Flächen:', ', '.join(f'{z[0]} ({z[2]})' for z in ZONES))
 
 
 if __name__ == '__main__':
-    main(sys.argv[1])
+    if '--fill-stage' in sys.argv:
+        fill(sys.argv[1], '--fill-all' in sys.argv)
+    else:
+        main(sys.argv[1])
