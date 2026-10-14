@@ -62,8 +62,8 @@
 	(attr smd)
 	(duplicate_pad_numbers_are_jumpers no)
 	(fp_line
-		(start -9.27 0)
-		(end -8.26 0)
+		(start -7.76 -3.7)
+		(end -6.74 -3.7)
 		(stroke
 			(width 0.25)
 			(type solid)
@@ -72,8 +72,8 @@
 		(uuid "02546745-84af-4e61-ab70-8bc68eaa2030")
 	)
 	(fp_line
-		(start -8.76 -0.51)
-		(end -8.76 0.51)
+		(start -7.25 -4.21)
+		(end -7.25 -3.19)
 		(stroke
 			(width 0.25)
 			(type solid)
@@ -152,8 +152,8 @@
 		(uuid "c8814f08-266b-4f61-bc1b-91e446e8ffb3")
 	)
 	(fp_line
-		(start 8.13 0)
-		(end 9.14 0)
+		(start 6.74 -3.7)
+		(end 7.76 -3.7)
 		(stroke
 			(width 0.25)
 			(type solid)
@@ -162,8 +162,8 @@
 		(uuid "73800aaf-d1d0-464b-9eea-e4aaaa3b6072")
 	)
 	(fp_line
-		(start 8.64 -0.51)
-		(end 8.64 0.51)
+		(start 7.25 -4.21)
+		(end 7.25 -3.19)
 		(stroke
 			(width 0.25)
 			(type solid)

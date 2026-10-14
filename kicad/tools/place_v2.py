@@ -10,6 +10,7 @@ Aufruf (KiCad-Python, Board im Projektordner):
 Drehsinn KiCad: rot 90 bildet einen Pad-Offset (x0, y0) auf (x + y0, y - x0) ab, rot 180 auf (x - x0, y - y0),
 rot 270 auf (x - y0, y + x0).
 """
+import math
 import sys
 import pcbnew
 
@@ -144,15 +145,18 @@ P.update({
 P.update({
     'TP1': (102.0, 135.5, 0), 'TP2': (120.6, 130.2, 0),                           # 12-V-Eingang
     'TP3': (104.4, 123.0, 0), 'TP7': (107.4, 123.0, 0), 'TP4': (110.4, 123.0, 0),  # Buck: VIN_SYS, GND, 3V3
-    'TP24': (109.3, 115.2, 0), 'TP25': (102.0, 117.6, 0), 'TP28': (112.4, 111.9, 0),   # Diagnose: DIAG_K, GND, RUN
+    # TP24 (DIAG_K) direkt unter TP25 (GND): mit Pinzette überbrückbar (G-03)
+    'TP24': (101.9, 120.3, 0), 'TP25': (102.0, 117.6, 0), 'TP28': (112.4, 111.9, 0),   # Diagnose: DIAG_K, GND, RUN
     'TP19': (125.4, 120.6, 0), 'TP20': (128.2, 120.6, 0), 'TP21': (131.0, 120.6, 0),   # AUTOTERM 3,3 V
     'TP16': (125.4, 123.3, 0), 'TP17': (128.2, 123.3, 0), 'TP18': (131.0, 123.3, 0),   # AUTOTERM 5 V
     'TP14': (135.0, 122.0, 0), 'TP12': (137.8, 122.0, 0), 'TP13': (140.6, 122.0, 0),   # MCU-Reihe
     'TP8': (143.4, 122.0, 0), 'TP26': (146.2, 122.0, 0),
     'TP27': (138.8, 127.6, 0),                                                     # Ring-LED-PWM
     'TP22': (151.3, 126.5, 0), 'TP23': (151.4, 135.4, 0),                          # 1-Wire
-    'TP10': (173.4, 114.3, 0), 'TP11': (176.2, 114.3, 0),                          # UART0 zwischen RESET und BOOT
-    'TP9': (173.4, 121.0, 0), 'TP15': (176.2, 121.0, 0),                           # BOOT, GND
+    # UART0 zwischen RESET und BOOT; TP11 und TP15 um 0,5 bzw. 0,2 mm versetzt, damit die Beschriftung
+    # mit 0,8 mm Schrift zwischen die Pads passt (Schritt 6.1, Bestückungsdruck)
+    'TP10': (173.4, 114.3, 0), 'TP11': (176.7, 114.3, 0),
+    'TP9': (173.4, 121.0, 0), 'TP15': (176.0, 121.0, 0),                           # BOOT, GND
     'TP5': (170.0, 141.0, 0), 'TP6': (169.9, 144.6, 0),                            # VBUS, VBUS_PROT
 })
 
@@ -180,10 +184,11 @@ def main(path):
         z.SetDoNotAllowPads(False); z.SetDoNotAllowFootprints(False)
         ls = pcbnew.LSET(); ls.AddLayer(pcbnew.F_Cu); ls.AddLayer(pcbnew.B_Cu); ls.AddLayer(pcbnew.In1_Cu); ls.AddLayer(pcbnew.In2_Cu)
         z.SetLayerSet(ls)
-        o = z.Outline(); o.NewOutline()
+        ps = pcbnew.SHAPE_POLY_SET(); ps.NewOutline()
         for k in range(16):
-            ang = 2 * 3.141592653589793 * k / 16
-            o.Append(pcbnew.FromMM(x + 2.0 * __import__('math').cos(ang)), pcbnew.FromMM(y + 2.0 * __import__('math').sin(ang)))
+            ang = 2 * math.pi * k / 16
+            ps.Append(pcbnew.FromMM(x + 2.0 * math.cos(ang)), pcbnew.FromMM(y + 2.0 * math.sin(ang)))
+        z.SetOutline(ps)
         b.Add(z)
     b.Save(path)
     print(f'{len(P)} von {len(fps)} Footprints platziert, 3 Sperrflächen um die Passermarken')
