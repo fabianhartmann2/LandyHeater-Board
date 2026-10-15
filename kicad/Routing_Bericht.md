@@ -157,6 +157,23 @@ Netzklasse USB entsprechend angepasst (Breite 0,24, Paarabstand 0,15); die nie w
 
 DRC nach der Überarbeitung: 0 Verletzungen, 0 offene Verbindungen; Platzierungs- und Routingprüfung ohne Befund.
 
+## 6.9 Unabhängige Verbindungsprüfung
+
+`tools/check_connectivity.py` prüft Kurzschlüsse und Fehlverdrahtung unabhängig von den Netznamen der Platine: Aus der
+reinen Kupfergeometrie (2483 Kupferelemente auf allen vier Lagen, jede Flächeninsel einzeln, Vias und Durchkontaktierungen
+verbinden die Lagen) werden die physikalisch verbundenen Pad-Gruppen bestimmt und mit der aus dem **Schaltplan**
+exportierten Netzliste verglichen.
+
+| Prüfung | Ergebnis |
+|---|---|
+| Kupfergruppe mit mehreren Schaltplannetzen (Kurzschluss) | 0 |
+| Schaltplannetz auf mehrere Kupfergruppen verteilt (Unterbrechung) | 0 |
+| Schaltplanpin ohne Pad / Pad ohne Schaltplanpin | 0 / 0 |
+
+Gegenprobe (Kopie mit absichtlich eingebautem Fehler): eine Bahn zwischen R9.2 (D−) und R10.2 (D+) – bewusst mit dem
+Netznamen D− versehen – und eine entfernte BOOT_N-Bahn werden als Kurzschluss USB_DN_C + USB_DP_C und als Unterbrechung
+BOOT_N gemeldet.
+
 ## Reproduktion
 
 ```
