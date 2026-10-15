@@ -28263,7 +28263,7 @@
 				)
 			)
 		)
-		(property "Spez" "PTC 0805, I_hold ca. 50 mA, I_trip ca. 150 mA, >= 16 V"
+		(property "Spez" "PTC 0805, I_hold 50 mA, I_trip 150 mA, 60 V (BORN SMD0805-005/60N)"
 			(at 0 0 270)
 			(unlocked yes)
 			(layer "F.Fab")
@@ -28272,6 +28272,42 @@
 			(effects
 				(font
 					(size 1 1)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "MPN" "SMD0805-005/60N"
+			(at 0 0 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "80014b5d-f6a7-4af9-860d-dde489b8fe46")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "Manufacturer" "BORN"
+			(at 0 0 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "7d0b9c6e-e2ce-44bf-aad1-dee5df90aeff")
+			(effects
+				(font
+					(size 1.27 1.27)
+					(thickness 0.15)
+				)
+			)
+		)
+		(property "LCSC" "C22366098"
+			(at 0 0 0)
+			(layer "F.SilkS")
+			(hide yes)
+			(uuid "05d5da15-135b-45f8-bb48-a77ce15bf3e0")
+			(effects
+				(font
+					(size 1.27 1.27)
 					(thickness 0.15)
 				)
 			)

@@ -102,7 +102,7 @@ Testpunkte: TP16 `AUTOTERM_5V`, TP17 `CTRL_TX`, TP18 `CTRL_RX`, TP19 `AUTOTERM_T
 | D10 | PESD3V3S2UT | K1 `BUTTON_N_C`, K2 offen, A `GND` |
 | R22 | 1 kΩ | `BUTTON_N_C` – `BUTTON_N` |
 | R23, C25 | 10 kΩ, 10 nF | `BUTTON_N` Pull-up / nach `GND` (≈ 10 µs) |
-| F1 | PTC ≈ 50 mA | `VIN_SYS` – `LED_CC_PLUS` |
+| F1 | PTC 0805, I_hold 50 mA / I_trip 150 mA, 60 V – BORN SMD0805-005/60N, LCSC C22366098 (Freigabe 15.10.2026); Symbol `LandyHeater:Polyfuse_0805` | `VIN_SYS` – `LED_CC_PLUS` |
 | U9 | BCR421UW6Q | OUT (2, 3, 5) `LED_PWM_MINUS`, GND, REXT offen (10 mA), EN über R24 |
 | R24, R25 | 100 Ω, 100 kΩ | `BUTTON_LED_PWM` – EN / EN – `GND` |
 | R26 + D11 + D15 | 12 kΩ, LED, BAS116 | `12V_PROT` → `DIAG_K` |

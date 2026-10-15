@@ -111,7 +111,7 @@ Ergebnis: alle Flächenpads angebunden (59 Vias, Rest über Handrouting).
 | spitze Winkel < 90° | 6 – kurze, überlappende Stichenden (RTC_INT, BUTTON_N, 1WIRE_DQ, AUTOTERM_5V_F), kosmetisch |
 
 **DRC (KiCad 10, alle Schweregrade, mit Schaltplanabgleich): 0 Verletzungen, 0 offene Verbindungen.**
-Einziger Eintrag: Footprint-Filter F1 (PTC) – offener Punkt Phase 5. Bericht: [doc/DRC_Routing.rpt](doc/DRC_Routing.rpt).
+Nach Festlegung von F1 (R-07) auch ohne Footprint-Hinweis. Bericht: [doc/DRC_Routing.rpt](doc/DRC_Routing.rpt).
 
 Kennzahlen: Bahnlänge L1 693 mm, L4 436 mm; 316 Vias (148 GND-Heftung, 62 Handrouting, 57 Flächenanbindung,
 26 Freerouting, 23 Nacharbeit).
@@ -200,10 +200,16 @@ Alle übrigen Schritte erzeugen ihre Gruppen bei jedem Lauf identisch neu.
 | R-03 | Routingbedingte Platzierungsänderungen: USB-Block (U1, D3, R1, R2, C17, C18, R6, C4) und R33 ↔ R34; Schaltplan unverändert (Schaltplanabgleich ohne Abweichung) | im Review akzeptiert |
 | R-04 | D− wechselt am Stecker einmal auf L4 (B7-Brücke, 1,5 mm); Bezugsebene dort L3 (3V3) statt GND | für USB Full Speed unkritisch – im Review akzeptiert |
 | R-05 | 6 spitze Winkel an kurzen Stichenden | kosmetisch, optional in KiCad nacharbeiten |
-| R-06 | ESP32-Modul ohne 3D-Modell im 3D-Bild | nur Darstellung |
-| R-07 | Footprint-Filter F1 (PTC) | Phase 5 (Bauteilwahl PTC/Ferrit) |
+| R-06 | 3D-Modelle fehlen für U4 (ESP32-S3-WROOM-1U), J1–J4 (Nano-Fit, KiCad 10 liefert keine), U2, U3, U6, L1, BT1 (eigene Footprints); Testpunkte haben keinen Körper | nur Darstellung/Höhenprüfung, keine Auswirkung auf die Fertigung – Phase 5 |
+| R-07 | F1 (PTC) | erledigt: BORN SMD0805-005/60N, LCSC C22366098, 0805 (Footprint passt); Symbol als `LandyHeater:Polyfuse_0805` mit passendem Footprint-Filter → ERC 0, DRC inkl. Schaltplanabgleich 0 |
 
 ## Nächster Schritt
 
 Phase 5 – Fertigungsdaten JLCPCB (Gerber/Bohrdaten, BOM mit LCSC-Nummern, Bestückungsdaten), DC-Bias-Prüfung,
 Impedanzbestätigung, 3D-Kontrolle.
+
+## Freigabe
+
+Routing durch den Auftraggeber am 15.10.2026 freigegeben (nach Prüfung: alle Footprints zugeordnet, Molex Nano-Fit
+J1–J4 = 105313-1302/-1303/-1304/-1305, rechtwinklig, 1-reihig, 2,5 mm – passend zu den Footprints
+`Molex_Nano-Fit_105313-xx0N_1x0N_P2.50mm_Horizontal`, Steckseite 0,5 mm innerhalb der Platinenkante). Git-Tag `routing-approved`.

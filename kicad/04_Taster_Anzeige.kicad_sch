@@ -736,7 +736,7 @@
 			)
 			(embedded_fonts no)
 		)
-		(symbol "Device:Polyfuse"
+		(symbol "LandyHeater:Polyfuse_0805"
 			(pin_numbers
 				(hide yes)
 			)
@@ -791,7 +791,7 @@
 					)
 				)
 			)
-			(property "Description" "Resettable fuse, polymeric positive temperature coefficient"
+			(property "Description" "Resettable fuse (PTC), 0805"
 				(at 0 0 0)
 				(show_name no)
 				(do_not_autoplace no)
@@ -813,7 +813,7 @@
 					)
 				)
 			)
-			(property "ki_fp_filters" "*polyfuse* *PTC*"
+			(property "ki_fp_filters" "*polyfuse* *PTC* Fuse_0805*"
 				(at 0 0 0)
 				(show_name no)
 				(do_not_autoplace no)
@@ -824,7 +824,7 @@
 					)
 				)
 			)
-			(symbol "Polyfuse_0_1"
+			(symbol "Polyfuse_0805_0_1"
 				(polyline
 					(pts
 						(xy -1.524 2.54) (xy -1.524 1.524) (xy 1.524 -1.524) (xy 1.524 -2.54)
@@ -861,7 +861,7 @@
 					)
 				)
 			)
-			(symbol "Polyfuse_1_1"
+			(symbol "Polyfuse_0805_1_1"
 				(pin passive line
 					(at 0 3.81 270)
 					(length 1.27)
@@ -6875,7 +6875,7 @@
 		)
 	)
 	(symbol
-		(lib_id "Device:Polyfuse")
+		(lib_id "LandyHeater:Polyfuse_0805")
 		(at 182.88 76.2 90)
 		(unit 1)
 		(body_style 1)
@@ -6950,7 +6950,40 @@
 				)
 			)
 		)
-		(property "Spez" "PTC 0805, I_hold ca. 50 mA, I_trip ca. 150 mA, >= 16 V"
+		(property "Spez" "PTC 0805, I_hold 50 mA, I_trip 150 mA, 60 V (BORN SMD0805-005/60N)"
+			(at 182.88 76.2 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "MPN" "SMD0805-005/60N"
+			(at 182.88 76.2 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "Manufacturer" "BORN"
+			(at 182.88 76.2 0)
+			(hide yes)
+			(show_name no)
+			(do_not_autoplace no)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+			)
+		)
+		(property "LCSC" "C22366098"
 			(at 182.88 76.2 0)
 			(hide yes)
 			(show_name no)
