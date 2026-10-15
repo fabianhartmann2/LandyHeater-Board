@@ -128,6 +128,35 @@ Kennzahlen: Bahnlänge L1 693 mm, L4 436 mm; 316 Vias (148 GND-Heftung, 62 Handr
 | 3D oben | ![3D oben](doc/Routing_8_3D_oben.png) |
 | 3D unten | ![3D unten](doc/Routing_9_3D_unten.png) |
 
+## 6.8 USB-Paar überarbeitet (Review 15.10.2026)
+
+Anlass: Review-Fragen zu Längengleichheit und Ecken (JLCPCB „PCB Design Rules", Abschnitt Differential Pairs).
+
+**Impedanz (JLCPCB-Impedanzrechner, Lagenaufbau JLC04161H-7628, 1,6 mm, außen 1 oz, Signal L1 gegen L2, Ziel 90 Ω
+differenziell, Abstand 5,9 mil = 0,15 mm):**
+
+| Variante | erforderliche Breite |
+|---|---|
+| Differenzpaar ohne Nachbarkupfer | 9,74 mil = 0,247 mm |
+| koplanar, GND-Füllung 9,84 mil = 0,25 mm neben dem Paar (wie auf der Platine) | 9,24 mil = 0,235 mm |
+
+Gewählt: **0,24 mm / 0,15 mm** – liegt zwischen beiden Fällen (≈ 89–91 Ω, je nach Nähe der Füllung).
+Netzklasse USB entsprechend angepasst (Breite 0,24, Paarabstand 0,15); die nie wirksame Regel „USB-Paar 0,13" in
+`LandyHeater.kicad_dru` auf 0,15 mm gesetzt.
+
+**Führung (vorher → jetzt):**
+
+| Punkt | vorher | jetzt |
+|---|---|---|
+| Kopplung | Leitungen zwischen U1 und x 161 auf 6,4 mm Länge 2,45 mm auseinander (Umweg zu C17/C18) | durchgehend gekoppelt (Mittenabstand 0,39 mm); nur am U1-GND-Pin/-Via 2 mm leicht gespreizt (Durchfluss-Gehäuse, GND-Pin liegt zwischen D+ und D−) |
+| Ecken | 90°-Ecken | alle Richtungswechsel als Bögen, im Paar mit gemeinsamem Mittelpunkt (innen 0,805 mm, außen 1,195 mm); auch D+-Schleife und D−-Brücke am Stecker als Bögen |
+| Länge Stecker → Serienwiderstand | D− 30,31 mm, D+ 32,49 mm (Δ 2,18 mm) | D− 29,358 mm, D+ 29,357 mm (**Δ 0,001 mm**); Ausgleich durch einen Mäander auf D+ (Höhe 1,04 mm) im geraden Abschnitt |
+| C17/C18 (DNP) | Paar lief auseinander zu den Pads | versetzt außen am Paar, Signalpad liegt auf der Leitung (stubfrei) |
+
+![USB-Paar](doc/Routing_10_USB_Paar.png)
+
+DRC nach der Überarbeitung: 0 Verletzungen, 0 offene Verbindungen; Platzierungs- und Routingprüfung ohne Befund.
+
 ## Reproduktion
 
 ```
@@ -149,10 +178,10 @@ Alle übrigen Schritte erzeugen ihre Gruppen bei jedem Lauf identisch neu.
 
 | Nr. | Punkt | Status |
 |---|---|---|
-| R-01 | USB-Paar 0,25/0,15 mm statt 0,25/0,13 mm (Netzklassen-Abstand nicht gelockert), ≈ 92 Ω | mit JLCPCB-Impedanzrechner bestätigen (P3-03) |
-| R-02 | Power-Netze der Taster-LED (LED_CC_PLUS/LED_PWM_MINUS) und die Diagnose-Zuleitungen mit 0,4 mm statt Netzklassen-Vorgabe 0,65 mm geroutet (Strom ≤ 50 mA bzw. ~1 mA) | Netzklassenbreite ist Vorgabe, keine DRC-Regel; zur Kenntnis |
-| R-03 | Routingbedingte Platzierungsänderungen: USB-Block (U1, D3, R1, R2, C17, C18, R6, C4) und R33 ↔ R34 | oben begründet |
-| R-04 | D− wechselt am Stecker einmal auf L4 (B7-Brücke, 1,5 mm); Bezugsebene dort L3 (3V3) statt GND | für USB Full Speed unkritisch |
+| R-01 | USB-Impedanz | erledigt: JLCPCB-Rechner, 0,24/0,15 mm ≈ 90 Ω (Abschnitt 6.8) |
+| R-02 | Power-Netze der Taster-LED (LED_CC_PLUS/LED_PWM_MINUS, 10 mA über BCR421, F1 ≈ 50 mA) und die Diagnose-Zuleitungen (~1 mA) mit 0,4 mm statt Netzklassen-Vorgabe 0,65 mm | im Review akzeptiert (0,4 mm außen trägt ≈ 1 A) |
+| R-03 | Routingbedingte Platzierungsänderungen: USB-Block (U1, D3, R1, R2, C17, C18, R6, C4) und R33 ↔ R34; Schaltplan unverändert (Schaltplanabgleich ohne Abweichung) | im Review akzeptiert |
+| R-04 | D− wechselt am Stecker einmal auf L4 (B7-Brücke, 1,5 mm); Bezugsebene dort L3 (3V3) statt GND | für USB Full Speed unkritisch – im Review akzeptiert |
 | R-05 | 6 spitze Winkel an kurzen Stichenden | kosmetisch, optional in KiCad nacharbeiten |
 | R-06 | ESP32-Modul ohne 3D-Modell im 3D-Bild | nur Darstellung |
 | R-07 | Footprint-Filter F1 (PTC) | Phase 5 (Bauteilwahl PTC/Ferrit) |

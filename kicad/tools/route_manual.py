@@ -26,6 +26,35 @@ def V(net, x, y):
     VIAS.append((net, x, y))
 
 
+ARCS = []
+
+
+def A(net, layer, pts, w, radii):
+    """Linienzug mit Bögen statt Ecken: radii = Radius je Innenpunkt (Zahl oder Liste). Der Radius wird so weit
+    verkleinert, dass die Tangentenpunkte auf den Nachbarsegmenten liegen (höchstens deren halbe Länge)."""
+    import math
+    n_ = len(pts)
+    rs = radii if isinstance(radii, (list, tuple)) else [radii] * (n_ - 2)
+    cur = pts[0]; out_pts = [cur]
+    for i in range(1, n_ - 1):
+        P, Q, R_ = pts[i - 1], pts[i], pts[i + 1]
+        lu, lv = math.dist(P, Q), math.dist(Q, R_)
+        u = ((Q[0] - P[0]) / lu, (Q[1] - P[1]) / lu); v = ((R_[0] - Q[0]) / lv, (R_[1] - Q[1]) / lv)
+        phi = math.acos(max(-1.0, min(1.0, u[0] * v[0] + u[1] * v[1])))
+        if phi < 1e-6 or rs[i - 1] <= 0:
+            out_pts.append(Q); continue
+        t = min(rs[i - 1] * math.tan(phi / 2), lu / 2 if i > 1 else lu, lv / 2 if i < n_ - 2 else lv)
+        r = t / math.tan(phi / 2)
+        a_ = (Q[0] - u[0] * t, Q[1] - u[1] * t); b_ = (Q[0] + v[0] * t, Q[1] + v[1] * t)
+        dx, dy = v[0] - u[0], v[1] - u[1]; dl = math.hypot(dx, dy)
+        c_ = (Q[0] + dx / dl * r / math.cos(phi / 2), Q[1] + dy / dl * r / math.cos(phi / 2))
+        k = math.dist(Q, c_); m_ = (c_[0] + (Q[0] - c_[0]) / k * r, c_[1] + (Q[1] - c_[1]) / k * r)
+        out_pts.append(a_)
+        T(net, layer, out_pts, w); out_pts = [b_]
+        ARCS.append((net, layer, a_, m_, b_, w))
+    out_pts.append(pts[-1]); T(net, layer, out_pts, w)
+
+
 def Z(name, net, layer, poly, prio=2):
     ZONES.append((name, net, layer, poly, prio))
 
@@ -87,23 +116,26 @@ V('GND', 107.4, 124.6); T('GND', F, [(107.4, 123.0), (107.4, 124.6)], 0.3)      
 # C) USB-C J5, ESD U1, CC, USB-Paar zum Modul (TPD2EUSB30 10.1, Espressif, Y-03)
 # =============================================================================================
 DP, DN = 'USB_DP_C', 'USB_DN_C'
+UW = 0.24                       # USB-Leiterbreite (JLCPCB-Impedanzrechner, siehe unten)
+DN_MEANDER, DP_MEANDER = [], [(157.0, 123.99), (157.0, 125.03), (155.4, 125.03), (155.4, 123.99)]   # Längenausgleich: Mäander auf D+ (kürzer), nach außen
+DN_MR, DP_MR = [], [0.3, 0.3, 0.3, 0.3]   # Bogenradien der Mäanderpunkte
 # Stecker-GND (A12/B1, A1/B12) direkt in die Schirmpads (THT, an allen GND-Lagen)
 T('GND', F, [(172.12, 124.8), (172.12, 124.0)], 0.4); T('GND', F, [(172.12, 131.2), (172.12, 132.0)], 0.4)
 # D+: B6 und A6 über eine Schleife hinter den Padenden verbunden (kein Via)
-T(DP, F, [(172.12, 127.25), (172.95, 127.25), (172.95, 128.25), (172.12, 128.25)], 0.15)
+A(DP, F, [(172.12, 127.25), (172.95, 127.25), (172.95, 128.25), (172.12, 128.25)], 0.15, 0.5)
 # Hauptpaar A7 (D-) / A6 (D+) zu U1; D- macht über dem Landevia einen Bogen nach oben
-T(DN, F, [(171.54, 127.75), (170.2, 127.75), (169.9, 127.45), (169.2, 127.45), (168.9, 127.75), (167.57, 127.75), (167.42, 127.65)], 0.25)
-T(DP, F, [(171.54, 128.25), (167.57, 128.25), (167.42, 128.35)], 0.25)
+A(DN, F, [(171.54, 127.75), (170.2, 127.75), (169.9, 127.45), (169.2, 127.45), (168.9, 127.75), (167.42, 127.75)], UW, 0.4)
+T(DP, F, [(171.54, 128.25), (167.42, 128.25)], UW)
 # D- B7: einziger Lagenwechsel (B.Cu-Brücke unter dem D+-Leiter) – nötig, weil D+/D- am Stecker abwechseln
-T(DN, F, [(171.54, 128.75), (169.85, 128.75), (169.55, 129.0)], 0.15)
-V(DN, 169.55, 129.0); T(DN, B, [(169.55, 129.0), (169.55, 127.45)], 0.25); V(DN, 169.55, 127.45)
+A(DN, F, [(171.54, 128.75), (169.85, 128.75), (169.55, 129.0)], 0.15, 0.4)
+V(DN, 169.55, 129.0); T(DN, B, [(169.55, 129.0), (169.55, 127.45)], UW); V(DN, 169.55, 127.45)
 # CC1 / CC2 zu den gedrehten Rd-Widerständen
 T('/Versorgung/CC1', F, [(171.54, 129.25), (171.3, 129.25), (170.9, 129.65), (167.82, 129.65)], 0.2)
 T('/Versorgung/CC2', F, [(171.54, 126.25), (170.4, 126.25), (169.5, 125.35), (169.22, 125.35)], 0.2)
 V('GND', 165.75, 124.4); T('GND', F, [(166.78, 125.3), (165.75, 124.4)], 0.3)                     # R2.2
 V('GND', 164.9, 131.3); T('GND', F, [(165.78, 130.38), (164.9, 131.3)], 0.3)                      # R1.2
-T('GND', F, [(164.47, 131.22), (164.9, 131.3)], 0.3)                                               # C18.2
-V('GND', 164.0, 123.7); T('GND', F, [(164.0, 124.28), (164.0, 123.7)], 0.3)                       # C17.2
+T('GND', F, [(164.05, 130.4), (164.9, 131.3)], 0.3)                                                 # C18.2 zum Via von R1.2
+V('GND', 163.45, 125.8); T('GND', F, [(162.55, 125.8), (163.45, 125.8)], 0.3)                       # C17.2
 # VBUS: obere Pads (A9/B4) über B.Cu zu den unteren (A4/B9); ESD D3 direkt an den unteren Pads
 T('/Versorgung/USB_VBUS', F, [(171.54, 125.6), (171.0, 125.6)], 0.4); V('/Versorgung/USB_VBUS', 171.0, 125.6)
 T('/Versorgung/USB_VBUS', B, [(171.0, 125.6), (171.0, 130.45)], 0.5); V('/Versorgung/USB_VBUS', 171.0, 130.45)
@@ -116,10 +148,16 @@ T('/Versorgung/USB_VBUS', F, [(164.62, 132.35), (161.07, 132.35), (161.07, 133.9
 T('/Versorgung/USB_VBUS', F, [(164.62, 133.6), (165.25, 134.25), (165.25, 135.4)], 0.3)
 # U1-GND mit eigenem Via (TI: großes Via, kurzer Weg)
 V('GND', 165.75, 128.0); T('GND', F, [(166.43, 128.0), (165.75, 128.0)], 0.3)
-# Paar von U1 weiter: D- oben, D+ unten; C17/C18 (DNP) liegen mit dem Signalpad direkt auf der Leitung
-T(DN, F, [(167.42, 127.5), (167.42, 126.75), (161.0, 126.75), (161.0, 123.6), (150.6, 123.6), (150.6, 118.83), (150.18, 118.83)], 0.25)
-T(DP, F, [(167.42, 128.5), (167.42, 128.95), (165.2, 128.95), (164.9, 129.2), (160.6, 129.2), (160.6, 124.0), (148.9, 124.0),
-          (148.9, 120.4), (149.38, 120.4)], 0.25)
+# Paar von U1 weiter (Rev. nach Review 15.10.2026): eng gekoppelt 0,24/0,15 mm (JLCPCB-Rechner, JLC04161H-7628, L1/L2:
+# 90 Ohm differenziell bei 0,235 mm koplanar bzw. 0,247 mm ohne Nachbarkupfer), alle Richtungswechsel als Bögen mit
+# gemeinsamem Mittelpunkt (innen 0,805 mm, außen 1,195 mm). Nur am U1-GND-Pin/-Via laufen die Leitungen kurz
+# auseinander (Durchfluss-Gehäuse, GND-Pin liegt zwischen D+ und D-). C17/C18 (DNP) sitzen versetzt außen am Paar,
+# Signalpad auf der Leitung (stubfrei). Längenausgleich: Mäander auf der kürzeren Leitung (siehe MEANDER).
+RI, RO = 0.805, 1.195
+A(DN, F, [(167.42, 127.65), (167.1, 127.38), (165.5, 127.38), (164.6, 127.805), (161.0, 127.805), (161.0, 123.6)] + DN_MEANDER
+  + [(150.6, 123.6), (150.6, 118.83), (150.18, 118.83)], UW, [0.3, 0.6, 0.6, RI, RO] + DN_MR + [RI, 0.3])
+A(DP, F, [(167.42, 128.35), (167.1, 128.62), (165.5, 128.62), (164.6, 128.195), (160.61, 128.195), (160.61, 123.99)] + DP_MEANDER
+  + [(150.21, 123.99), (150.21, 120.9), (150.0, 120.6)], UW, [0.3, 0.6, 0.6, RO, RI] + DP_MR + [RO, 0.2])
 # Modulseite der Serienwiderstände
 T('Net-(U4-USB_D-)', F, [(151.82, 118.83), (152.5, 118.83)], 0.25)
 T('Net-(U4-USB_D+)', F, [(151.82, 120.4), (152.2, 120.1), (152.5, 120.1)], 0.25)
@@ -241,8 +279,12 @@ def main(path):
     net = lambda n: b.FindNet(n) if b.FindNet(n) else sys.exit(f'Netz fehlt: {n}')
     for n, layer, pts, w in TRACKS:
         for (x1, y1), (x2, y2) in zip(pts, pts[1:]):
+            if abs(x1 - x2) < 1e-6 and abs(y1 - y2) < 1e-6: continue    # Nullsegment (z. B. zwischen zwei Bögen)
             t = pcbnew.PCB_TRACK(b); t.SetStart(P(x1, y1)); t.SetEnd(P(x2, y2)); t.SetWidth(fm(w)); t.SetLayer(layer)
             t.SetNet(net(n)); b.Add(t); grp.AddItem(t)
+    for n, layer, (x1, y1), (xm, ym), (x2, y2), w in ARCS:
+        t = pcbnew.PCB_ARC(b); t.SetStart(P(x1, y1)); t.SetMid(P(xm, ym)); t.SetEnd(P(x2, y2)); t.SetWidth(fm(w))
+        t.SetLayer(layer); t.SetNet(net(n)); b.Add(t); grp.AddItem(t)
     for n, x, y in VIAS:
         v = pcbnew.PCB_VIA(b); v.SetPosition(P(x, y)); v.SetWidth(fm(VIA_D)); v.SetDrill(fm(VIA_DRILL)); v.SetNet(net(n))
         b.Add(v); grp.AddItem(v)
@@ -255,7 +297,7 @@ def main(path):
         z.SetOutline(ps); ps.thisown = 0
         b.Add(z)
     b.Save(path)
-    print(f'manuell: {len(TRACKS)} Bahnzüge, {len(VIAS)} Vias, {len(ZONES)} Flächen', flush=True)
+    print(f'manuell: {len(TRACKS)} Bahnzüge, {len(ARCS)} Bögen, {len(VIAS)} Vias, {len(ZONES)} Flächen', flush=True)
     here = os.path.dirname(os.path.abspath(__file__))
     subprocess.run([sys.executable, os.path.join(here, 'zones.py'), path, '--fill-stage'], check=True)
     os._exit(0)

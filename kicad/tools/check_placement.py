@@ -52,7 +52,7 @@ SEP = [('U6', 20.0, 'RTC'), ('U1', 25.0, 'USB-ESD'), ('R9', 25.0, 'USB-R'), ('U8
 KEEPOUT = [
     ('Fan-out Modulpads 4-12', 150.9, 107.2, 152.2, 118.0, set()),     # ab Oberkante Via Pad 4
     ('USB-Paar unter dem Modul', 149.0, 122.45, 161.6, 124.8, set()),
-    ('USB-Paar senkrecht', 159.8, 122.45, 161.6, 129.2, set()),
+    ('USB-Paar senkrecht', 159.8, 122.45, 161.5, 129.2, set()),       # Paarkante D- bei x 161,12 + 0,38 mm
     ('USB-Paar zu U1', 161.6, 126.6, 166.2, 129.1, {'C17', 'C18'}),   # DNP-Abgleich direkt am Paar (stubfrei)
 ]
 POLAR_SAME = [['D11', 'D12', 'D13', 'D19', 'D14'], ['D20', 'D21']]

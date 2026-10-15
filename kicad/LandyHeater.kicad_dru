@@ -11,10 +11,10 @@
 	(condition "A.Type == 'Pad' && B.Type == 'Pad' && ((A.Parent == 'U2' && B.Parent == 'U2') || (A.Parent == 'U3' && B.Parent == 'U3') || (A.Parent == 'U6' && B.Parent == 'U6') || (A.Parent == 'U7' && B.Parent == 'U7'))")
 	(constraint clearance (min 0.12)))
 
-# USB-Differenzpaar: Spalt 0,13 mm innerhalb des Paares (Impedanz ~90 Ohm).
+# USB-Differenzpaar: 0,24 mm / Spalt 0,15 mm = 90 Ohm differenziell (JLCPCB-Impedanzrechner, JLC04161H-7628, L1 gegen L2).
 (rule "USB-Paar"
 	(condition "A.NetClass == 'USB' && B.NetClass == 'USB'")
-	(constraint clearance (min 0.13)))
+	(constraint clearance (min 0.15)))
 
 # Bohrung-Kupfer allgemein 0,25 mm (Board-Setup-Minimum 0,15 mm).
 (rule "Bohrung-Kupfer"

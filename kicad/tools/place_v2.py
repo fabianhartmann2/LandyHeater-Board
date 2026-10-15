@@ -94,7 +94,7 @@ P.update({
     'D3': (169.6, 130.6, 180),       # VBUS-ESD an J5 VBUS (130,4); VBUS-Pad zum Stecker (Routing 6.3)
     'R2': (168.0, 125.3, 180),       # CC2 (126,25) oberhalb des Paares, CC-Pad zum Stecker (Routing 6.3)
     'R1': (166.6, 129.9, 180),       # CC1 (129,25) unterhalb des Paares, CC-Pad zum Stecker (Routing 6.3)
-    'C17': (164.0, 125.5, 90), 'C18': (164.0, 130.45, 270),   # DNP, Signalpad berührt die Paarleitung (stubfrei)
+    'C17': (162.35, 126.59, 90), 'C18': (164.05, 129.41, 270),  # DNP, außen am gekoppelten Paar, versetzt; Signalpad auf der Leitung
     'C2': (165.4, 133.3, 0),         # eFuse IN
     'R3': (161.9, 134.4, 0), 'R4': (161.9, 136.2, 0), 'R5': (161.9, 138.0, 0),   # Teiler an EN/OVLO
     'R6': (168.6, 135.9, 0), 'C3': (168.6, 138.0, 0), 'C4': (168.6, 134.3, 0),   # ILM, DVDT, ITIMER; GND-Pin 8 frei nach rechts (Routing 6.3)
